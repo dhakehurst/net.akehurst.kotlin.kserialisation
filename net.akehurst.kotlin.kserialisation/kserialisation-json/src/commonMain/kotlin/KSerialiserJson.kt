@@ -17,7 +17,9 @@ class KSerialiserJson(
 
     companion object {
         val CLASS = "${'$'}class"
+        val TYPE = "${'$'}type"
         val ELEMENTS = "${'$'}elements"
+        val OBJECT = "${'$'}OBJECT"
         val LIST = "${'$'}LIST"
         val SET = "${'$'}SET"
     }
@@ -76,7 +78,7 @@ class KSerialiserJson(
                     else -> throw KSerialiserJsonException("Unknown collection type ${coll::class.simpleName}")
                 }
                 val listObj = JsonObject(mapOf(
-                        "$CLASS" to JsonString(collTypeName),
+                        "$TYPE" to JsonString(collTypeName),
                         "$ELEMENTS" to JsonArray(mutableListOf())
                 ))
                 currentObjStack.push(listObj)
@@ -98,6 +100,7 @@ class KSerialiserJson(
             objectBegin { key, info, obj, datatype ->
                 val path = info.path + key.toString()
                 val obj = JsonObject(mutableMapOf(
+                        "$TYPE" to JsonString(OBJECT),
                         "$CLASS" to JsonString(datatype.qualifiedName("."))
                 ))
                 currentObjStack.push(obj)
