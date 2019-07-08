@@ -17,9 +17,14 @@ abstract class JsonValue {
     open fun asObject() : JsonObject {
         throw JsonException("Object is not a JsonObject")
     }
+    open fun asReference() : JsonReference {
+        throw JsonException("Object is not a JsonReference")
+    }
     open fun asArray() : JsonArray {
         throw JsonException("Object is not a JsonArray")
     }
+
+    abstract fun toJsonString() : String
 }
 
 data class JsonObject(
@@ -29,6 +34,28 @@ data class JsonObject(
         return this
     }
 
+    fun withProperty(key:String, value:JsonValue) : JsonObject{
+        val newProps = property + Pair(key,value)
+        return JsonObject(newProps)
+    }
+
+    override fun toJsonString(): String {
+        val elements = this.property.map {
+            """"${it.key}":${it.value.toJsonString()}"""
+        }.joinToString(",")
+        return """{${elements}}"""
+    }
+}
+
+data class JsonReference(
+        val path:String
+) : JsonValue() {
+    override fun asReference(): JsonReference {
+        return this
+    }
+    override fun toJsonString(): String {
+        return """{ "${Json.REF}" : "$path" }"""
+    }
 }
 
 data class JsonBoolean(
@@ -36,6 +63,9 @@ data class JsonBoolean(
 ) : JsonValue() {
     override fun asBoolean(): JsonBoolean {
         return this
+    }
+    override fun toJsonString(): String {
+        return """${this.value}"""
     }
 }
 
@@ -54,6 +84,9 @@ data class JsonNumber(
     override fun asNumber(): JsonNumber {
         return this
     }
+    override fun toJsonString(): String {
+        return """${this._value}"""
+    }
 }
 
 data class JsonString(
@@ -62,14 +95,32 @@ data class JsonString(
     override fun asString(): JsonString {
         return this
     }
+    override fun toJsonString(): String {
+        return """"${this.value}""""
+    }
 }
 
 data class JsonArray(
-        val value:List<JsonValue>
+        val elements:List<JsonValue>
 ) : JsonValue() {
     override fun asArray(): JsonArray {
         return this
     }
+    override fun toJsonString(): String {
+        val elements = this.elements.map {
+            it.toJsonString()
+        }.joinToString(",")
+        return """[${elements}]"""
+    }
+
+    fun withElement(element:JsonValue) : JsonArray {
+        val newElements = this.elements + element
+        return JsonArray(newElements)
+    }
 }
 
-object JsonNull : JsonValue()
+object JsonNull : JsonValue() {
+    override fun toJsonString(): String {
+        return "null"
+    }
+}

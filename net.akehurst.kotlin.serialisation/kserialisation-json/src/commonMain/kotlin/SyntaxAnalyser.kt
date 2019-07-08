@@ -20,7 +20,7 @@ class SyntaxAnalyser : SyntaxAnalyserAbstract() {
         // could autodetect these by reflection, for jvm, but faster if registered
         this.register("json", this::json as BranchHandler<JsonValue>)
         this.register("value", this::value as BranchHandler<JsonValue>)
-        this.register("object", this::object_ as BranchHandler<JsonObject>)
+        this.register("object", this::object_ as BranchHandler<JsonValue>)
         this.register("property", this::property as BranchHandler<Pair<String,JsonValue>>)
         this.register("array", this::array as BranchHandler<JsonArray>)
         this.register("literalValue", this::literalValue as BranchHandler<JsonValue>)
@@ -49,16 +49,22 @@ class SyntaxAnalyser : SyntaxAnalyserAbstract() {
     }
 
     // object = '{' property* '}' ;
-    fun object_(target: SPPTBranch, children: List<SPPTBranch>, arg: Any): JsonObject {
+    fun object_(target: SPPTBranch, children: List<SPPTBranch>, arg: Any): JsonValue {
         val properties = children[0].branchNonSkipChildren.associate {
             super.transform<Pair<String,JsonValue>>(it,arg)
         }
-        return JsonObject(properties)
+
+        return if (1==properties.size && properties.containsKey(Json.REF)) {
+            JsonReference(properties[Json.REF]!!.asString().value)
+        } else {
+            JsonObject(properties)
+        }
     }
 
     // property = DOUBLE_QUOTE_STRING ':' value ;
     fun property(target: SPPTBranch, children: List<SPPTBranch>, arg: Any): Pair<String,JsonValue> {
-        val name = children[0].nonSkipMatchedText
+        val nameWithQuotes = children[0].nonSkipMatchedText
+        val name = nameWithQuotes.substring(1, nameWithQuotes.length-1)
         val value =  super.transform<JsonValue>(children[1],arg)
         return Pair(name, value)
     }

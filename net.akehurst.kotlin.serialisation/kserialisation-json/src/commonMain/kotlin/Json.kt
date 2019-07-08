@@ -1,6 +1,5 @@
 package net.akehurst.kotlin.kserialisation.json
 
-import net.akehurst.kotlin.komposite.api.DatatypeModel
 import net.akehurst.language.api.processor.LanguageProcessor
 import net.akehurst.language.processor.Agl
 import kotlin.js.JsName
@@ -8,6 +7,8 @@ import kotlin.js.JsName
 object Json {
 
     private var _processor:LanguageProcessor? = null
+
+    val REF = "${'$'}ref"
 
     internal fun processor(): LanguageProcessor {
         if (null== _processor) {

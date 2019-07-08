@@ -1,7 +1,10 @@
 package net.akehurst.kotlin.kserialisation.json
 
+import net.akehurst.language.api.parser.ParseFailedException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.expect
 
 
 class test_JsonProcessor {
@@ -11,11 +14,9 @@ class test_JsonProcessor {
 
         val jsonString = ""
 
-        val actual = Json.process(jsonString)
-
-        val expected = JsonObject(emptyMap())
-
-        assertEquals(expected, actual)
+        assertFailsWith<ParseFailedException> {
+            val actual = Json.process(jsonString)
+        }
 
     }
 
@@ -108,15 +109,24 @@ class test_JsonProcessor {
                 "sProp" : "hello",
                 "aProp" : [ 1, true, "hello", {} ],
                 "oProp" : {
-                    "bProp": true,
-                    "nProp" : 1
+                    "bProp": false,
+                    "nProp" : 3.14
                 }
             }
         """.trimIndent()
 
         val actual = Json.process(jsonString);
 
-        val expected = JsonObject(emptyMap())
+        val expected = JsonObject(mapOf(
+                "bProp" to JsonBoolean(true),
+                "nProp" to JsonNumber("1"),
+                "sProp" to JsonString("hello"),
+                "aProp" to JsonArray(listOf(JsonNumber("1"), JsonBoolean(true), JsonString("hello"), JsonObject(emptyMap()))),
+                "oProp" to JsonObject(mapOf(
+                        "bProp" to JsonBoolean(false),
+                        "nProp" to JsonNumber("3.14")
+                ))
+        ))
 
         assertEquals(expected, actual)
 
