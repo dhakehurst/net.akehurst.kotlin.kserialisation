@@ -6,6 +6,17 @@ import kotlin.test.assertEquals
 class A(
         val prop1: String
 ) {
+
+    private var _privProp:Int = -1
+
+    fun getProp2() :Int{
+        return this._privProp
+    }
+
+    fun setProp2(value:Int) {
+        this._privProp = value
+    }
+
     override fun hashCode(): Int {
         return prop1.hashCode()
     }
@@ -33,8 +44,9 @@ class test_KSerialiser {
         namespace kotlin.collection {
             collection Collection
             collection List
-            collection Set
             collection ArrayList
+            collection Set
+            collection LinkedHashSet
         }
         namespace net.akehurst.kotlin.kserialisation.json {
 
@@ -127,7 +139,7 @@ class test_KSerialiser {
 
         val expected = JsonObject(
                 mapOf(
-                        KSerialiserJson.CLASS to JsonString(KSerialiserJson.LIST),
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.LIST),
                         KSerialiserJson.ELEMENTS to JsonArray(listOf(JsonNumber("1"), JsonBoolean(true), JsonString("hello")))
                 )
         ).toJsonString()
@@ -150,23 +162,27 @@ class test_KSerialiser {
     @Test
     fun toJson_Set() {
 
-        val root = "hello"
+        val root = setOf(1, true, "hello")
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonString("hello").toJsonString()
-
+        val expected = JsonObject(
+                mapOf(
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.SET),
+                        KSerialiserJson.ELEMENTS to JsonArray(listOf(JsonNumber("1"), JsonBoolean(true), JsonString("hello")))
+                )
+        ).toJsonString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun toData_Set() {
 
-        val root = JsonString("hello").toJsonString()
+        val root = JsonArray(listOf(JsonNumber("1"), JsonBoolean(true), JsonString("hello"))).toJsonString()
 
         val actual = this.sut.toData(root)
 
-        val expected = "hello"
+        val expected = setOf(1.0, true, "hello")
 
         assertEquals(expected, actual)
     }
@@ -175,13 +191,16 @@ class test_KSerialiser {
     fun toJson_A() {
 
         val root = A("hello")
-        val dtA = sut.registry.findDatatypeByName("A")
+        root.setProp2(5)
+        val dtA = sut.registry.findDatatypeByName("A")!!
 
         val actual = this.sut.toJson(root, root)
 
         val expected = JsonObject(mapOf(
+                KSerialiserJson.TYPE to JsonString(KSerialiserJson.OBJECT),
                 KSerialiserJson.CLASS to JsonString(dtA.qualifiedName(".")),
-                "prop1" to JsonString("hello")
+                "prop1" to JsonString("hello"),
+                "prop2" to JsonNumber("5")
         )).toJsonString()
 
         assertEquals(expected, actual)
@@ -189,7 +208,7 @@ class test_KSerialiser {
 
     @Test
     fun toData_A() {
-        val dtA = sut.registry.findDatatypeByName("A")
+        val dtA = sut.registry.findDatatypeByName("A")!!
 
         val json = JsonObject(mapOf(
                 KSerialiserJson.CLASS to JsonString(dtA.qualifiedName(".")),

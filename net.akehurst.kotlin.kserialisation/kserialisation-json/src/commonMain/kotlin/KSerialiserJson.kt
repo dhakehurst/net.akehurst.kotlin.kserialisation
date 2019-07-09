@@ -24,6 +24,8 @@ class KSerialiserJson(
         val SET = "${'$'}SET"
     }
 
+    private val reference_cache = mutableMapOf<Any, String>()
+
     val registry = DatatypeRegistry()
     val jsonReg = DatatypeRegistry()
 
@@ -47,6 +49,30 @@ class KSerialiserJson(
         """)
     }
 
+    protected fun calcReferencePath(root:Any, targetValue:Any) : String {
+        return if (reference_cache.containsKey(targetValue)) {
+            reference_cache[targetValue]!!
+        } else {
+            val walker = kompositeWalker<List<String>, Boolean>(registry) {
+                collBegin { key, info, coll ->
+                    val path = info.path + key.toString()
+                    WalkInfo(path, info.acc)
+                }
+                objectBegin { key, info, obj, datatype ->
+                    val path = info.path + key.toString()
+                    WalkInfo(path, obj==targetValue)
+                }
+                propertyBegin { key, info, property ->
+                    val path = info.path + key.toString()
+                    WalkInfo(path, info.acc)
+                }
+            }
+
+            val result = walker.walk(WalkInfo(emptyList(), false), root)
+            if (result.acc) result.path.joinToString("/") else "${'$'}unknown"
+        }
+    }
+
     fun toJson(root: Any, data: Any): String {
         var currentObjStack = Stack<JsonObject>()
         val walker = kompositeWalker<List<String>, JsonValue>(registry) {
@@ -67,7 +93,8 @@ class KSerialiserJson(
             }
             reference { key, info, value, property ->
                 val path = info.path + key.toString()
-                val ref = JsonReference(path.joinToString("/"))
+                val refPath = calcReferencePath(root, value)
+                val ref = JsonReference( refPath )
                 WalkInfo(path, ref)
             }
             collBegin { key, info, coll ->
@@ -87,7 +114,7 @@ class KSerialiserJson(
             collSeparate { key, info, coll, previousElement ->
                 val path = info.path + key.toString()
                 val listObj = currentObjStack.pop()
-                val list = listObj.property[ELEMENTS] as JsonArray
+                val list = (listObj.property[ELEMENTS] ?: JsonArray()) as JsonArray
                 val newList = list.withElement(info.acc)
                 val nObj = listObj.withProperty(ELEMENTS, newList)
                 currentObjStack.push(nObj)
@@ -105,6 +132,10 @@ class KSerialiserJson(
                 ))
                 currentObjStack.push(obj)
                 WalkInfo(path, obj)
+            }
+            objectEnd { key, info, obj, datatype ->
+                val obj = currentObjStack.pop()
+                WalkInfo(info.path, obj)
             }
             propertyBegin { key, info, property ->
                 info

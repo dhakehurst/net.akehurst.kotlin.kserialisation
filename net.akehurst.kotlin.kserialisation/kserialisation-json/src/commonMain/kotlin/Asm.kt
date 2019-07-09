@@ -28,7 +28,7 @@ abstract class JsonValue {
 }
 
 data class JsonObject(
-        val property: Map<String, JsonValue>
+        val property: Map<String, JsonValue> = emptyMap()
 ) : JsonValue() {
     override fun asObject(): JsonObject {
         return this
@@ -101,7 +101,7 @@ data class JsonString(
 }
 
 data class JsonArray(
-        val elements:List<JsonValue>
+        val elements:List<JsonValue> = emptyList()
 ) : JsonValue() {
     override fun asArray(): JsonArray {
         return this

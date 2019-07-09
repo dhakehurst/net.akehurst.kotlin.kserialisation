@@ -63,7 +63,11 @@ class FromJsonConverter(
             }
             val obj = dt.construct(*idProps.toTypedArray())
             dt.nonIdentityProperties.forEach {
-                it.set(obj, props[it.name])
+                if (dt.allProperty[it.name]!!.ignore) {
+                    //TODO: log it !
+                } else {
+                    it.set(obj, props[it.name])
+                }
             }
             return obj
         }
