@@ -1,6 +1,9 @@
 val version_komposite:String by project
 val version_agl:String by project
 
+val group_klock:String by project
+val version_klock:String by project
+
 val version_kxreflect:String by project
 
 dependencies {
@@ -9,6 +12,9 @@ dependencies {
     commonMainImplementation("net.akehurst.language:agl-processor:${version_agl}")
 
     commonMainImplementation("net.akehurst.kotlinx:kotlinx-collections:$version_kxreflect")
+
+
+    commonTestImplementation ("${group_klock}:klock:${version_klock}")
 
 
     // because IntelliJ won't resolve Implementation dependencies at runtime!

@@ -1,13 +1,16 @@
 package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.komposite.api.Datatype
+import net.akehurst.kotlin.komposite.api.PrimitiveType
 import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.construct
 import net.akehurst.kotlin.komposite.common.set
+import kotlin.reflect.KClass
 
 
 class FromJsonConverter(
-        val registry : DatatypeRegistry
+        val registry : DatatypeRegistry,
+        val primitiveFromJson: Map<PrimitiveType, (value:JsonValue)->Any>
 ) {
 
     private val resolvedReference = mutableMapOf<String, Any>()
@@ -37,15 +40,27 @@ class FromJsonConverter(
             return when (type) {
                 KSerialiserJson.LIST -> convertList(path, json.property[KSerialiserJson.ELEMENTS]!!.asArray())
                 KSerialiserJson.SET -> convertSet(path, json.property[KSerialiserJson.ELEMENTS]!!.asArray())
-                KSerialiserJson.OBJECT -> convertObject2(path, json)
+                KSerialiserJson.MAP -> convertMap(path, json.property[KSerialiserJson.ELEMENTS]!!.asObject())
+                KSerialiserJson.OBJECT -> convertObject2Object(path, json)
+                KSerialiserJson.PRIMITIVE -> convertObject2Primitive(path, json)
                 else -> {
-                    convertObject2(path, json)
+                    convertObject2Object(path, json)
                 }
             }
         }
     }
 
-    private fun convertObject2(path:String, json: JsonObject) :Any {
+    private fun convertObject2Primitive(path:String, json: JsonObject) :Any {
+        val clsName = json.property[KSerialiserJson.CLASS]!!.asString().value
+        val ns = clsName.substringBeforeLast(".")
+        val sn = clsName.substringAfterLast(".")
+        //TODO: use qualified name when we can
+        val dt = this.registry.findPrimitiveByName(sn) ?: throw KSerialiserJson.KSerialiserJsonException("The primtive is not defined in the Komposite configuration")
+        val func = this.primitiveFromJson[dt] ?: throw KSerialiserJson.KSerialiserJsonException("Do not know how to convert ${sn} from json, did you register its converter")
+        return func(json)
+    }
+
+    private fun convertObject2Object(path:String, json: JsonObject) :Any {
         val clsName = json.property[KSerialiserJson.CLASS]!!.asString().value
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
@@ -73,14 +88,20 @@ class FromJsonConverter(
         }
     }
 
-    private fun convertList(path:String, json:JsonArray) : List<Any?> {
+    private fun convertList(path:String, json:JsonArray) : List<*> {
         return json.elements.mapIndexed { index, it ->
             this.convertValue(path+"/$index", it)
         }
     }
-    private fun convertSet(path:String, json:JsonArray) : List<Any?> {
+    private fun convertSet(path:String, json:JsonArray) : Set<*> {
         return json.elements.mapIndexed { index, it ->
             this.convertValue(path+"/$index", it)
+        }.toSet()
+    }
+
+    private fun convertMap(path:String, json:JsonObject) : Map<*,*> {
+        return json.property.mapValues {
+            this.convertValue(path+"/${it.key}", it.value)
         }
     }
 }

@@ -1,5 +1,7 @@
 package net.akehurst.kotlin.kserialisation.json
 
+import com.soywiz.klock.DateTime
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -7,13 +9,13 @@ class A(
         val prop1: String
 ) {
 
-    private var _privProp:Int = -1
+    private var _privProp: Int = -1
 
-    fun getProp2() :Int{
+    fun getProp2(): Int {
         return this._privProp
     }
 
-    fun setProp2(value:Int) {
+    fun setProp2(value: Int) {
         this._privProp = value
     }
 
@@ -32,30 +34,56 @@ class A(
 class test_KSerialiser {
 
 
-    val sut = KSerialiserJson("""
-        namespace kotlin {
-            primitive String
-            primitive Boolean
-            primitive Int
-            primitive Long
-            primitive Float
-            primitive Double
-        }
-        namespace kotlin.collection {
-            collection Collection
-            collection List
-            collection ArrayList
-            collection Set
-            collection LinkedHashSet
-        }
-        namespace net.akehurst.kotlin.kserialisation.json {
+    val sut = KSerialiserJson()
 
-            datatype A {
-                prop1 { identity(0) }
+    @BeforeTest
+    fun setup() {
+        this.sut.confgureDatatypeModel("""
+            namespace kotlin {
+                primitive String
+                primitive Boolean
+                primitive Int
+                primitive Long
+                primitive Float
+                primitive Double
             }
-        }
-    """.trimIndent())
+            namespace kotlin.collection {
+                collection Collection
+                collection List
+                collection ArrayList
+                collection Set
+                collection LinkedHashSet
+                collection Map
+                collection LinkedHashMap
+            }
+            namespace com.soywiz.klock {
+              primitive DateTime
+            }
+            namespace net.akehurst.kotlin.kserialisation.json {
+    
+                datatype A {
+                    prop1 { identity(0) }
+                }
+            }
+        """.trimIndent())
 
+        this.sut.registerPrimitive(Boolean::class, //
+                { value -> JsonBoolean(value) }, //
+                { json -> json.asBoolean().value }
+        )
+        this.sut.registerPrimitive(Int::class, //
+                { value -> JsonNumber(value.toString()) }, //
+                { json -> json.asNumber().toInt() }
+        )
+        this.sut.registerPrimitive(String::class, //
+                { value -> JsonString(value) }, //
+                { json -> json.asString().value }
+        )
+        this.sut.registerPrimitiveAsObject(DateTime::class, //
+                { value -> JsonNumber(value.unixMillisDouble.toString()) }, //
+                { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
+        )
+    }
 
     @Test
     fun toJson_Boolean_true() {
@@ -105,7 +133,6 @@ class test_KSerialiser {
         assertEquals(expected, actual)
     }
 
-
     @Test
     fun toJson_String() {
 
@@ -126,6 +153,43 @@ class test_KSerialiser {
         val actual = this.sut.toData(root)
 
         val expected = "hello"
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toJson_DateTime() {
+
+        val now = DateTime.now()
+
+        val root = now
+
+        val actual = this.sut.toJson(root, root)
+
+        val dt = sut.registry.findPrimitiveByName("DateTime")!!
+        val expected = JsonObject(mapOf(
+                KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
+                KSerialiserJson.CLASS to JsonString(dt.qualifiedName(".")),
+                KSerialiserJson.VALUE to JsonNumber(now.unixMillisDouble.toString())
+        )).toJsonString()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toData_DateTime() {
+
+        val now = DateTime.now()
+        val dt = sut.registry.findPrimitiveByName("DateTime")!!
+        val root = JsonObject(mapOf(
+                KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
+                KSerialiserJson.CLASS to JsonString(dt.qualifiedName(".")),
+                KSerialiserJson.VALUE to JsonNumber(now.unixMillisDouble.toString())
+        )).toJsonString()
+
+        val actual = this.sut.toData(root)
+
+        val expected = now
 
         assertEquals(expected, actual)
     }
@@ -178,11 +242,50 @@ class test_KSerialiser {
     @Test
     fun toData_Set() {
 
-        val root = JsonArray(listOf(JsonNumber("1"), JsonBoolean(true), JsonString("hello"))).toJsonString()
-
+        val root = JsonObject(mapOf(
+                KSerialiserJson.TYPE to JsonString(KSerialiserJson.SET),
+                KSerialiserJson.ELEMENTS to JsonArray(listOf(JsonNumber("1"), JsonBoolean(true), JsonString("hello")))
+        )).toJsonString()
         val actual = this.sut.toData(root)
 
         val expected = setOf(1.0, true, "hello")
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toJson_Map() {
+
+        val root = mapOf("a" to 1, "b" to true, "c" to "hello")
+
+        val actual = this.sut.toJson(root, root)
+
+        val expected = JsonObject(
+                mapOf(
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
+                        KSerialiserJson.ELEMENTS to JsonObject(
+                                mapOf("a" to JsonNumber("1"), "b" to JsonBoolean(true), "c" to JsonString("hello"))
+                        )
+                )
+        ).toJsonString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toData_Map() {
+
+        val root = JsonObject(
+                mapOf(
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
+                        KSerialiserJson.ELEMENTS to JsonObject(
+                                mapOf("a" to JsonNumber("1"), "b" to JsonBoolean(true), "c" to JsonString("hello"))
+                        )
+                )
+        ).toJsonString()
+
+        val actual = this.sut.toData(root)
+
+        val expected = mapOf("a" to 1.0, "b" to true, "c" to "hello")
 
         assertEquals(expected, actual)
     }
