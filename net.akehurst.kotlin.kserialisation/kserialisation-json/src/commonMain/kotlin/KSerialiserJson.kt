@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2019 Dr. David H. Akehurst (http://dr.david.h.akehurst.net)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.komposite.api.Datatype
@@ -6,14 +22,15 @@ import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.WalkInfo
 import net.akehurst.kotlin.komposite.common.kompositeWalker
 import net.akehurst.kotlinx.collections.Stack
+import net.akehurst.kotlinx.reflect.ModuleRegistry
+import kotlin.js.JsName
 import kotlin.reflect.KClass
 
+class KSerialiserJsonException : RuntimeException {
+    constructor(message: String) : super(message)
+}
 
 class KSerialiserJson() {
-
-    class KSerialiserJsonException : RuntimeException {
-        constructor(message: String) : super(message)
-    }
 
     companion object {
         val TYPE = "${'$'}type"     // PRIMITIVE | OBJECT | LIST | SET | MAP
@@ -28,8 +45,8 @@ class KSerialiserJson() {
     }
 
     private val reference_cache = mutableMapOf<Any, String>()
-    private val primitiveToJson = mutableMapOf<PrimitiveType, (value:Any)->JsonValue>()
-    private val primitiveFomJson = mutableMapOf<PrimitiveType, (value:JsonValue)->Any>()
+    private val primitiveToJson = mutableMapOf<PrimitiveType, (value: Any) -> JsonValue>()
+    private val primitiveFomJson = mutableMapOf<PrimitiveType, (value: JsonValue) -> Any>()
 
     val registry = DatatypeRegistry()
     /*
@@ -54,10 +71,11 @@ class KSerialiserJson() {
         """)
     }
 */
-    protected fun calcReferencePath(root:Any, targetValue:Any) : String {
+    protected fun calcReferencePath(root: Any, targetValue: Any): String {
         return if (reference_cache.containsKey(targetValue)) {
             reference_cache[targetValue]!!
         } else {
+            var resultPath:String? = null //TODO: terminate walking early if result found
             val walker = kompositeWalker<List<String>, Boolean>(registry) {
                 collBegin { key, info, coll ->
                     val path = info.path + key.toString()
@@ -65,7 +83,10 @@ class KSerialiserJson() {
                 }
                 objectBegin { key, info, obj, datatype ->
                     val path = info.path + key.toString()
-                    WalkInfo(path, obj==targetValue)
+                    if (obj==targetValue) {
+                        resultPath = path.joinToString("/")
+                    }
+                    WalkInfo(path, obj == targetValue)
                 }
                 propertyBegin { key, info, property ->
                     val path = info.path + key.toString()
@@ -74,39 +95,60 @@ class KSerialiserJson() {
             }
 
             val result = walker.walk(WalkInfo(emptyList(), false), root)
-            if (result.acc) result.path.joinToString("/") else "${'$'}unknown"
+            resultPath ?: "${'$'}unknown ${targetValue::class.simpleName}"
         }
     }
 
-    fun confgureDatatypeModel(config:String) {
+    fun confgureDatatypeModel(config: String) {
         registry.registerFromConfigString(config)
     }
 
-    fun <T:Any> registerPrimitive(cls:KClass<T>, toJson:(value:T)->JsonValue, fromJson:(json:JsonValue)->T) {
+    @JsName("registerModule")
+    fun registerModule(module: Any) {
+        ModuleRegistry.register(module)
+    }
+
+    @JsName("registerKotlinStdPrimitives")
+    fun registerKotlinStdPrimitives() {
+        this.confgureDatatypeModel(DatatypeRegistry.KOTLIN_STD)
+        this.registerPrimitive(Boolean::class, { value -> JsonBoolean(value) }, { json -> json.asBoolean().value })
+        this.registerPrimitive(Byte::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
+        this.registerPrimitive(Short::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })
+        this.registerPrimitive(Int::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toInt() })
+        this.registerPrimitive(Long::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toLong() })
+        this.registerPrimitive(Float::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toFloat() })
+        this.registerPrimitive(Double::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toDouble() })
+        this.registerPrimitive(String::class, { value -> JsonString(value.replace("\"", "\\\"")) }, { json -> json.asString().value })
+    }
+
+    @JsName("registerPrimitive")
+    fun <T : Any> registerPrimitive(cls: KClass<T>, toJson: (value: T) -> JsonValue, fromJson: (json: JsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primtive is not defined in the Komposite configuration")
-        primitiveToJson[dt] = toJson as (Any)->JsonValue
+        primitiveToJson[dt] = toJson as (Any) -> JsonValue
         primitiveFomJson[dt] = fromJson
     }
 
-    fun <T:Any> registerPrimitiveAsObject(cls:KClass<T>, toJson:(value:T)->JsonValue, fromJson:(json:JsonValue)->T) {
+    @JsName("registerPrimitiveAsObject")
+    fun <T : Any> registerPrimitiveAsObject(cls: KClass<T>, toJson: (value: T) -> JsonValue, fromJson: (json: JsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primtive is not defined in the Komposite configuration")
-        primitiveToJson[dt] = { value:T ->
+        primitiveToJson[dt] = { value: T ->
             JsonObject(mapOf(
                     KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
                     KSerialiserJson.CLASS to JsonString(dt.qualifiedName(".")),
                     KSerialiserJson.VALUE to toJson(value)
             ))
-        } as (Any)->JsonValue
+        } as (Any) -> JsonValue
         primitiveFomJson[dt] = { json ->
             val jsonValue = json.asObject().property[KSerialiserJson.VALUE]!!
             fromJson(jsonValue)
         }
     }
 
+    @JsName("toJson")
     fun toJson(root: Any, data: Any): String {
-        var currentObjStack = Stack<JsonObject>()
+        var currentObjStack = Stack<JsonValue>()
         val walker = kompositeWalker<List<String>, JsonValue>(registry) {
             nullValue { key, info ->
                 WalkInfo(info.path + key.toString(), JsonNull)
@@ -122,12 +164,12 @@ class KSerialiserJson() {
             reference { key, info, value, property ->
                 val path = info.path + key.toString()
                 val refPath = calcReferencePath(root, value)
-                val ref = JsonReference( refPath )
+                val ref = JsonReference(refPath)
                 WalkInfo(path, ref)
             }
             collBegin { key, info, coll ->
                 val path = info.path + key.toString()
-                val collTypeName = when(coll) {
+                val collTypeName = when (coll) {
                     is List<*> -> LIST
                     is Set<*> -> SET
                     else -> throw KSerialiserJsonException("Unknown collection type ${coll::class.simpleName}")
@@ -141,7 +183,7 @@ class KSerialiserJson() {
             }
             collElementEnd { key, info, element ->
                 val path = info.path + key.toString()
-                val listObj = currentObjStack.pop()
+                val listObj = currentObjStack.pop() as JsonObject
                 val list = (listObj.property[ELEMENTS] ?: JsonArray()) as JsonArray
                 val newList = list.withElement(info.acc)
                 val nObj = listObj.withProperty(ELEMENTS, newList)
@@ -156,16 +198,27 @@ class KSerialiserJson() {
                 val path = info.path + key.toString()
                 val listObj = JsonObject(mapOf(
                         "$TYPE" to JsonString(MAP),
-                        "$ELEMENTS" to JsonObject()
+                        "$ELEMENTS" to JsonArray()
                 ))
                 currentObjStack.push(listObj)
                 WalkInfo(info.path, listObj)
             }
-            mapEntryEnd { key, info, entry ->
+            mapEntryKeyEnd { key, info, entry ->
+                //push key ontostack
+                currentObjStack.push(info.acc)
+                info
+            }
+            mapEntryValueEnd { key, info, entry ->
                 val path = info.path + key.toString()
-                val mapObj = currentObjStack.pop()
-                val map = (mapObj.property[ELEMENTS] ?: JsonObject()) as JsonObject
-                val newMap = map.withProperty(key as String, info.acc)
+                val meKey = currentObjStack.pop()
+                val meValue = info.acc
+                val mapObj = currentObjStack.pop() as JsonObject
+                val mapElements = (mapObj.property[ELEMENTS] ?: JsonArray()) as JsonArray
+                val neEl = JsonObject(mapOf(
+                        "key" to meKey,
+                        "value" to meValue
+                ))
+                val newMap = mapElements.withElement(neEl)
                 val nObj = mapObj.withProperty(ELEMENTS, newMap)
                 currentObjStack.push(nObj)
                 WalkInfo(path, nObj)
@@ -192,7 +245,8 @@ class KSerialiserJson() {
             }
             propertyEnd { key, info, property ->
                 val path = info.path + key.toString()
-                val nObj = currentObjStack.pop().withProperty(key as String, info.acc)
+                val cuObj = currentObjStack.pop() as JsonObject
+                val nObj = cuObj.withProperty(key as String, info.acc)
                 currentObjStack.push(nObj)
                 WalkInfo(path, nObj)
             }
@@ -202,15 +256,13 @@ class KSerialiserJson() {
         return result.acc.toJsonString()
     }
 
-
-    fun toData(jsonRoot: String): Any? {
+    @JsName("toData")
+    fun toData(jsonString: String): Any? {
         //TODO: use a bespoke written JSON parser, it will most likely be faster
-        val json = Json.process(jsonRoot)
-        val conv = FromJsonConverter(this.registry, this.primitiveFomJson)
+        val json = Json.process(jsonString)
+        val conv = FromJsonConverter(this.registry, this.primitiveFomJson, json)
         return conv.convertValue("", json)
     }
-
-
 
 
 }

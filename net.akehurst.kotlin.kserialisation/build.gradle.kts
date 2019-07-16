@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import org.gradle.internal.impldep.org.apache.commons.io.output.ByteArrayOutputStream
+import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import java.io.File
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 plugins {
     kotlin("multiplatform") version("1.3.41") apply false
+    id("com.jfrog.bintray") version("1.8.4") apply false
 }
 
 allprojects {
@@ -33,28 +38,14 @@ allprojects {
 
 }
 
-fun getPassword(currentUser:String , location:String ) : String {
-    return if (project.hasProperty("maclocal")) {
-        println("Getting password using local mac login credentials")
-        val stdout =  ByteArrayOutputStream()
-        val stderr =  ByteArrayOutputStream()
-        exec {
-            commandLine = listOf("security", "-q", "find-internet-password", "-a", currentUser, "-s", location, "-w")
-            standardOutput = stdout
-            errorOutput = stderr
-            setIgnoreExitValue(true)
-        }
-        stdout.toString().trim()
-    } else {
-        ""
-    }
-}
+fun getProjectProperty(s: String) = project.findProperty(s) as String?
+
 
 subprojects {
+
     apply(plugin="org.jetbrains.kotlin.multiplatform")
     apply(plugin = "maven-publish")
-
-    val version_kotlin: String by project
+    apply(plugin = "com.jfrog.bintray")
 
     repositories {
         mavenLocal()
@@ -76,15 +67,46 @@ subprojects {
             }
         }
         js("js") {
-            //val main by compilations.getting {
-            //    kotlinOptions {
-            //        moduleKind = "plain"
-            //    }
-            // }
             nodejs()
             browser()
         }
+        sourceSets {
+            val commonMain by getting {
+                kotlin.srcDir("$buildDir/generated/kotlin")
+            }
+        }
+    }
 
+    val now = Instant.now()
+    fun fBbuildStamp(): String {
+        return DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")).format(now)
+    }
+    fun fBuildDate(): String {
+        return DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(ZoneId.of("UTC")).format(now)
+    }
+    fun fBuildTime(): String {
+        return DateTimeFormatter.ofPattern("HH:mm:ss z").withZone(ZoneId.of("UTC")).format(now)
+    }
+    tasks.register<Copy>("generateFromTemplates") {
+        val templateContext = mapOf(
+                "version" to project.version,
+                "buildStamp" to fBbuildStamp(),
+                "buildDate" to fBuildDate(),
+                "buildTime" to fBuildTime()
+        )
+        inputs.properties(templateContext) // for gradle up-to-date check
+        from("src/template/kotlin")
+        into("$buildDir/generated/kotlin")
+        expand(templateContext)
+    }
+    tasks.getByName("compileKotlinMetadata") {
+        dependsOn("generateFromTemplates")
+    }
+    tasks.getByName("compileKotlinJvm8") {
+        dependsOn("generateFromTemplates")
+    }
+    tasks.getByName("compileKotlinJs") {
+        dependsOn("generateFromTemplates")
     }
 
     dependencies {
@@ -99,20 +121,20 @@ subprojects {
         "jsTestImplementation"(kotlin("test-js"))
     }
 
-
-    configure<PublishingExtension> {
-        repositories {
-            maven {
-                name = "itemis-akehurst"
-                url = uri("https://projects.itemis.de/nexus/content/repositories/akehurst/")
-                credentials {
-                    username = if (project.hasProperty("username")) project.property("username") as String else System.getenv("USER")
-                    password = if (project.hasProperty("password")) project.property("password") as String else if (project.hasProperty("maclocal")) getPassword(System.getenv("USER"), "projects.itemis.de") else System.getenv("PASSWORD")
-                }
-            }
-        }
-
+    configure<BintrayExtension> {
+        user = getProjectProperty("bintrayUser")
+        key = getProjectProperty("bintrayApiKey")
+        publish = true
+        override = true
+        setPublications("kotlinMultiplatform","metadata","js","jvm8")
+        pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
+            repo = "maven"
+            name = "${rootProject.name}"
+            userOrg = user
+            websiteUrl = "https://github.com/dhakehurst/net.akehurst.kotlin.kserialisation"
+            vcsUrl = "https://github.com/dhakehurst/net.akehurst.kotlin.kserialisation"
+            setLabels("kotlin")
+            setLicenses("Apache-2.0")
+        })
     }
-
-
 }

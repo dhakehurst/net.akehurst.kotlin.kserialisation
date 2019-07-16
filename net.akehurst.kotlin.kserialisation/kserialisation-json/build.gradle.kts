@@ -12,6 +12,7 @@ dependencies {
     commonMainImplementation("net.akehurst.language:agl-processor:${version_agl}")
 
     commonMainImplementation("net.akehurst.kotlinx:kotlinx-collections:$version_kxreflect")
+    commonMainImplementation("net.akehurst.kotlinx:kotlinx-reflect:$version_kxreflect")
 
 
     commonTestImplementation ("${group_klock}:klock:${version_klock}")
@@ -20,5 +21,4 @@ dependencies {
     // because IntelliJ won't resolve Implementation dependencies at runtime!
     commonTestImplementation(kotlin("reflect"))
     commonTestImplementation("net.akehurst.kotlin.komposite:komposite-processor:$version_komposite")
-    commonTestImplementation("net.akehurst.kotlinx:kotlinx-reflect:$version_kxreflect")
 }

@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2019 Dr. David H. Akehurst (http://dr.david.h.akehurst.net)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.akehurst.kotlin.kserialisation.json
 
 import com.soywiz.klock.DateTime
@@ -39,23 +55,6 @@ class test_KSerialiser {
     @BeforeTest
     fun setup() {
         this.sut.confgureDatatypeModel("""
-            namespace kotlin {
-                primitive String
-                primitive Boolean
-                primitive Int
-                primitive Long
-                primitive Float
-                primitive Double
-            }
-            namespace kotlin.collection {
-                collection Collection
-                collection List
-                collection ArrayList
-                collection Set
-                collection LinkedHashSet
-                collection Map
-                collection LinkedHashMap
-            }
             namespace com.soywiz.klock {
               primitive DateTime
             }
@@ -67,18 +66,7 @@ class test_KSerialiser {
             }
         """.trimIndent())
 
-        this.sut.registerPrimitive(Boolean::class, //
-                { value -> JsonBoolean(value) }, //
-                { json -> json.asBoolean().value }
-        )
-        this.sut.registerPrimitive(Int::class, //
-                { value -> JsonNumber(value.toString()) }, //
-                { json -> json.asNumber().toInt() }
-        )
-        this.sut.registerPrimitive(String::class, //
-                { value -> JsonString(value) }, //
-                { json -> json.asString().value }
-        )
+        this.sut.registerKotlinStdPrimitives()
         this.sut.registerPrimitiveAsObject(DateTime::class, //
                 { value -> JsonNumber(value.unixMillisDouble.toString()) }, //
                 { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
@@ -260,28 +248,26 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonObject(
-                mapOf(
-                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
-                        KSerialiserJson.ELEMENTS to JsonObject(
-                                mapOf("a" to JsonNumber("1"), "b" to JsonBoolean(true), "c" to JsonString("hello"))
-                        )
-                )
-        ).toJsonString()
+        val expected = JsonObject(mapOf(
+                KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
+                KSerialiserJson.ELEMENTS to JsonArray(listOf(
+                        JsonObject(mapOf(Pair("key", JsonString("a")),Pair("value",JsonNumber("1")))),
+                        JsonObject(mapOf(Pair("key", JsonString("b")),Pair("value",JsonBoolean(true)))),
+                        JsonObject(mapOf(Pair("key", JsonString("c")),Pair("value",JsonString("hello"))))
+                )))).toJsonString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun toData_Map() {
 
-        val root = JsonObject(
-                mapOf(
-                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
-                        KSerialiserJson.ELEMENTS to JsonObject(
-                                mapOf("a" to JsonNumber("1"), "b" to JsonBoolean(true), "c" to JsonString("hello"))
-                        )
-                )
-        ).toJsonString()
+        val root = JsonObject(mapOf(
+                KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
+                KSerialiserJson.ELEMENTS to JsonArray(listOf(
+                        JsonObject(mapOf(Pair("key", JsonString("a")),Pair("value",JsonNumber("1")))),
+                        JsonObject(mapOf(Pair("key", JsonString("b")),Pair("value",JsonBoolean(true)))),
+                        JsonObject(mapOf(Pair("key", JsonString("c")),Pair("value",JsonString("hello"))))
+                )))).toJsonString()
 
         val actual = this.sut.toData(root)
 
