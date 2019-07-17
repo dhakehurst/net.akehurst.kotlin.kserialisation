@@ -52,7 +52,34 @@ class FromJsonConverter(
             val index = head.toIntOrNull()
             val json = when (root) {
                 is JsonArray -> if (null != index) root.elements[index] else throw KSerialiserJsonException("Path error in reference") //TODO: better error
-                is JsonObject -> root.property[head]
+                is JsonObject -> {
+                    val type = root.property[KSerialiserJson.TYPE]?.asString()?.value
+                    when(type) {
+                        KSerialiserJson.OBJECT -> root.property[head]
+                        KSerialiserJson.LIST -> {
+                            if (null != index) {
+                                root.property[KSerialiserJson.ELEMENTS]?.asArray()?.elements?.get(index)
+                            } else {
+                                throw KSerialiserJsonException("Path error in reference")
+                            }
+                        }
+                        KSerialiserJson.SET -> {
+                            if (null != index) {
+                                root.property[KSerialiserJson.ELEMENTS]?.asArray()?.elements?.get(index)
+                            } else {
+                                throw KSerialiserJsonException("Path error in reference")
+                            }
+                        }
+                        KSerialiserJson.MAP -> {
+                            if (null != index) {
+                                root.property[KSerialiserJson.ELEMENTS]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(KSerialiserJson.VALUE)
+                            } else {
+                                throw KSerialiserJsonException("Path error in reference")
+                            }
+                        }
+                        else -> throw KSerialiserJsonException("findByReference doesn't know what to do with a ${type}")
+                    }
+                }
                 else -> null
             }
             if (null == json) {
@@ -169,14 +196,14 @@ class FromJsonConverter(
     }
 
     private fun convertMap(path: String, json: JsonArray): Map<*, *> {
-        return json.elements.associate { jme ->
-            val jKey = jme.asObject().property["key"]!!
-            val jValue = jme.asObject().property["value"]!!
-            val pathk = path + "/key"
-            val pathv = path + "/value"
+        return json.elements.mapIndexed { index, jme ->
+            val jKey = jme.asObject().property[KSerialiserJson.KEY]!!
+            val jValue = jme.asObject().property[KSerialiserJson.VALUE]!!
+            val pathk = path + "/key" //TODO: this is not correct
+            val pathv = path + "/${index}"
             val key = this.convertValue(pathk, jKey)
             val value = this.convertValue(pathv, jValue)
             Pair(key, value)
-        }
+        }.associate { it }
     }
 }

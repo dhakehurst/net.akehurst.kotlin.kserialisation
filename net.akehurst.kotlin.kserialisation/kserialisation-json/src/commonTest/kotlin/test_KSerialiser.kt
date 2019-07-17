@@ -17,6 +17,7 @@
 package net.akehurst.kotlin.kserialisation.json
 
 import com.soywiz.klock.DateTime
+import net.akehurst.kotlinx.reflect.ModuleRegistry
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -251,9 +252,9 @@ class test_KSerialiser {
         val expected = JsonObject(mapOf(
                 KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
                 KSerialiserJson.ELEMENTS to JsonArray(listOf(
-                        JsonObject(mapOf(Pair("key", JsonString("a")),Pair("value",JsonNumber("1")))),
-                        JsonObject(mapOf(Pair("key", JsonString("b")),Pair("value",JsonBoolean(true)))),
-                        JsonObject(mapOf(Pair("key", JsonString("c")),Pair("value",JsonString("hello"))))
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("a")),Pair(KSerialiserJson.VALUE,JsonNumber("1")))),
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("b")),Pair(KSerialiserJson.VALUE,JsonBoolean(true)))),
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("c")),Pair(KSerialiserJson.VALUE,JsonString("hello"))))
                 )))).toJsonString()
         assertEquals(expected, actual)
     }
@@ -264,9 +265,9 @@ class test_KSerialiser {
         val root = JsonObject(mapOf(
                 KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
                 KSerialiserJson.ELEMENTS to JsonArray(listOf(
-                        JsonObject(mapOf(Pair("key", JsonString("a")),Pair("value",JsonNumber("1")))),
-                        JsonObject(mapOf(Pair("key", JsonString("b")),Pair("value",JsonBoolean(true)))),
-                        JsonObject(mapOf(Pair("key", JsonString("c")),Pair("value",JsonString("hello"))))
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("a")),Pair(KSerialiserJson.VALUE,JsonNumber("1")))),
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("b")),Pair(KSerialiserJson.VALUE,JsonBoolean(true)))),
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("c")),Pair(KSerialiserJson.VALUE,JsonString("hello"))))
                 )))).toJsonString()
 
         val actual = this.sut.toData(root)
@@ -297,6 +298,7 @@ class test_KSerialiser {
 
     @Test
     fun toData_A() {
+        sut.registerModule("net.akehurst.kotlin.kserialisation-kserialisation-json-test")
         val dtA = sut.registry.findDatatypeByName("A")!!
 
         val json = JsonObject(mapOf(
