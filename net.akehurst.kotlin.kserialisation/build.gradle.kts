@@ -15,6 +15,8 @@
  */
 
 import com.jfrog.bintray.gradle.BintrayExtension
+import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
+import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
 import java.time.Instant
@@ -136,5 +138,26 @@ subprojects {
             setLabels("kotlin")
             setLicenses("Apache-2.0")
         })
+    }
+
+    val bintrayUpload by tasks.getting
+    val publishToMavenLocal by tasks.getting
+    val publishing = extensions.getByType(PublishingExtension::class.java)
+
+    bintrayUpload.dependsOn(publishToMavenLocal)
+
+    tasks.withType<BintrayUploadTask> {
+        doFirst {
+            publishing.publications
+                    .filterIsInstance<MavenPublication>()
+                    .forEach { publication ->
+                        val moduleFile = buildDir.resolve("publications/${publication.name}/module.json")
+                        if (moduleFile.exists()) {
+                            publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
+                                override fun getDefaultExtension() = "module"
+                            })
+                        }
+                    }
+        }
     }
 }
