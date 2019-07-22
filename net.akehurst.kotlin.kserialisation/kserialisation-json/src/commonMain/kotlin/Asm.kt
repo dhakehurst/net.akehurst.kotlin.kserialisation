@@ -123,6 +123,7 @@ data class JsonString(
         return this
     }
     override fun toJsonString(): String {
+        val escaped = this.value.replace("\"", "\\\"")
         return """"${this.value}""""
     }
 }

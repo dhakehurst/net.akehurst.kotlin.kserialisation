@@ -53,7 +53,7 @@ object Json {
                 literalValue = BOOLEAN < DOUBLE_QUOTE_STRING < NUMBER < NULL ;
                 BOOLEAN             = 'true' | 'false' ;
                 NUMBER              = "-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?" ;
-                DOUBLE_QUOTE_STRING = "\"(?:\\?.)*?\"" ;
+                DOUBLE_QUOTE_STRING = "(?s)\"(?:\\?.)*?\"" ;
                 NULL                = 'null' ;
             
             }

@@ -33,7 +33,7 @@ class FromJsonConverter(
     fun convertValue(path: String, json: JsonValue): Any? {
         return when (json) {
             is JsonNull -> null
-            is JsonString -> json.value
+            is JsonString -> json.value.replace("\\\"","\"")
             is JsonNumber -> convertNumber(json)
             is JsonBoolean -> json.value
             is JsonArray -> convertList(path, json)

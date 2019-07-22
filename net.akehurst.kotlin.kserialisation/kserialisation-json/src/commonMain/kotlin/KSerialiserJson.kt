@@ -128,7 +128,7 @@ class KSerialiserJson() {
         this.registerPrimitive(Long::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toLong() })
         this.registerPrimitive(Float::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toFloat() })
         this.registerPrimitive(Double::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toDouble() })
-        this.registerPrimitive(String::class, { value -> JsonString(value.replace("\"", "\\\"")) }, { json -> json.asString().value })
+        this.registerPrimitive(String::class, { value -> JsonString(value.replace("\"", "\\\"")) }, { json -> json.asString().value.replace("\\\"", "\"") })
     }
 
     @JsName("registerPrimitive")

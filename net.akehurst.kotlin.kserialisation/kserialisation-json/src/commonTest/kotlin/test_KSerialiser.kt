@@ -125,11 +125,11 @@ class test_KSerialiser {
     @Test
     fun toJson_String() {
 
-        val root = "hello"
+        val root = "hello world!"
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonString("hello").toJsonString()
+        val expected = JsonString("hello world!").toJsonString()
 
         assertEquals(expected, actual)
     }
@@ -142,6 +142,64 @@ class test_KSerialiser {
         val actual = this.sut.toData(root)
 
         val expected = "hello"
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toJson_String_with_quotes() {
+
+        val root = "hello \"world!\""
+
+        val actual = this.sut.toJson(root, root)
+
+        val expected = JsonString("hello \\\"world!\\\"").toJsonString()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toData_String_with_quotes() {
+
+        val root = JsonString("hello \\\"world!\\\"").toJsonString()
+
+        val actual = this.sut.toData(root)
+
+        val expected = "hello \"world!\""
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toJson_String_with_linebreak() {
+
+        val root = """
+            hello
+            world!
+        """.trimMargin()
+
+        val actual = this.sut.toJson(root, root)
+
+        val expected = JsonString(root).toJsonString()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toData_String_with_linebreak() {
+
+        val v = """
+            hello
+            world!
+        """.trimMargin()
+        val root = JsonString(v).toJsonString()
+
+        val actual = this.sut.toData(root)
+
+        val expected = """
+            hello
+            world!
+        """.trimMargin()
 
         assertEquals(expected, actual)
     }
