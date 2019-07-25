@@ -22,22 +22,22 @@ import kotlin.js.JsName
 
 object Json {
 
-    private var _processor:LanguageProcessor? = null
+    //private var _processor:LanguageProcessor? = null
 
     val REF = "${'$'}ref"
-
-    internal fun processor(): LanguageProcessor {
-        if (null== _processor) {
-            val grammarStr = fetchGrammarStr()
-            _processor = Agl.processor(
-                    grammarStr,
-                    SyntaxAnalyser(),
-                    Formatter()
-            )
+    /*
+        internal fun processor(): LanguageProcessor {
+            if (null== _processor) {
+                val grammarStr = fetchGrammarStr()
+                _processor = Agl.processor(
+                        grammarStr,
+                        SyntaxAnalyser(),
+                        Formatter()
+                )
+            }
+            return _processor!!
         }
-        return _processor!!
-    }
-
+    */
     internal fun fetchGrammarStr(): String {
         return """
             namespace net.akehurst.kotlin.kserialisation.json
@@ -53,19 +53,18 @@ object Json {
                 literalValue = BOOLEAN < DOUBLE_QUOTE_STRING < NUMBER < NULL ;
                 BOOLEAN             = 'true' | 'false' ;
                 NUMBER              = "-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?" ;
-                DOUBLE_QUOTE_STRING = "(?s)\"(?:\\?.)*?\"" ;
+                DOUBLE_QUOTE_STRING = "\"(?:\\?(.|\n))*?\"" ;
                 NULL                = 'null' ;
             
             }
             
             """.trimIndent()
-
-
     }
 
 
     @JsName("process")
-    fun process(jsonString:String) : JsonValue {
-        return this.processor().process("json", jsonString)
+    fun process(jsonString: String): JsonValue {
+        //return this.processor().process("json", jsonString)
+        return JsonParser.process(jsonString)
     }
 }

@@ -76,6 +76,20 @@ class test_JsonProcessor {
     }
 
     @Test
+    fun string() {
+
+        val jsonString = "\"hello\""
+
+        val actual = Json.process(jsonString)
+
+        val expected = JsonString("hello")
+
+        assertEquals(expected, actual)
+
+    }
+
+
+    @Test
     fun emptyArray() {
 
         val jsonString = "[]"

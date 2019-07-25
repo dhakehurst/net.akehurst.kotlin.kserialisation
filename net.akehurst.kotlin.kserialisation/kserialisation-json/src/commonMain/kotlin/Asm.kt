@@ -18,42 +18,50 @@
 package net.akehurst.kotlin.kserialisation.json
 
 class JsonException : RuntimeException {
-    constructor(message:String) : super(message)
+    constructor(message: String) : super(message)
 }
 
 abstract class JsonValue {
-    open fun asBoolean() : JsonBoolean {
+    open fun asBoolean(): JsonBoolean {
         throw JsonException("Object is not a JsonNumber")
     }
-    open fun asNumber() : JsonNumber {
+
+    open fun asNumber(): JsonNumber {
         throw JsonException("Object is not a JsonNumber")
     }
-    open fun asString() : JsonString {
+
+    open fun asString(): JsonString {
         throw JsonException("Object is not a JsonString")
     }
-    open fun asObject() : JsonObject {
+
+    open fun asObject(): JsonObject {
         throw JsonException("Object is not a JsonObject")
     }
-    open fun asReference() : JsonReference {
+
+    open fun asReference(): JsonReference {
         throw JsonException("Object is not a JsonReference")
     }
-    open fun asArray() : JsonArray {
+
+    open fun asArray(): JsonArray {
         throw JsonException("Object is not a JsonArray")
     }
 
-    abstract fun toJsonString() : String
+    abstract fun toJsonString(): String
 }
 
-data class JsonObject(
-        val property: Map<String, JsonValue> = emptyMap()
+class JsonObject(
+        initProperty: Map<String, JsonValue> = emptyMap()
 ) : JsonValue() {
+
+    val property: Map<String, JsonValue> = mutableMapOf<String, JsonValue>() + initProperty
+
     override fun asObject(): JsonObject {
         return this
     }
 
-    fun withProperty(key:String, value:JsonValue) : JsonObject{
-        val newProps = property + Pair(key,value)
-        return JsonObject(newProps)
+    fun setProperty(key: String, value: JsonValue): JsonObject {
+        (this.property as MutableMap)[key] = value
+        return this
     }
 
     override fun toJsonString(): String {
@@ -62,14 +70,22 @@ data class JsonObject(
         }.joinToString(",")
         return """{${elements}}"""
     }
+
+    override fun equals(other: Any?): Boolean {
+        return when {
+            other is JsonObject -> this.property == other.property
+            else -> false
+        }
+    }
 }
 
 data class JsonReference(
-        val path:String
+        val path: String
 ) : JsonValue() {
     override fun asReference(): JsonReference {
         return this
     }
+
     override fun toJsonString(): String {
         return """{ "${Json.REF}" : "$path" }"""
     }
@@ -81,36 +97,43 @@ data class JsonBoolean(
     override fun asBoolean(): JsonBoolean {
         return this
     }
+
     override fun toJsonString(): String {
         return """${this.value}"""
     }
 }
 
 data class JsonNumber(
-        private val _value:String
+        private val _value: String
 ) : JsonValue() {
-    fun toByte() : Byte {
+    fun toByte(): Byte {
         return this._value.toByte()
     }
-    fun toShort() : Short {
+
+    fun toShort(): Short {
         return this._value.toShort()
     }
-    fun toInt() : Int {
+
+    fun toInt(): Int {
         return this._value.toInt()
     }
-    fun toLong() : Long {
+
+    fun toLong(): Long {
         return this._value.toLong()
     }
-    fun toFloat() : Float {
+
+    fun toFloat(): Float {
         return this._value.toFloat()
     }
-    fun toDouble() : Double {
+
+    fun toDouble(): Double {
         return this._value.toDouble()
     }
 
     override fun asNumber(): JsonNumber {
         return this
     }
+
     override fun toJsonString(): String {
         return """${this._value}"""
     }
@@ -122,18 +145,23 @@ data class JsonString(
     override fun asString(): JsonString {
         return this
     }
+
     override fun toJsonString(): String {
         val escaped = this.value.replace("\"", "\\\"")
         return """"${this.value}""""
     }
 }
 
-data class JsonArray(
-        val elements:List<JsonValue> = emptyList()
+class JsonArray(
+        initElement : List<JsonValue> = emptyList()
 ) : JsonValue() {
+
+    val elements: List<JsonValue> = mutableListOf<JsonValue>() + initElement
+
     override fun asArray(): JsonArray {
         return this
     }
+
     override fun toJsonString(): String {
         val elements = this.elements.map {
             it.toJsonString()
@@ -141,9 +169,16 @@ data class JsonArray(
         return """[${elements}]"""
     }
 
-    fun withElement(element:JsonValue) : JsonArray {
-        val newElements = this.elements + element
-        return JsonArray(newElements)
+    fun addElement(element: JsonValue): JsonArray {
+        (this.elements as MutableList).add(element)
+        return this
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when {
+            other is JsonArray -> this.elements == other.elements
+            else -> false
+        }
     }
 }
 

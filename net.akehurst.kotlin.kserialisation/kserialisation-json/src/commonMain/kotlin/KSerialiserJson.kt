@@ -193,12 +193,12 @@ class KSerialiserJson() {
             }
             collElementEnd { key, info, element ->
                 val path = if (key== KompositeWalker.ROOT) info.path else info.path + key.toString()
-                val listObj = currentObjStack.pop() as JsonObject
+                val listObj = currentObjStack.peek() as JsonObject
                 val list = (listObj.property[ELEMENTS] ?: JsonArray()) as JsonArray
-                val newList = list.withElement(info.acc)
-                val nObj = listObj.withProperty(ELEMENTS, newList)
-                currentObjStack.push(nObj)
-                WalkInfo(path, nObj)
+                list.addElement(info.acc)
+                //val nObj = listObj.withProperty(ELEMENTS, newList)
+                //currentObjStack.push(nObj)
+                WalkInfo(path, listObj)
             }
             collEnd { key, info, coll ->
                 val listObj = currentObjStack.pop()
@@ -222,16 +222,16 @@ class KSerialiserJson() {
                 val path = if (key== KompositeWalker.ROOT) info.path else info.path + key.toString()
                 val meKey = currentObjStack.pop()
                 val meValue = info.acc
-                val mapObj = currentObjStack.pop() as JsonObject
+                val mapObj = currentObjStack.peek() as JsonObject
                 val mapElements = (mapObj.property[ELEMENTS] ?: JsonArray()) as JsonArray
                 val neEl = JsonObject(mapOf(
                         KEY to meKey,
                         VALUE to meValue
                 ))
-                val newMap = mapElements.withElement(neEl)
-                val nObj = mapObj.withProperty(ELEMENTS, newMap)
-                currentObjStack.push(nObj)
-                WalkInfo(path, nObj)
+                mapElements.addElement(neEl)
+                //mapObj.withProperty(ELEMENTS, newMap)
+                //currentObjStack.push(nObj)
+                WalkInfo(path, mapObj)
             }
             mapEnd { key, info, map ->
                 val obj = currentObjStack.pop()
@@ -255,10 +255,10 @@ class KSerialiserJson() {
             }
             propertyEnd { key, info, property ->
                 val path = if (key== KompositeWalker.ROOT) info.path else info.path + key.toString()
-                val cuObj = currentObjStack.pop() as JsonObject
-                val nObj = cuObj.withProperty(key as String, info.acc)
-                currentObjStack.push(nObj)
-                WalkInfo(path, nObj)
+                val cuObj = currentObjStack.peek() as JsonObject
+                cuObj.setProperty(key as String, info.acc)
+                //currentObjStack.push(nObj)
+                WalkInfo(path, cuObj)
             }
         }
 
