@@ -20,6 +20,7 @@ import net.akehurst.kotlin.komposite.api.PrimitiveType
 import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.construct
 import net.akehurst.kotlin.komposite.common.set
+import kotlin.reflect.KClass
 
 
 class FromJsonConverter(
@@ -33,8 +34,8 @@ class FromJsonConverter(
     fun convertValue(path: String, json: JsonValue): Any? {
         return when (json) {
             is JsonNull -> null
-            is JsonString -> json.value.replace("\\\"","\"")
-            is JsonNumber -> convertNumber(json)
+            is JsonString -> json.value.replace("\\\"", "\"")
+            is JsonNumber -> throw KSerialiserJsonException("JsonNumber cannot be converted, not enough type information, please register a primitiveAsObject converter")
             is JsonBoolean -> json.value
             is JsonArray -> convertList(path, json)
             is JsonObject -> convertObject(path, json)
@@ -54,7 +55,7 @@ class FromJsonConverter(
                 is JsonArray -> if (null != index) root.elements[index] else throw KSerialiserJsonException("Path error in reference") //TODO: better error
                 is JsonObject -> {
                     val type = root.property[KSerialiserJson.TYPE]?.asString()?.value
-                    when(type) {
+                    when (type) {
                         KSerialiserJson.OBJECT -> root.property[head]
                         KSerialiserJson.LIST -> {
                             if (null != index) {
@@ -94,10 +95,6 @@ class FromJsonConverter(
         val p2 = if (path.startsWith("/")) path.substring(1) else path
         val pathList = p2.split("/")
         return this.findByReference(root, pathList)
-    }
-
-    private fun convertNumber(json: JsonNumber): Number {
-        return json.toDouble()
     }
 
     private fun convertReference(path: String, json: JsonReference): Any? {

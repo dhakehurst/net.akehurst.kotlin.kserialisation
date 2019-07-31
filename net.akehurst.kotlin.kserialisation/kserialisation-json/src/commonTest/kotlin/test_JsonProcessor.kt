@@ -16,11 +16,9 @@
 
 package net.akehurst.kotlin.kserialisation.json
 
-import net.akehurst.language.api.parser.ParseFailedException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.expect
 
 
 class test_JsonProcessor {
@@ -30,7 +28,7 @@ class test_JsonProcessor {
 
         val jsonString = ""
 
-        assertFailsWith<ParseFailedException> {
+        assertFailsWith<JsonParserException> {
             val actual = Json.process(jsonString)
         }
 

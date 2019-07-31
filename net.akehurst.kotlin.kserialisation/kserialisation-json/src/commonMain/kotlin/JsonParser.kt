@@ -58,6 +58,9 @@ object JsonParser {
     }
 
     fun process(input: String) : JsonValue {
+        if (input.isEmpty()) {
+            throw JsonParserException("Expected Json content but input was empty")
+        }
         val scanner = SimpleScanner(input)
         val nameStack = Stack<String>()
         val valueStack = Stack<JsonValue>()
