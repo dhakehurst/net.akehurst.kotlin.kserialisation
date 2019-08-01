@@ -284,11 +284,11 @@ class test_KSerialiser {
         val root = """
             hello
             world!
-        """.trimMargin()
+        """.trimIndent()
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonString(root).toJsonString()
+        val expected = "\"hello\\nworld!\""
 
         assertEquals(expected, actual)
     }
@@ -299,7 +299,7 @@ class test_KSerialiser {
         val v = """
             hello
             world!
-        """.trimMargin()
+        """.trimIndent()
         val root = JsonString(v).toJsonString()
 
         val actual = this.sut.toData(root)
@@ -307,7 +307,7 @@ class test_KSerialiser {
         val expected = """
             hello
             world!
-        """.trimMargin()
+        """.trimIndent()
 
         assertEquals(expected, actual)
     }

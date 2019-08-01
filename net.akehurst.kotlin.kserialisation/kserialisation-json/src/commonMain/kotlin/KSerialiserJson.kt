@@ -131,16 +131,27 @@ class KSerialiserJson() {
         this.registerPrimitive(
                 String::class,
                 { value ->
-                    JsonString(
-                            value //
-                                    .replace("\n", "\\n")
-                                    .replace("\"", "\\\"")
+                    JsonString(value //
+                            .replace("\\", "\\\\")
+                            .replace("\b", "\\b")
+                            .replace("\u000C", "\\f")
+                            .replace("\n", "\\n")
+                            .replace("\r", "\\r")
+                            .replace("\t", "\\t")
+                            .replace("\"", "\\\"")
 
                     )
                 },
-                { json -> json.asString().value //
-                        .replace("\\n", "\n")
-                        .replace("\\\"", "\"") }
+                { json ->
+                    json.asString().value //
+                            .replace("\\b", "\b")
+                            .replace("\\f", "\u000C")
+                            .replace("\\n", "\n")
+                            .replace("\\r", "\r")
+                            .replace("\\t", "\t")
+                            .replace("\\\"", "\"")
+                            .replace("\\\\", "\\")
+                }
         )
     }
 
