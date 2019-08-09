@@ -94,7 +94,7 @@ class KSerialiserJson() {
                 objectBegin { key, info, obj, datatype ->
                     val path = if (key == KompositeWalker.ROOT) info.path else info.path + key.toString()
                     if (obj == targetValue) {
-                        resultPath = path.joinToString("/")
+                        resultPath = "/"+path.joinToString("/")
                     }
                     WalkInfo(path, obj == targetValue)
                 }
