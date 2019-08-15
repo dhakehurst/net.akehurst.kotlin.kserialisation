@@ -21,6 +21,7 @@ import net.akehurst.kotlinx.reflect.ModuleRegistry
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class A(
         val prop1: String
@@ -296,11 +297,7 @@ class test_KSerialiser {
     @Test
     fun toData_String_with_linebreak() {
 
-        val v = """
-            hello
-            world!
-        """.trimIndent()
-        val root = JsonString(v).toJsonString()
+        val root = "\"hello\\nworld!\""
 
         val actual = this.sut.toData(root)
 
@@ -350,6 +347,80 @@ class test_KSerialiser {
     }
 
     @Test
+    fun toJson_Array_empty_Int() {
+
+        val root = emptyArray<Int>()
+
+        val actual = this.sut.toJson(root, root)
+
+        val expected = JsonObject(
+                mapOf(
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.ARRAY),
+                        KSerialiserJson.ELEMENTS to JsonArray(listOf())
+                )
+        ).toJsonString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toData_Array_empty_Int() {
+
+        val root = JsonObject(
+                mapOf(
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.ARRAY),
+                        KSerialiserJson.ELEMENTS to JsonArray(listOf())
+                )
+        ).toJsonString()
+
+        val actual = this.sut.toData(root) as Array<Any>
+
+        val expected = emptyArray<Int>()
+
+        assertTrue (expected contentEquals  actual)
+    }
+
+    @Test
+    fun toJson_Array() {
+
+        val root = arrayOf(1, true, "hello")
+
+        val actual = this.sut.toJson(root, root)
+
+        val expected = JsonObject(
+                mapOf(
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.ARRAY),
+                        KSerialiserJson.ELEMENTS to JsonArray(listOf(JsonObject(mapOf(
+                                KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
+                                KSerialiserJson.CLASS to JsonString("kotlin.Int"),
+                                KSerialiserJson.VALUE to JsonNumber(1.toString())
+                        )), JsonBoolean(true), JsonString("hello")))
+                )
+        ).toJsonString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun toData_Array() {
+
+        val root = JsonArray(listOf( //
+                JsonObject(mapOf(
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
+                        KSerialiserJson.CLASS to JsonString("kotlin.Int"),
+                        KSerialiserJson.VALUE to JsonNumber(1.toString())
+                )), //
+                JsonBoolean(true), //
+                JsonString("hello")//
+        )).toJsonString()
+
+        val actual = this.sut.toData(root) as Array<Any>
+
+        val expected = arrayOf(1, true, "hello")
+
+        assertTrue (expected contentEquals  actual)
+    }
+
+
+    @Test
     fun toJson_List() {
 
         val root = listOf(1, true, "hello")
@@ -372,15 +443,20 @@ class test_KSerialiser {
     @Test
     fun toData_List() {
 
-        val root = JsonArray(listOf(JsonObject(mapOf(
-                KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
-                KSerialiserJson.CLASS to JsonString("kotlin.Double"),
-                KSerialiserJson.VALUE to JsonNumber(1.0.toString())
-        )), JsonBoolean(true), JsonString("hello"))).toJsonString()
+        val root = JsonObject(
+                mapOf(
+                        KSerialiserJson.TYPE to JsonString(KSerialiserJson.LIST),
+                        KSerialiserJson.ELEMENTS to JsonArray(listOf(JsonObject(mapOf(
+                                KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
+                                KSerialiserJson.CLASS to JsonString("kotlin.Int"),
+                                KSerialiserJson.VALUE to JsonNumber(1.toString())
+                        )), JsonBoolean(true), JsonString("hello")))
+                )
+        ).toJsonString()
 
         val actual = this.sut.toData(root)
 
-        val expected = listOf(1.0, true, "hello")
+        val expected = listOf(1, true, "hello")
 
         assertEquals(expected, actual)
     }
@@ -434,13 +510,13 @@ class test_KSerialiser {
         val expected = JsonObject(mapOf(
                 KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
                 KSerialiserJson.ELEMENTS to JsonArray(listOf(
-                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("a")),Pair(KSerialiserJson.VALUE,JsonObject(mapOf(
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("a")), Pair(KSerialiserJson.VALUE, JsonObject(mapOf(
                                 KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
                                 KSerialiserJson.CLASS to JsonString("kotlin.Int"),
                                 KSerialiserJson.VALUE to JsonNumber(1.toString())
                         ))))),
-                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("b")),Pair(KSerialiserJson.VALUE,JsonBoolean(true)))),
-                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("c")),Pair(KSerialiserJson.VALUE,JsonString("hello"))))
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("b")), Pair(KSerialiserJson.VALUE, JsonBoolean(true)))),
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("c")), Pair(KSerialiserJson.VALUE, JsonString("hello"))))
                 )))).toJsonString()
         assertEquals(expected, actual)
     }
@@ -451,13 +527,13 @@ class test_KSerialiser {
         val root = JsonObject(mapOf(
                 KSerialiserJson.TYPE to JsonString(KSerialiserJson.MAP),
                 KSerialiserJson.ELEMENTS to JsonArray(listOf(
-                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("a")),Pair(KSerialiserJson.VALUE,JsonObject(mapOf(
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("a")), Pair(KSerialiserJson.VALUE, JsonObject(mapOf(
                                 KSerialiserJson.TYPE to JsonString(KSerialiserJson.PRIMITIVE),
                                 KSerialiserJson.CLASS to JsonString("kotlin.Int"),
                                 KSerialiserJson.VALUE to JsonNumber(1.toString())
                         ))))),
-                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("b")),Pair(KSerialiserJson.VALUE,JsonBoolean(true)))),
-                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("c")),Pair(KSerialiserJson.VALUE,JsonString("hello"))))
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("b")), Pair(KSerialiserJson.VALUE, JsonBoolean(true)))),
+                        JsonObject(mapOf(Pair(KSerialiserJson.KEY, JsonString("c")), Pair(KSerialiserJson.VALUE, JsonString("hello"))))
                 )))).toJsonString()
 
         val actual = this.sut.toData(root)

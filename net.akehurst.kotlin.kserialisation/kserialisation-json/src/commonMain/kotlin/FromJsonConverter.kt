@@ -34,14 +34,20 @@ class FromJsonConverter(
     fun convertValue(path: String, json: JsonValue): Any? {
         return when (json) {
             is JsonNull -> null
-            is JsonString -> json.value.replace("\\\"", "\"")
+            is JsonString -> convertPrimitive(json, "String")
             is JsonNumber -> throw KSerialiserJsonException("JsonNumber cannot be converted, not enough type information, please register a primitiveAsObject converter")
-            is JsonBoolean -> json.value
-            is JsonArray -> convertList(path, json)
+            is JsonBoolean -> convertPrimitive(json, "Boolean")
+            is JsonArray -> convertList(path, json).toTypedArray()
             is JsonObject -> convertObject(path, json)
             is JsonReference -> convertReference(path, json)
             else -> throw KSerialiserJsonException("Cannot convert $json")
         }
+    }
+
+    private fun convertPrimitive(json: JsonValue, typeName:String): Any {
+        val dt = this.registry.findPrimitiveByName(typeName) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+        val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
+        return func(json)
     }
 
     private fun findByReference(root: JsonValue, path: List<String>): JsonValue? {
@@ -112,13 +118,17 @@ class FromJsonConverter(
         } else {
             val type = json.property[KSerialiserJson.TYPE]?.asString()?.value
             when (type) {
+                KSerialiserJson.ARRAY -> {
+                    val elements = json.property[KSerialiserJson.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                    convertList(path, elements.asArray()).toTypedArray()
+                }
                 KSerialiserJson.LIST -> {
                     val elements = json.property[KSerialiserJson.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
                     convertList(path, elements.asArray())
                 }
                 KSerialiserJson.SET -> {
                     val elements = json.property[KSerialiserJson.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
-                    convertSet(path, elements.asArray())
+                    convertList(path, elements.asArray()).toSet()
                 }
                 KSerialiserJson.MAP -> {
                     val elements = json.property[KSerialiserJson.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
@@ -138,7 +148,7 @@ class FromJsonConverter(
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
         //TODO: use qualified name when we can
-        val dt = this.registry.findPrimitiveByName(sn) ?: throw KSerialiserJsonException("The primtive is not defined in the Komposite configuration")
+        val dt = this.registry.findPrimitiveByName(sn) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
         val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${sn} from json, did you register its converter")
         return func(json)
     }
@@ -184,12 +194,6 @@ class FromJsonConverter(
         return json.elements.mapIndexed { index, it ->
             this.convertValue(path + "/$index", it)
         }
-    }
-
-    private fun convertSet(path: String, json: JsonArray): Set<*> {
-        return json.elements.mapIndexed { index, it ->
-            this.convertValue(path + "/$index", it)
-        }.toSet()
     }
 
     private fun convertMap(path: String, json: JsonArray): Map<*, *> {

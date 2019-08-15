@@ -40,10 +40,11 @@ class KSerialiserJson() {
         val PRIMITIVE = "${'$'}PRIMITIVE"
         val KEY = "${'$'}key"
         val VALUE = "${'$'}value"
-        val LIST = "${'$'}LIST"
-        val MAP = "${'$'}MAP"
-        val SET = "${'$'}SET"
-        val ELEMENTS = "${'$'}elements"
+        val ARRAY = "\$ARRAY"
+        val LIST = "\$LIST"
+        val MAP = "\$MAP"
+        val SET = "\$SET"
+        val ELEMENTS = "\$elements"
     }
 
     private val reference_cache = mutableMapOf<Any, String>()
@@ -79,7 +80,7 @@ class KSerialiserJson() {
         } else {
             var resultPath: String? = null //TODO: terminate walking early if result found
             val walker = kompositeWalker<List<String>, Boolean>(registry) {
-                collBegin { key, info, coll ->
+                collBegin { key, info, type, coll ->
                     val path = if (key == KompositeWalker.ROOT) info.path else info.path + key.toString()
                     WalkInfo(path, info.acc)
                 }
@@ -94,7 +95,7 @@ class KSerialiserJson() {
                 objectBegin { key, info, obj, datatype ->
                     val path = if (key == KompositeWalker.ROOT) info.path else info.path + key.toString()
                     if (obj == targetValue) {
-                        resultPath = "/"+path.joinToString("/")
+                        resultPath = "/" + path.joinToString("/")
                     }
                     WalkInfo(path, obj == targetValue)
                 }
@@ -201,32 +202,33 @@ class KSerialiserJson() {
                 val ref = JsonReference(refPath)
                 WalkInfo(path, ref)
             }
-            collBegin { key, info, coll ->
-                val path = if (key == KompositeWalker.ROOT) info.path else info.path + key.toString()
-                val collTypeName = when (coll) {
-                    is List<*> -> LIST
-                    is Set<*> -> SET
-                    else -> throw KSerialiserJsonException("Unknown collection type ${coll::class.simpleName}")
-                }
-                val listObj = JsonObject(mapOf(
-                        TYPE to JsonString(collTypeName),
-                        ELEMENTS to JsonArray()
-                ))
-                currentObjStack.push(listObj)
-                WalkInfo(info.path, listObj)
+            collBegin { key, info, type, coll ->
+                val elements = JsonArray()
+                currentObjStack.push(elements)
+                WalkInfo(info.path, elements)
             }
             collElementEnd { key, info, element ->
                 val path = if (key == KompositeWalker.ROOT) info.path else info.path + key.toString()
-                val listObj = currentObjStack.peek() as JsonObject
-                val list = (listObj.property[ELEMENTS] ?: JsonArray()) as JsonArray
-                list.addElement(info.acc)
+                val elements = currentObjStack.peek() as JsonArray
+                elements.addElement(info.acc)
                 //val nObj = listObj.withProperty(ELEMENTS, newList)
                 //currentObjStack.push(nObj)
-                WalkInfo(path, listObj)
+                WalkInfo(path, elements)
             }
-            collEnd { key, info, coll ->
-                val listObj = currentObjStack.pop()
-                WalkInfo(info.path, listObj)
+            collEnd { key, info, type, coll ->
+                val jsonTypeName = when {
+                    type.isArray -> JsonString(ARRAY)
+                    type.isList -> JsonString(LIST)
+                    type.isSet -> JsonString(SET)
+                    else -> throw KSerialiserJsonException("Unknown type $type")
+                }
+                val elements = currentObjStack.pop()
+                val setObj = JsonObject(mapOf(
+                        TYPE to jsonTypeName,
+                        //ELEMENT_TYPE to JsonString(type.elementType.qualifiedName), //needed for deserialising empty Arrays
+                        ELEMENTS to elements
+                ))
+                WalkInfo(info.path, setObj)
             }
             mapBegin { key, info, map ->
                 val path = if (key == KompositeWalker.ROOT) info.path else info.path + key.toString()
