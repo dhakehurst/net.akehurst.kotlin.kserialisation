@@ -190,7 +190,7 @@ class KSerialiserJson() {
             }
             primitive { key, info, value ->
                 //TODO: use qualified name when we can!
-                val dt = registry.findPrimitiveByName(value::class.simpleName!!) ?: throw KSerialiserJsonException("The primtive is not defined in the Komposite configuration")
+                val dt = registry.findPrimitiveByName(value::class.simpleName!!) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
                 val path = if (key == KompositeWalker.ROOT) info.path else info.path + key.toString()
                 val func = primitiveToJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${value::class} to json, did you register its converter")
                 val json = func(value)
