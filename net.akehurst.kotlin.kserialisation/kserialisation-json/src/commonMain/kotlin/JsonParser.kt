@@ -57,11 +57,13 @@ object JsonParser {
         }
     }
 
-    fun process(input: String) : JsonValue {
+    fun process(input: String) : JsonDocument {
+        val doc = JsonDocument("json")
         if (input.isEmpty()) {
             throw JsonParserException("Expected Json content but input was empty")
         }
         val scanner = SimpleScanner(input)
+        val path = Stack<String>()
         val nameStack = Stack<String>()
         val valueStack = Stack<JsonValue>()
         while (scanner.hasMore()) {
@@ -119,7 +121,7 @@ object JsonParser {
                 }
                 scanner.hasNext(TOKEN_OBJECT_START) -> {
                     scanner.next(TOKEN_OBJECT_START)
-                    valueStack.push(JsonObject())
+                    valueStack.push(JsonObject(doc, path.elements))
                     //check for empty object
                     while(scanner.hasMore() && scanner.hasNext(TOKEN_WHITESPACE)) {
                         scanner.next(TOKEN_WHITESPACE)
@@ -136,7 +138,7 @@ object JsonParser {
                         val name = nameStack.pop()
                         peek.setProperty(name, value)
                         if (1==peek.property.size && peek.property.containsKey(Json.REF)) {
-                            val ref = JsonReference(peek.property[Json.REF]!!.asString().value)
+                            val ref = JsonReference(doc, path.elements, peek.property[Json.REF]!!.asString().value)
                             valueStack.pop()
                             valueStack.push(ref)
                         }
@@ -152,6 +154,7 @@ object JsonParser {
                 else -> throw JsonParserException("Unexpected character at position ${scanner.position} - '${input.substring(scanner.position)}'")
             }
         }
-        return valueStack.pop()
+        valueStack.pop()
+        return doc
     }
 }

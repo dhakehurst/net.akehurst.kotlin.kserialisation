@@ -21,7 +21,16 @@ class JsonException : RuntimeException {
     constructor(message: String) : super(message)
 }
 
+data class JsonDocument(
+        val identity: String
+) {
+    val references = mutableMapOf<List<String>, JsonValue>()
+
+    var root:JsonValue = JsonObject(this, emptyList())
+}
+
 abstract class JsonValue {
+
     open fun asBoolean(): JsonBoolean {
         throw JsonException("Object is not a JsonNumber")
     }
@@ -49,11 +58,16 @@ abstract class JsonValue {
     abstract fun toJsonString(): String
 }
 
-class JsonObject(
-        initProperty: Map<String, JsonValue> = emptyMap()
+data class JsonObject(
+        val document: JsonDocument,
+        val path: List<String>
 ) : JsonValue() {
 
-    val property: Map<String, JsonValue> = mutableMapOf<String, JsonValue>() + initProperty
+    init {
+        this.document.references[path] = this
+    }
+
+    val property: Map<String, JsonValue> = mutableMapOf()
 
     override fun asObject(): JsonObject {
         return this
@@ -71,23 +85,23 @@ class JsonObject(
         return """{${elements}}"""
     }
 
-    override fun equals(other: Any?): Boolean {
-        return when {
-            other is JsonObject -> this.property == other.property
-            else -> false
-        }
-    }
 }
 
 data class JsonReference(
-        val path: String
+        val document: JsonDocument,
+        val refPath: List<String>
 ) : JsonValue() {
+
+    val target:JsonValue get() {
+        return this.document.references[refPath] ?: throw JsonException("Reference target not found for path='$refPath'")
+    }
+
     override fun asReference(): JsonReference {
         return this
     }
 
     override fun toJsonString(): String {
-        return """{ "${Json.REF}" : "$path" }"""
+        return """{ "${Json.REF}" : "$refPath" }"""
     }
 }
 
@@ -153,10 +167,10 @@ data class JsonString(
 }
 
 class JsonArray(
-        initElement : List<JsonValue> = emptyList()
+
 ) : JsonValue() {
 
-    val elements: List<JsonValue> = mutableListOf<JsonValue>() + initElement
+    val elements: List<JsonValue> = mutableListOf<JsonValue>()
 
     override fun asArray(): JsonArray {
         return this

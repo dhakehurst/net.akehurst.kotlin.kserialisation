@@ -26,7 +26,7 @@ import kotlin.reflect.KClass
 class FromJsonConverter(
         val registry: DatatypeRegistry,
         val primitiveFromJson: Map<PrimitiveType, (value: JsonValue) -> Any>,
-        val root: JsonValue
+        val document: JsonDocument
 ) {
 
     private val resolvedReference = mutableMapOf<String, Any>()
@@ -104,12 +104,13 @@ class FromJsonConverter(
     }
 
     private fun convertReference(path: String, json: JsonReference): Any? {
-        return if (resolvedReference.containsKey(json.path)) {
-            resolvedReference[json.path]
-        } else {
-            val resolved = findByReference(root, json.path) ?: JsonNull
-            convertValue(json.path, resolved)
-        }
+        return json.target
+        //return if (resolvedReference.containsKey(json.path)) {
+        //    resolvedReference[json.path]
+        //} else {
+        //    val resolved = findByReference(root, json.path) ?: JsonNull
+        //    convertValue(json.path, resolved)
+        //}
     }
 
     private fun convertObject(path: String, json: JsonObject): Any {

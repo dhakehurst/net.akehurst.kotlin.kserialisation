@@ -63,7 +63,7 @@ object Json {
 
 
     @JsName("process")
-    fun process(jsonString: String): JsonValue {
+    fun process(jsonString: String): JsonDocument {
         //return this.processor().process("json", jsonString)
         return JsonParser.process(jsonString)
     }
