@@ -171,6 +171,7 @@ class FromJsonConverter(
                     v
                 }
             }
+
             val obj = dt.construct(*idProps.toTypedArray()) //TODO: need better error when this fails
             // add resolved reference path ASAP, so that we avoid recursion if possible
             resolvedReference[path] = obj
