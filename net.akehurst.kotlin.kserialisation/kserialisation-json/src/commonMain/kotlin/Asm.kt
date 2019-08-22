@@ -24,9 +24,28 @@ class JsonException : RuntimeException {
 data class JsonDocument(
         val identity: String
 ) {
+    companion object {
+        val TYPE = "\$type"     // PRIMITIVE | OBJECT | LIST | SET | MAP
+        val CLASS = "\$class"
+        val KEY = "\$key"
+        val VALUE = "\$value"
+        val ELEMENTS = "\$elements"
+
+        val PRIMITIVE = JsonString("\$PRIMITIVE")
+        val ARRAY = JsonString("\$ARRAY") // TODO: ?
+        val OBJECT = JsonString("\$OBJECT")
+        val LIST = JsonString("\$LIST")
+        val MAP = JsonString("\$MAP")
+        val SET = JsonString("\$SET")
+    }
+
     val references = mutableMapOf<List<String>, JsonValue>()
 
-    var root:JsonValue = JsonObject(this, emptyList())
+    var root: JsonValue = JsonUnreferencableObject()
+
+    fun toJsonString(): String {
+        return this.root.toJsonString()
+    }
 }
 
 abstract class JsonValue {
@@ -58,22 +77,14 @@ abstract class JsonValue {
     abstract fun toJsonString(): String
 }
 
-data class JsonObject(
-        val document: JsonDocument,
-        val path: List<String>
-) : JsonValue() {
-
-    init {
-        this.document.references[path] = this
-    }
-
-    val property: Map<String, JsonValue> = mutableMapOf()
+abstract class JsonObject : JsonValue() {
+    var property: Map<String, JsonValue> = mutableMapOf()
 
     override fun asObject(): JsonObject {
         return this
     }
 
-    fun setProperty(key: String, value: JsonValue): JsonObject {
+    open fun setProperty(key: String, value: JsonValue): JsonObject {
         (this.property as MutableMap)[key] = value
         return this
     }
@@ -84,6 +95,28 @@ data class JsonObject(
         }.joinToString(",")
         return """{${elements}}"""
     }
+}
+
+class JsonUnreferencableObject : JsonObject() {
+
+    override fun asObject(): JsonUnreferencableObject = this
+
+    override fun setProperty(key: String, value: JsonValue): JsonUnreferencableObject = super.setProperty(key, value) as JsonUnreferencableObject
+
+}
+
+data class JsonReferencableObject(
+        val document: JsonDocument,
+        val path: List<String>
+) : JsonObject() {
+
+    init {
+        this.document.references[path] = this
+    }
+
+    override fun asObject(): JsonReferencableObject = this
+
+    override fun setProperty(key: String, value: JsonValue): JsonReferencableObject = super.setProperty(key, value) as JsonReferencableObject
 
 }
 
@@ -92,16 +125,18 @@ data class JsonReference(
         val refPath: List<String>
 ) : JsonValue() {
 
-    val target:JsonValue get() {
-        return this.document.references[refPath] ?: throw JsonException("Reference target not found for path='$refPath'")
-    }
+    val target: JsonValue
+        get() {
+            return this.document.references[refPath] ?: throw JsonException("Reference target not found for path='$refPath'")
+        }
 
     override fun asReference(): JsonReference {
         return this
     }
 
     override fun toJsonString(): String {
-        return """{ "${Json.REF}" : "$refPath" }"""
+        val refPathStr = this.refPath.joinToString(separator="/", prefix = "/")
+        return """{ "${Json.REF}" : "$refPathStr" }"""
     }
 }
 
@@ -166,11 +201,9 @@ data class JsonString(
     }
 }
 
-class JsonArray(
+class JsonArray : JsonValue() {
 
-) : JsonValue() {
-
-    val elements: List<JsonValue> = mutableListOf<JsonValue>()
+    var elements: List<JsonValue> = mutableListOf<JsonValue>()
 
     override fun asArray(): JsonArray {
         return this
@@ -198,6 +231,10 @@ class JsonArray(
 
 object JsonNull : JsonValue() {
     override fun toJsonString(): String {
+        return "null"
+    }
+
+    override fun toString(): String {
         return "null"
     }
 }

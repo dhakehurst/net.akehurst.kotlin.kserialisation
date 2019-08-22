@@ -29,9 +29,9 @@ class FromJsonConverter(
         val document: JsonDocument
 ) {
 
-    private val resolvedReference = mutableMapOf<String, Any>()
+    private val resolvedReference = mutableMapOf<List<String>, Any>()
 
-    fun convertValue(path: String, json: JsonValue): Any? {
+    fun convertValue(path: List<String>, json: JsonValue): Any? {
         return when (json) {
             is JsonNull -> null
             is JsonString -> convertPrimitive(json, "String")
@@ -44,7 +44,7 @@ class FromJsonConverter(
         }
     }
 
-    private fun convertPrimitive(json: JsonValue, typeName:String): Any {
+    private fun convertPrimitive(json: JsonValue, typeName: String): Any {
         val dt = this.registry.findPrimitiveByName(typeName) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
         val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
         return func(json)
@@ -60,26 +60,26 @@ class FromJsonConverter(
             val json = when (root) {
                 is JsonArray -> if (null != index) root.elements[index] else throw KSerialiserJsonException("Path error in reference") //TODO: better error
                 is JsonObject -> {
-                    val type = root.property[KSerialiserJson.TYPE]?.asString()?.value
+                    val type = root.property[JsonDocument.TYPE]
                     when (type) {
-                        KSerialiserJson.OBJECT -> root.property[head]
-                        KSerialiserJson.LIST -> {
+                        JsonDocument.OBJECT -> root.property[head]
+                        JsonDocument.LIST -> {
                             if (null != index) {
-                                root.property[KSerialiserJson.ELEMENTS]?.asArray()?.elements?.get(index)
+                                root.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)
                             } else {
                                 throw KSerialiserJsonException("Path error in reference")
                             }
                         }
-                        KSerialiserJson.SET -> {
+                        JsonDocument.SET -> {
                             if (null != index) {
-                                root.property[KSerialiserJson.ELEMENTS]?.asArray()?.elements?.get(index)
+                                root.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)
                             } else {
                                 throw KSerialiserJsonException("Path error in reference")
                             }
                         }
-                        KSerialiserJson.MAP -> {
+                        JsonDocument.MAP -> {
                             if (null != index) {
-                                root.property[KSerialiserJson.ELEMENTS]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(KSerialiserJson.VALUE)
+                                root.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(JsonDocument.VALUE)
                             } else {
                                 throw KSerialiserJsonException("Path error in reference")
                             }
@@ -103,40 +103,39 @@ class FromJsonConverter(
         return this.findByReference(root, pathList)
     }
 
-    private fun convertReference(path: String, json: JsonReference): Any? {
-        return json.target
-        //return if (resolvedReference.containsKey(json.path)) {
-        //    resolvedReference[json.path]
-        //} else {
-        //    val resolved = findByReference(root, json.path) ?: JsonNull
-        //    convertValue(json.path, resolved)
-        //}
+    private fun convertReference(path: List<String>, json: JsonReference): Any? {
+        return if (resolvedReference.containsKey(json.refPath)) {
+            resolvedReference[json.refPath]
+        } else {
+            val resolved = json.target ?: JsonNull
+            convertValue(json.refPath, resolved)
+        }
     }
 
-    private fun convertObject(path: String, json: JsonObject): Any {
+    private fun convertObject(path: List<String>, json: JsonObject): Any {
         return if (resolvedReference.containsKey(path)) {
             resolvedReference[path]!!
         } else {
-            val type = json.property[KSerialiserJson.TYPE]?.asString()?.value
+            val type = json.property[JsonDocument.TYPE]
             when (type) {
-                KSerialiserJson.ARRAY -> {
-                    val elements = json.property[KSerialiserJson.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                JsonDocument.ARRAY -> {
+                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
                     convertList(path, elements.asArray()).toTypedArray()
                 }
-                KSerialiserJson.LIST -> {
-                    val elements = json.property[KSerialiserJson.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                JsonDocument.LIST -> {
+                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
                     convertList(path, elements.asArray())
                 }
-                KSerialiserJson.SET -> {
-                    val elements = json.property[KSerialiserJson.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                JsonDocument.SET -> {
+                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
                     convertList(path, elements.asArray()).toSet()
                 }
-                KSerialiserJson.MAP -> {
-                    val elements = json.property[KSerialiserJson.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                JsonDocument.MAP -> {
+                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
                     convertMap(path, elements.asArray())
                 }
-                KSerialiserJson.OBJECT -> convertObject2Object(path, json)
-                KSerialiserJson.PRIMITIVE -> convertObject2Primitive(path, json)
+                JsonDocument.OBJECT -> convertObject2Object(path, json)
+                JsonDocument.PRIMITIVE -> convertObject2Primitive(path, json)
                 else -> {
                     convertObject2Object(path, json)
                 }
@@ -144,8 +143,8 @@ class FromJsonConverter(
         }
     }
 
-    private fun convertObject2Primitive(path: String, json: JsonObject): Any {
-        val clsName = json.property[KSerialiserJson.CLASS]!!.asString().value
+    private fun convertObject2Primitive(path: List<String>, json: JsonObject): Any {
+        val clsName = json.property[JsonDocument.CLASS]!!.asString().value
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
         //TODO: use qualified name when we can
@@ -154,8 +153,8 @@ class FromJsonConverter(
         return func(json)
     }
 
-    private fun convertObject2Object(path: String, json: JsonObject): Any {
-        val clsName = json.property[KSerialiserJson.CLASS]!!.asString().value
+    private fun convertObject2Object(path: List<String>, json: JsonObject): Any {
+        val clsName = json.property[JsonDocument.CLASS]!!.asString().value
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
         //TODO: use ns
@@ -168,7 +167,7 @@ class FromJsonConverter(
                 if (null == jsonPropValue) {
                     null
                 } else {
-                    val v = this.convertValue(path + "/${it.name}", jsonPropValue)
+                    val v = this.convertValue(path + it.name, jsonPropValue)
                     v
                 }
             }
@@ -176,33 +175,29 @@ class FromJsonConverter(
             // add resolved reference path ASAP, so that we avoid recursion if possible
             resolvedReference[path] = obj
 
-            dt.nonIdentityProperties.forEach {
-                if (it.ignore) {
-                    //TODO: log it !
-                } else {
-                    val jsonPropValue = json.property[it.name]
-                    if (null != jsonPropValue) {
-                        val value = this.convertValue(path + "/${it.name}", jsonPropValue)
-                        it.set(obj, value)
-                    }
+            dt.objectNonIdentityMutableProperties(obj).forEach {
+                val jsonPropValue = json.property[it.name]
+                if (null != jsonPropValue) {
+                    val value = this.convertValue(path + it.name, jsonPropValue)
+                    it.set(obj, value)
                 }
             }
             return obj
         }
     }
 
-    private fun convertList(path: String, json: JsonArray): List<*> {
+    private fun convertList(path: List<String>, json: JsonArray): List<*> {
         return json.elements.mapIndexed { index, it ->
-            this.convertValue(path + "/$index", it)
+            this.convertValue(path + "$index", it)
         }
     }
 
-    private fun convertMap(path: String, json: JsonArray): Map<*, *> {
+    private fun convertMap(path: List<String>, json: JsonArray): Map<*, *> {
         return json.elements.mapIndexed { index, jme ->
-            val jKey = jme.asObject().property[KSerialiserJson.KEY]!!
-            val jValue = jme.asObject().property[KSerialiserJson.VALUE]!!
-            val pathk = path + "/key" //TODO: this is not correct
-            val pathv = path + "/${index}"
+            val jKey = jme.asObject().property[JsonDocument.KEY]!!
+            val jValue = jme.asObject().property[JsonDocument.VALUE]!!
+            val pathk = path + "key" //TODO: this is not correct
+            val pathv = path + "${index}"
             val key = this.convertValue(pathk, jKey)
             val value = this.convertValue(pathv, jValue)
             Pair(key, value)

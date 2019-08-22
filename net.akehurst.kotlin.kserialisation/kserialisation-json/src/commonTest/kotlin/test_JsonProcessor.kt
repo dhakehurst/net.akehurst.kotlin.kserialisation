@@ -41,7 +41,9 @@ class test_JsonProcessor {
 
         val actual = Json.process(jsonString)
 
-        val expected = JsonBoolean(false)
+        val expected = json("json") {
+            primitive(false)
+        }
 
         assertEquals(expected, actual)
 
@@ -54,7 +56,9 @@ class test_JsonProcessor {
 
         val actual = Json.process(jsonString)
 
-        val expected = JsonBoolean(true)
+        val expected = json("json") {
+            primitive(true)
+        }
 
         assertEquals(expected, actual)
 
@@ -67,7 +71,9 @@ class test_JsonProcessor {
 
         val actual = Json.process(jsonString)
 
-        val expected = JsonNumber("1")
+        val expected = json("json") {
+            primitive(1)
+        }
 
         assertEquals(expected, actual)
 
@@ -80,7 +86,9 @@ class test_JsonProcessor {
 
         val actual = Json.process(jsonString)
 
-        val expected = JsonString("hello")
+        val expected = json("json") {
+            primitive("hello")
+        }
 
         assertEquals(expected, actual)
 
@@ -94,7 +102,9 @@ class test_JsonProcessor {
 
         val actual = Json.process(jsonString)
 
-        val expected = JsonArray(emptyList())
+        val expected = json("json") {
+            arrayJson{}
+        }
 
         assertEquals(expected, actual)
 
@@ -107,7 +117,14 @@ class test_JsonProcessor {
 
         val actual = Json.process(jsonString)
 
-        val expected = JsonArray(listOf(JsonNumber("1"), JsonBoolean(true), JsonString("hello"), JsonObject(emptyMap())))
+        val expected = json("json") {
+            arrayJson {
+                primitive(1)
+                primitive(true)
+                primitive("hello")
+                objectJson { }
+            }
+        }
 
         assertEquals(expected, actual)
 
@@ -120,7 +137,9 @@ class test_JsonProcessor {
 
         val actual = Json.process(jsonString);
 
-        val expected = JsonObject(emptyMap())
+        val expected = json("json") {
+            objectJson { }
+        }
 
         assertEquals(expected, actual)
 
@@ -145,16 +164,20 @@ class test_JsonProcessor {
 
         val actual = Json.process(jsonString);
 
-        val expected = JsonObject(mapOf(
-                "bProp" to JsonBoolean(true),
-                "nProp" to JsonNumber("1"),
-                "sProp" to JsonString("hello"),
-                "aProp" to JsonArray(listOf(JsonNumber("1"), JsonBoolean(true), JsonString("hello"), JsonObject(emptyMap()))),
-                "oProp" to JsonObject(mapOf(
-                        "bProp" to JsonBoolean(false),
-                        "nProp" to JsonNumber("3.14")
-                ))
-        ))
+        val expected = json("json") {
+            objectJson {
+                property("bProp", true)
+                property("nProp", true)
+                property("sProp", true)
+                property("aProp", true)
+                property("oProp") {
+                    objectJson {
+                        property("bProp", true)
+                        property("nProp", true)
+                    }
+                }
+            }
+        }
 
         assertEquals(expected, actual)
 

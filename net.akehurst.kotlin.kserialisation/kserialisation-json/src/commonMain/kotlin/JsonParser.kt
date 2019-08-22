@@ -9,17 +9,17 @@ class JsonParserException : RuntimeException {
 object JsonParser {
 
 
-        val TOKEN_WHITESPACE = Regex("\\s+", RegexOption.MULTILINE)
-        val TOKEN_STRING = Regex("\"(?:\\\\?(.|\n))*?\"", RegexOption.MULTILINE)
-        val TOKEN_NULL = "null"
-        val TOKEN_NUMBER = Regex("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?")
-        val TOKEN_BOOLEAN = Regex("true|false", RegexOption.IGNORE_CASE)
-        val TOKEN_ARRAY_START = "["
-        val TOKEN_ARRAY_END = "]"
-        val TOKEN_OBJECT_START = "{"
-        val TOKEN_OBJECT_END = "}"
-        val TOKEN_PROPERTY_SEP = ":"
-        val TOKEN_SEP = ","
+    val TOKEN_WHITESPACE = Regex("\\s+", RegexOption.MULTILINE)
+    val TOKEN_STRING = Regex("\"(?:\\\\?(.|\n))*?\"", RegexOption.MULTILINE)
+    val TOKEN_NULL = "null"
+    val TOKEN_NUMBER = Regex("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?")
+    val TOKEN_BOOLEAN = Regex("true|false", RegexOption.IGNORE_CASE)
+    val TOKEN_ARRAY_START = "["
+    val TOKEN_ARRAY_END = "]"
+    val TOKEN_OBJECT_START = "{"
+    val TOKEN_OBJECT_END = "}"
+    val TOKEN_PROPERTY_SEP = ":"
+    val TOKEN_SEP = ","
 
 
     class SimpleScanner(private val input: CharSequence) {
@@ -38,7 +38,7 @@ object JsonParser {
             return lookingAt
         }
 
-        fun next(literal: String) : String{
+        fun next(literal: String): String {
             //assumes hasNext already called
             this.position += literal.length
             return literal
@@ -57,7 +57,7 @@ object JsonParser {
         }
     }
 
-    fun process(input: String) : JsonDocument {
+    fun process(input: String): JsonDocument {
         val doc = JsonDocument("json")
         if (input.isEmpty()) {
             throw JsonParserException("Expected Json content but input was empty")
@@ -87,17 +87,20 @@ object JsonParser {
                 }
                 scanner.hasNext(TOKEN_ARRAY_START) -> {
                     scanner.next(TOKEN_ARRAY_START)
+                    path.push("0") // path segment for first element
                     valueStack.push(JsonArray())
                     //check for empty array
-                    while(scanner.hasMore() && scanner.hasNext(TOKEN_WHITESPACE)) {
+                    while (scanner.hasMore() && scanner.hasNext(TOKEN_WHITESPACE)) {
                         scanner.next(TOKEN_WHITESPACE)
                     }
                     if (scanner.hasNext(TOKEN_ARRAY_END)) {
                         scanner.next(TOKEN_ARRAY_END)
+                        path.pop()
                     }
                 }
                 scanner.hasNext(TOKEN_ARRAY_END) -> {
                     scanner.next(TOKEN_ARRAY_END)
+                    path.pop()
                     val value = valueStack.pop()
                     val peek = valueStack.peek()
                     if (peek is JsonArray) {
@@ -108,10 +111,14 @@ object JsonParser {
                 }
                 scanner.hasNext(TOKEN_SEP) -> {
                     scanner.next(TOKEN_SEP)
+                    path.pop()
                     val value = valueStack.pop()
                     val peek = valueStack.peek()
-                    when(peek) {
-                        is JsonArray -> peek.addElement(value)
+                    when (peek) {
+                        is JsonArray -> {
+                            peek.addElement(value)
+                            path.push(peek.elements.size.toString())
+                        }
                         is JsonObject -> {
                             val name = nameStack.pop()
                             peek.setProperty(name, value)
@@ -121,9 +128,9 @@ object JsonParser {
                 }
                 scanner.hasNext(TOKEN_OBJECT_START) -> {
                     scanner.next(TOKEN_OBJECT_START)
-                    valueStack.push(JsonObject(doc, path.elements))
+                    valueStack.push(JsonUnreferencableObject())
                     //check for empty object
-                    while(scanner.hasMore() && scanner.hasNext(TOKEN_WHITESPACE)) {
+                    while (scanner.hasMore() && scanner.hasNext(TOKEN_WHITESPACE)) {
                         scanner.next(TOKEN_WHITESPACE)
                     }
                     if (scanner.hasNext(TOKEN_OBJECT_END)) {
@@ -132,16 +139,36 @@ object JsonParser {
                 }
                 scanner.hasNext(TOKEN_OBJECT_END) -> {
                     scanner.next(TOKEN_OBJECT_END)
+                    path.pop()
                     val value = valueStack.pop()
                     val peek = valueStack.peek()
                     if (peek is JsonObject) {
                         val name = nameStack.pop()
                         peek.setProperty(name, value)
-                        if (1==peek.property.size && peek.property.containsKey(Json.REF)) {
-                            val ref = JsonReference(doc, path.elements, peek.property[Json.REF]!!.asString().value)
-                            valueStack.pop()
-                            valueStack.push(ref)
+                        // handle different kinds of object!
+                        when {
+                            // JsonReference
+                            (1 == peek.property.size && peek.property.containsKey(Json.REF)) -> {
+                                val refStr = peek.property[Json.REF]!!.asString().value
+                                // remove leading '/' then split
+                                val refStr1 = refStr.substring(1)
+                                val refPath = if (refStr1.isEmpty()) emptyList<String>() else refStr1.split("/")
+                                val ref = JsonReference(doc, refPath)
+                                valueStack.pop()
+                                valueStack.push(ref)
+                            }
+                            // JsonReferenceableObject
+                            (peek.property.containsKey(JsonDocument.TYPE) && peek.property[JsonDocument.TYPE] == JsonDocument.OBJECT) -> {
+                                val jPath = path.elements.filter {
+                                    it != JsonDocument.ELEMENTS && it != JsonDocument.VALUE
+                                }
+                                val obj = JsonReferencableObject(doc, jPath)
+                                valueStack.pop()
+                                obj.property = peek.property
+                                valueStack.push(obj)
+                            }
                         }
+
                     } else {
                         throw JsonParserException("Expected an Object but was a ${peek::class.simpleName}")
                     }
@@ -150,11 +177,12 @@ object JsonParser {
                     scanner.next(TOKEN_PROPERTY_SEP)
                     val name = valueStack.pop().asString().value
                     nameStack.push(name)
+                    path.push(name)
                 }
                 else -> throw JsonParserException("Unexpected character at position ${scanner.position} - '${input.substring(scanner.position)}'")
             }
         }
-        valueStack.pop()
+        doc.root = valueStack.pop()
         return doc
     }
 }

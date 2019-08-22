@@ -51,7 +51,9 @@ class SyntaxAnalyser : SyntaxAnalyserAbstract() {
     }
 
     override fun <T> transform(sppt: SharedPackedParseTree): T {
-        return this.transform<T>(sppt.root.asBranch, "") as T
+        val doc = JsonDocument("json")
+        doc.root = this.transform(sppt.root.asBranch, doc)
+        return doc as T
     }
 
     // json = value ;
@@ -71,9 +73,14 @@ class SyntaxAnalyser : SyntaxAnalyserAbstract() {
         }
 
         return if (1==properties.size && properties.containsKey(Json.REF)) {
-            JsonReference(properties[Json.REF]!!.asString().value)
+            val refPath = properties[Json.REF]!!.asString().value.split("/")
+            JsonReference(arg as JsonDocument, refPath)
         } else {
-            JsonObject(properties)
+            val path = emptyList<String>()
+            TODO("path needs a real value, but this class is no longer used, do we still need it?")
+            val obj = JsonReferencableObject(arg as JsonDocument, path)
+            obj.property = properties
+            obj
         }
     }
 
@@ -90,7 +97,9 @@ class SyntaxAnalyser : SyntaxAnalyserAbstract() {
         val list = children[0].branchNonSkipChildren.map {
             super.transform<JsonValue>(it, arg)
         }
-        return JsonArray(list)
+        val json = JsonArray()
+        json.elements = list // Does this need to be a mutable list ?
+        return json
     }
 
     // literalValue = BOOLEAN < DOUBLE_QUOTE_STRING < NUMBER < NULL ;
@@ -121,4 +130,5 @@ class SyntaxAnalyser : SyntaxAnalyserAbstract() {
     fun NULL(target: SPPTBranch, children: List<SPPTBranch>, arg: Any): JsonNull {
         return JsonNull
     }
+
 }

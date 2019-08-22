@@ -33,52 +33,17 @@ class KSerialiserJsonException : RuntimeException {
 
 class KSerialiserJson() {
 
-    companion object {
-        val TYPE = "${'$'}type"     // PRIMITIVE | OBJECT | LIST | SET | MAP
-        val OBJECT = "${'$'}OBJECT"
-        val CLASS = "${'$'}class"
-        val PRIMITIVE = "${'$'}PRIMITIVE"
-        val KEY = "${'$'}key"
-        val VALUE = "${'$'}value"
-        val ARRAY = "\$ARRAY"
-        val LIST = "\$LIST"
-        val MAP = "\$MAP"
-        val SET = "\$SET"
-        val ELEMENTS = "\$elements"
-    }
-
-    private val reference_cache = mutableMapOf<Any, String>()
-    private val primitiveToJson = mutableMapOf<PrimitiveType, (value: Any) -> JsonValue>()
-    private val primitiveFomJson = mutableMapOf<PrimitiveType, (value: JsonValue) -> Any>()
+    internal val reference_cache = mutableMapOf<Any, List<String>>()
+    internal val primitiveToJson = mutableMapOf<PrimitiveType, (value: Any) -> JsonValue>()
+    internal val primitiveFomJson = mutableMapOf<PrimitiveType, (value: JsonValue) -> Any>()
 
     val registry = DatatypeRegistry()
-    /*
-    val jsonReg = DatatypeRegistry()
 
-    init {
-        jsonReg.registerFromConfigString("""
-            namespace net.akehurst.kotlin.kserialisation.json {
-                primitive JsonString
-                primitive JsonNumber
-                primitive JsonBoolean
-                primitive JsonNull
-                
-                collection JsonArray
-                
-                datatype JsonObject {
-                }
-                
-                datatype JsonArray {
-                }
-            }
-        """)
-    }
-*/
-    protected fun calcReferencePath(root: Any, targetValue: Any): String {
+    protected fun calcReferencePath(root: Any, targetValue: Any): List<String> {
         return if (reference_cache.containsKey(targetValue)) {
             reference_cache[targetValue]!!
         } else {
-            var resultPath: String? = null //TODO: terminate walking early if result found
+            var resultPath:List<String>? = null //TODO: terminate walking early if result found
             val walker = kompositeWalker<List<String>, Boolean>(registry) {
                 collBegin { path, info, type, coll ->
                     WalkInfo(info.up, info.acc)
@@ -91,8 +56,10 @@ class KSerialiserJson() {
                 //                   WalkInfo(path, info.acc)
                 //               }
                 objectBegin { path, info, obj, datatype ->
+                    reference_cache[obj] = path
                     if (obj == targetValue) {
-                        resultPath = "/" + path.joinToString("/")
+                        resultPath = path
+                        // TODO: find a way to terminate the walk!
                     }
                     WalkInfo(info.up, obj == targetValue)
                 }
@@ -102,7 +69,7 @@ class KSerialiserJson() {
             }
 
             val result = walker.walk(WalkInfo(emptyList(), false), root)
-            resultPath ?: "${'$'}unknown ${targetValue::class.simpleName}"
+            resultPath ?: listOf("${'$'}unknown ${targetValue::class.simpleName}")
         }
     }
 
@@ -165,14 +132,14 @@ class KSerialiserJson() {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
         primitiveToJson[dt] = { value: T ->
-            val obj = JsonObject(doc, path)
-            obj.setProperty(TYPE, JsonString(KSerialiserJson.PRIMITIVE))
-            obj.setProperty(CLASS, JsonString(dt.qualifiedName(".")))
-            obj.setProperty(VALUE,toJson(value))
+            val obj = JsonUnreferencableObject()
+            obj.setProperty(JsonDocument.TYPE, JsonDocument.PRIMITIVE)
+            obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName(".")))
+            obj.setProperty(JsonDocument.VALUE,toJson(value))
             obj
         } as (Any) -> JsonValue
         primitiveFomJson[dt] = { json ->
-            val jsonValue = json.asObject().property[KSerialiserJson.VALUE]!!
+            val jsonValue = json.asObject().property[JsonDocument.VALUE]!!
             fromJson(jsonValue)
         }
     }
@@ -211,22 +178,22 @@ class KSerialiserJson() {
             }
             collEnd { path, info, type, coll ->
                 val jsonTypeName = when {
-                    type.isArray -> JsonString(ARRAY)
-                    type.isList -> JsonString(LIST)
-                    type.isSet -> JsonString(SET)
+                    type.isArray -> JsonDocument.ARRAY
+                    type.isList -> JsonDocument.LIST
+                    type.isSet -> JsonDocument.SET
                     else -> throw KSerialiserJsonException("Unknown type $type")
                 }
                 val elements = currentObjStack.pop()
-                val setObj = JsonObject(doc,path)
-                setObj.setProperty(TYPE, jsonTypeName)
+                val setObj = JsonUnreferencableObject()
+                setObj.setProperty(JsonDocument.TYPE, jsonTypeName)
                 //ELEMENT_TYPE to JsonString(type.elementType.qualifiedName), //needed for deserialising empty Arrays
-                setObj.setProperty(ELEMENTS, elements)
+                setObj.setProperty(JsonDocument.ELEMENTS, elements)
                 WalkInfo(info.up, setObj)
             }
             mapBegin { path, info, map ->
-                val obj = JsonObject(doc,path)
-                obj.setProperty(TYPE, JsonString(MAP))
-                obj.setProperty(ELEMENTS, JsonArray())
+                val obj = JsonUnreferencableObject()
+                obj.setProperty(JsonDocument.TYPE, JsonDocument.MAP)
+                obj.setProperty(JsonDocument.ELEMENTS, JsonArray())
                 currentObjStack.push(obj)
                 WalkInfo(info.up, obj)
             }
@@ -239,10 +206,10 @@ class KSerialiserJson() {
                 val meKey = currentObjStack.pop()
                 val meValue = info.acc
                 val mapObj = currentObjStack.peek() as JsonObject
-                val mapElements = (mapObj.property[ELEMENTS] ?: JsonArray()) as JsonArray
-                val neEl = JsonObject(doc,path)
-                neEl.setProperty(KEY, meKey)
-                neEl.setProperty(VALUE, meValue)
+                val mapElements = (mapObj.property[JsonDocument.ELEMENTS] ?: JsonArray()) as JsonArray
+                val neEl = JsonUnreferencableObject()
+                neEl.setProperty(JsonDocument.KEY, meKey)
+                neEl.setProperty(JsonDocument.VALUE, meValue)
                 mapElements.addElement(neEl)
                 //mapObj.withProperty(ELEMENTS, newMap)
                 //currentObjStack.push(nObj)
@@ -253,11 +220,12 @@ class KSerialiserJson() {
                 WalkInfo(info.up, obj)
             }
             objectBegin { path, info, obj, datatype ->
-                val obj = JsonObject(doc, path)
-                obj.setProperty(TYPE, JsonString(OBJECT))
-                obj.setProperty(CLASS, JsonString(datatype.qualifiedName(".")))
-                currentObjStack.push(obj)
-                WalkInfo(path, obj)
+                val json = JsonReferencableObject(doc, path)
+                reference_cache[obj] = json.path
+                json.setProperty(JsonDocument.TYPE, JsonDocument.OBJECT)
+                json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName(".")))
+                currentObjStack.push(json)
+                WalkInfo(path, json)
             }
             objectEnd { path, info, obj, datatype ->
                 val obj = currentObjStack.pop()
@@ -280,11 +248,11 @@ class KSerialiserJson() {
     }
 
     @JsName("toData")
-    fun toData(jsonString: String): Any? {
+    fun <T : Any> toData(jsonString: String): T {
         //TODO: use a bespoke written JSON parser, it will most likely be faster
         val json = Json.process(jsonString)
         val conv = FromJsonConverter(this.registry, this.primitiveFomJson, json)
-        return conv.convertValue("", json.root)
+        return conv.convertValue(emptyList(), json.root) as T
     }
 
 
