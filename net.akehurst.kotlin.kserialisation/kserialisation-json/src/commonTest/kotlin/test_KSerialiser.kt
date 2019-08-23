@@ -69,6 +69,7 @@ class test_KSerialiser {
                     prop1 { identity(0) }
                     comp { composite }
                     refr { reference }
+                    prop2 { reference }
                 }
             }
         """.trimIndent())
