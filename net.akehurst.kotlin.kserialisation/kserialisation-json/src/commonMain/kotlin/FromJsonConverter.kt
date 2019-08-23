@@ -176,7 +176,8 @@ class FromJsonConverter(
             // add resolved reference path ASAP, so that we avoid recursion if possible
             resolvedReference[path] = obj
 
-            dt.objectNonIdentityMutableProperties(obj).forEach {
+            // TODO: change this to enable nonExplicit properties, once JS reflection works
+            dt.explicitNonIdentityProperties.forEach {
                 val jsonPropValue = json.property[it.name]
                 if (null != jsonPropValue) {
                     val value = this.convertValue(path + it.name, jsonPropValue)
