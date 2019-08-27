@@ -39,6 +39,10 @@ class KSerialiserJson() {
 
     val registry = DatatypeRegistry()
 
+    class FoundReferenceException : RuntimeException {
+        constructor() : super()
+    }
+
     protected fun calcReferencePath(root: Any, targetValue: Any): List<String> {
         return if (reference_cache.containsKey(targetValue)) {
             reference_cache[targetValue]!!
@@ -59,6 +63,7 @@ class KSerialiserJson() {
                     reference_cache[obj] = path
                     if (obj == targetValue) {
                         resultPath = path
+                        throw FoundReferenceException()
                         // TODO: find a way to terminate the walk!
                     }
                     WalkInfo(info.up, obj == targetValue)
@@ -68,7 +73,11 @@ class KSerialiserJson() {
                 }
             }
 
-            val result = walker.walk(WalkInfo(emptyList(), false), root)
+            try {
+                val result = walker.walk(WalkInfo(emptyList(), false), root)
+            } catch (e:FoundReferenceException) {
+
+            }
             resultPath ?: listOf("${'$'}unknown ${targetValue::class.simpleName}")
         }
     }
@@ -146,6 +155,7 @@ class KSerialiserJson() {
 
     @JsName("toJson")
     fun toJson(root: Any, data: Any): String {
+        this.reference_cache.clear()
         val doc = JsonDocument("json")
         var currentObjStack = Stack<JsonValue>()
         val walker = kompositeWalker<List<String>, JsonValue>(registry) {

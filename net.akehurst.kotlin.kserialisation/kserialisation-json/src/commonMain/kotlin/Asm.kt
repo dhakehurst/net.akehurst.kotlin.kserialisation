@@ -127,7 +127,7 @@ data class JsonReference(
 
     val target: JsonValue
         get() {
-            return this.document.references[refPath] ?: throw JsonException("Reference target not found for path='$refPath'")
+            return this.document.references[refPath] ?: throw JsonException("Reference target not found for path='${refPath.joinToString(",", prefix = "/")}'")
         }
 
     override fun asReference(): JsonReference {
