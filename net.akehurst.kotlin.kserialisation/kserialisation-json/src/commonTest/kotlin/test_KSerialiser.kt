@@ -417,7 +417,7 @@ class test_KSerialiser {
                 string("hello")
             }
         }.toFormattedJsonString("  ", "  ")
-        println(expected)
+
         assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 

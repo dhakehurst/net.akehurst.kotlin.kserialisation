@@ -47,7 +47,7 @@ data class JsonDocument(
         return this.root.toJsonString()
     }
 
-    fun toFormattedJsonString(indent:String, increment:String): String {
+    fun toFormattedJsonString(indent:String="  ", increment:String="  "): String {
         return this.root.toFormattedJsonString(indent, increment)
     }
 }
@@ -241,13 +241,18 @@ class JsonArray : JsonValue() {
         return """[${elements}]"""
     }
     override fun toFormattedJsonString(indent: String, increment:String): String {
-        if (elements.size > 1) {
-            val elements = this.elements.map {
-                indent + it.toFormattedJsonString(indent + increment, increment)
-            }.joinToString(",\n")
-            return "[\n${elements}\n${indent.substringBeforeLast(increment)}]"
-        } else {
-            return this.toJsonString()
+        return when (elements.size) {
+            0 -> "[]"
+            1 -> {
+                val element = this.elements[0].toFormattedJsonString(indent + increment, increment)
+                return "[ ${element} ]"
+            }
+            else -> {
+                val elements = this.elements.map {
+                    indent + it.toFormattedJsonString(indent + increment, increment)
+                }.joinToString(",\n")
+                return "[\n${elements}\n${indent.substringBeforeLast(increment)}]"
+            }
         }
     }
 
