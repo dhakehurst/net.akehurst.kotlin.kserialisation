@@ -154,7 +154,7 @@ class KSerialiserJson() {
     }
 
     @JsName("toJson")
-    fun toJson(root: Any, data: Any): String {
+    fun toJson(root: Any, data: Any): JsonDocument {
         this.reference_cache.clear()
         val doc = JsonDocument("json")
         var currentObjStack = Stack<JsonValue>()
@@ -254,7 +254,8 @@ class KSerialiserJson() {
         }
 
         val result = walker.walk(WalkInfo(emptyList(), JsonNull), data)
-        return result.acc.toJsonString()
+        doc.root = result.acc
+        return doc
     }
 
     @JsName("toData")

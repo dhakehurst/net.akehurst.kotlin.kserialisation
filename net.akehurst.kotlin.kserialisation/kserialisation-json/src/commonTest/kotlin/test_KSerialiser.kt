@@ -89,15 +89,15 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonBoolean(true).toJsonString()
+        val expected = JsonBoolean(true).toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
     fun toData_Boolean_true() {
 
-        val root = JsonBoolean(true).toJsonString()
+        val root = JsonBoolean(true).toFormattedJsonString("  ", "  ")
 
         val actual:Boolean = this.sut.toData(root)
 
@@ -113,15 +113,15 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonBoolean(false).toJsonString()
+        val expected = JsonBoolean(false).toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
     fun toData_Boolean_false() {
 
-        val root = JsonBoolean(false).toJsonString()
+        val root = JsonBoolean(false).toFormattedJsonString("  ", "  ")
 
         val actual:Boolean = this.sut.toData(root)
 
@@ -143,9 +143,9 @@ class test_KSerialiser {
 
         val expected = json("expected") {
             primitiveObject(dt.qualifiedName("."), root)
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -154,7 +154,7 @@ class test_KSerialiser {
         val dt = sut.registry.findPrimitiveByName("Byte")!!
         val root = json("expected") {
             primitiveObject(dt.qualifiedName("."), 1)
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:Byte = this.sut.toData(root)
 
@@ -173,9 +173,9 @@ class test_KSerialiser {
         val dt = sut.registry.findPrimitiveByName("Int")!!
         val expected = json("expected") {
             primitiveObject(dt.qualifiedName("."), root)
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -184,7 +184,7 @@ class test_KSerialiser {
         val dt = sut.registry.findPrimitiveByName("Int")!!
         val root = json("expected") {
             primitiveObject(dt.qualifiedName("."), 1)
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:Int = this.sut.toData(root)
 
@@ -203,10 +203,10 @@ class test_KSerialiser {
         val dt = sut.registry.findPrimitiveByName("Long")!!
         val expected = json("expected") {
             primitiveObject(dt.qualifiedName("."), root)
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -215,7 +215,7 @@ class test_KSerialiser {
         val dt = sut.registry.findPrimitiveByName("Long")!!
         val root = json("expected") {
             primitiveObject(dt.qualifiedName("."), 1)
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:Long = this.sut.toData(root)
 
@@ -231,15 +231,15 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonString("hello world!").toJsonString()
+        val expected = JsonString("hello world!").toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
     fun toData_String() {
 
-        val root = JsonString("hello").toJsonString()
+        val root = JsonString("hello").toFormattedJsonString("  ", "  ")
 
         val actual:String = this.sut.toData(root)
 
@@ -255,15 +255,15 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonString("hello \\\"world!\\\"").toJsonString()
+        val expected = JsonString("hello \\\"world!\\\"").toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
     fun toData_String_with_quotes() {
 
-        val root = JsonString("hello \\\"world!\\\"").toJsonString()
+        val root = JsonString("hello \\\"world!\\\"").toFormattedJsonString("  ", "  ")
 
         val actual:String = this.sut.toData(root)
 
@@ -284,7 +284,7 @@ class test_KSerialiser {
 
         val expected = "\"hello\\nworld!\""
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -314,9 +314,9 @@ class test_KSerialiser {
 
         val expected = json("expected") {
             primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -326,7 +326,7 @@ class test_KSerialiser {
         val dt = sut.registry.findPrimitiveByName("DateTime")!!
         val root = json("expected") {
             primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:DateTime = this.sut.toData(root)
 
@@ -346,8 +346,8 @@ class test_KSerialiser {
             arrayObject {
 
             }
-        }.toJsonString()
-        assertEquals(expected, actual)
+        }.toFormattedJsonString("  ", "  ")
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -357,7 +357,7 @@ class test_KSerialiser {
             arrayObject {
 
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual = this.sut.toData(root) as Array<Any>
 
@@ -379,9 +379,9 @@ class test_KSerialiser {
                 boolean(true)
                 string("hello")
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -393,7 +393,7 @@ class test_KSerialiser {
                 boolean(true)
                 string("hello")
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual = this.sut.toData(root) as Array<Any>
 
@@ -416,9 +416,9 @@ class test_KSerialiser {
                 boolean(true)
                 string("hello")
             }
-        }.toJsonString()
-
-        assertEquals(expected, actual)
+        }.toFormattedJsonString("  ", "  ")
+        println(expected)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -430,7 +430,7 @@ class test_KSerialiser {
                 boolean(true)
                 string("hello")
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:List<Any> = this.sut.toData(root)
 
@@ -453,8 +453,9 @@ class test_KSerialiser {
                 boolean(true)
                 string("hello")
             }
-        }.toJsonString()
-        assertEquals(expected, actual)
+        }.toFormattedJsonString("  ", "  ")
+
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -466,7 +467,7 @@ class test_KSerialiser {
                 boolean(true)
                 string("hello")
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:Set<Any> = this.sut.toData(root)
 
@@ -488,9 +489,9 @@ class test_KSerialiser {
                 entry({ string("b") }) { boolean(true) }
                 entry({ string("c") }) { string("hello") }
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -502,7 +503,7 @@ class test_KSerialiser {
                 entry("b", true)
                 entry("c", "hello")
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:Map<String,Any> = this.sut.toData(root)
 
@@ -529,9 +530,9 @@ class test_KSerialiser {
                     primitiveObject("kotlin.Int", 5)
                 }
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -546,7 +547,7 @@ class test_KSerialiser {
                     primitiveObject("kotlin.Int", 5)
                 }
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:A = this.sut.toData(json)
 
@@ -586,9 +587,9 @@ class test_KSerialiser {
                     primitiveObject("kotlin.Int", 5)
                 }
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
 
     @Test
@@ -616,7 +617,7 @@ class test_KSerialiser {
                     primitiveObject("kotlin.Int", 5)
                 }
             }
-        }.toJsonString()
+        }.toFormattedJsonString("  ", "  ")
 
         val actual:A = this.sut.toData(json)
 
