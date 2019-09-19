@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package net.akehurst.kotlin.kserialisation.json
-
 object BuildInfo {
 
     val version = "$version"

@@ -66,10 +66,10 @@ class test_KSerialiser {
             namespace net.akehurst.kotlin.kserialisation.json {
     
                 datatype A {
-                    prop1 { identity(0) }
-                    comp { composite }
-                    refr { reference }
-                    prop2 { reference }
+                    val prop1 : String
+                    car comp : A
+                    var refr : A
+                    var prop2  : Int
                 }
             }
         """.trimIndent())
