@@ -16,13 +16,9 @@
 
 package net.akehurst.kotlin.kserialisation.json
 
-import net.akehurst.kotlin.komposite.api.Datatype
-import net.akehurst.kotlin.komposite.api.DatatypeModel
 import net.akehurst.kotlin.komposite.api.DatatypeProperty
-import net.akehurst.kotlin.komposite.api.Namespace
 import net.akehurst.language.api.sppt.SPPTBranch
 import net.akehurst.language.api.sppt.SharedPackedParseTree
-import net.akehurst.language.api.sppt2ast.UnableToTransformSppt2AstExeception
 import net.akehurst.language.processor.BranchHandler
 import net.akehurst.language.processor.SyntaxAnalyserAbstract
 

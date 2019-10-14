@@ -83,7 +83,8 @@ class KSerialiserJson() {
     }
 
     fun confgureDatatypeModel(config: String) {
-        registry.registerFromConfigString(config)
+        //TODO: mappers!
+        registry.registerFromConfigString(config, emptyMap())
     }
 
     @JsName("registerModule")
@@ -162,11 +163,12 @@ class KSerialiserJson() {
             nullValue { path, info ->
                 WalkInfo(info.up, JsonNull)
             }
-            primitive { path, info, value ->
+            primitive { path, info, primitive, mapper ->
                 //TODO: use qualified name when we can!
-                val dt = registry.findPrimitiveByName(value::class.simpleName!!) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-                val func = primitiveToJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${value::class} to json, did you register its converter")
-                val json = func(value)
+                //TODO: use mappers
+                val dt = registry.findPrimitiveByName(primitive::class.simpleName!!) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+                val func = primitiveToJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
+                val json = func(primitive)
                 WalkInfo(info.up, json)
             }
             reference { path, info, value, property ->

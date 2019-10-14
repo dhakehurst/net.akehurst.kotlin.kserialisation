@@ -64,7 +64,6 @@ class test_KSerialiser {
               primitive DateTime
             }
             namespace net.akehurst.kotlin.kserialisation.json {
-    
                 datatype A {
                     val prop1 : String
                     car comp : A
