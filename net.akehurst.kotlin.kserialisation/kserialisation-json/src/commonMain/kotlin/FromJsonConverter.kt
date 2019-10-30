@@ -16,17 +16,15 @@
 
 package net.akehurst.kotlin.kserialisation.json
 
-import net.akehurst.kotlin.komposite.api.PrimitiveType
+import net.akehurst.kotlin.json.*
+import net.akehurst.kotlin.komposite.api.PrimitiveMapper
 import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.construct
 import net.akehurst.kotlin.komposite.common.set
-import kotlin.reflect.KClass
 
 
 class FromJsonConverter(
-        val registry: DatatypeRegistry,
-        val primitiveFromJson: Map<PrimitiveType, (value: JsonValue) -> Any>,
-        val document: JsonDocument
+        val registry: DatatypeRegistry
 ) {
 
     private val resolvedReference = mutableMapOf<List<String>, Any>()
@@ -45,9 +43,10 @@ class FromJsonConverter(
     }
 
     private fun convertPrimitive(json: JsonValue, typeName: String): Any {
-        val dt = this.registry.findPrimitiveByName(typeName) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-        val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
-        return func(json)
+        //val dt = this.registry.findPrimitiveByName(typeName) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+       // val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
+        val mapper = this.registry.findPrimitiveMapperFor(typeName) ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
+        return (mapper as PrimitiveMapper<Any, JsonValue>).toPrimitive(json)
     }
 
     private fun findByReference(root: JsonValue, path: List<String>): JsonValue? {
@@ -107,7 +106,7 @@ class FromJsonConverter(
         return if (resolvedReference.containsKey(json.refPath)) {
             resolvedReference[json.refPath]
         } else {
-            val resolved = json.target ?: JsonNull
+            val resolved = json.target
             convertValue(json.refPath, resolved)
         }
     }
@@ -148,9 +147,12 @@ class FromJsonConverter(
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
         //TODO: use qualified name when we can
-        val dt = this.registry.findPrimitiveByName(sn) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-        val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${sn} from json, did you register its converter")
-        return func(json)
+        //val dt = this.registry.findPrimitiveByName(sn) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+        //val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${sn} from json, did you register its converter")
+        //return func(json)
+        val mapper = this.registry.findPrimitiveMapperFor(sn) ?: throw KSerialiserJsonException("Do not know how to convert ${sn} from json, did you register its converter")
+        return (mapper as PrimitiveMapper<Any, JsonObject>).toPrimitive(json)
+
     }
 
     private fun convertObject2Object(path: List<String>, json: JsonObject): Any {

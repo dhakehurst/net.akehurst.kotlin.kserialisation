@@ -19,7 +19,7 @@ package net.akehurst.kotlin.kserialisation.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-
+import net.akehurst.kotlin.json.*
 
 class test_JsonProcessor {
 

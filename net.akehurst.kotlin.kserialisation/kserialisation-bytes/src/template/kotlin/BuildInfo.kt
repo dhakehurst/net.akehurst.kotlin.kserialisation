@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Dr. David H. Akehurst (http://dr.david.h.akehurst.net)
+ * Copyright (C) 2018 Dr. David H. Akehurst (http://dr.david.h.akehurst.net)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package net.akehurst.kotlin.kserialisation.json
+object BuildInfo {
 
-import net.akehurst.language.processor.FormatterAbstract
-
-class Formatter : FormatterAbstract() {
-
-    override fun <T> format(asm: T): String {
-        return ""
-    }
+    val version = "$version"
+    val buildDate = "$buildDate"
+    val buildTime = "$buildTime"
+    val buildStamp = "$buildStamp"
 
 }

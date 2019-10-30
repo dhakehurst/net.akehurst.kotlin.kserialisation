@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package net.akehurst.kotlin.kserialisation.json
+package net.akehurst.kotlin.kserialisation.hjson
 
 import com.soywiz.klock.DateTime
-import net.akehurst.kotlin.json.*
+import net.akehurst.hjson.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,7 +55,7 @@ class A(
 class test_KSerialiser {
 
 
-    val sut = KSerialiserJson()
+    val sut = KSerialiserHJson()
 
     @BeforeTest
     fun setup() {
@@ -75,28 +75,28 @@ class test_KSerialiser {
 
         this.sut.registerKotlinStdPrimitives()
         this.sut.registerPrimitiveAsObject(DateTime::class, //
-                { value -> JsonNumber(value.unixMillisDouble.toString()) }, //
+                { value -> HJsonNumber(value.unixMillisDouble.toString()) }, //
                 { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
         )
         sut.registerModule("net.akehurst.kotlin.kserialisation-kserialisation-json-test")
     }
 
     @Test
-    fun toJson_Boolean_true() {
+    fun toHJson_Boolean_true() {
 
         val root = true
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = JsonBoolean(true).toFormattedJsonString("  ", "  ")
+        val expected = HJsonBoolean(true).toHJsonString("","")
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Boolean_true() {
 
-        val root = JsonBoolean(true).toFormattedJsonString("  ", "  ")
+        val root = HJsonBoolean(true).toHJsonString("","")
 
         val actual:Boolean = this.sut.toData(root)
 
@@ -106,21 +106,21 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_Boolean_false() {
+    fun toHHJson_Boolean_false() {
 
         val root = false
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = JsonBoolean(false).toFormattedJsonString("  ", "  ")
+        val expected = HJsonBoolean(false).toHJsonString("","")
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Boolean_false() {
 
-        val root = JsonBoolean(false).toFormattedJsonString("  ", "  ")
+        val root = HJsonBoolean(false).toHJsonString("","")
 
         val actual:Boolean = this.sut.toData(root)
 
@@ -130,30 +130,30 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_Byte_1() {
+    fun toHHJson_Byte_1() {
 
         val root = 1.toByte()
         assertEquals("Byte", root::class.simpleName)
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
         val dt = sut.registry.findPrimitiveByName("Byte")!!
         assertEquals("Byte", dt.name)
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             primitiveObject(dt.qualifiedName("."), root)
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Byte_1() {
 
         val dt = sut.registry.findPrimitiveByName("Byte")!!
-        val root = json("expected") {
+        val root = hjson("expected") {
             primitiveObject(dt.qualifiedName("."), 1)
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:Byte = this.sut.toData(root)
 
@@ -163,27 +163,27 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_Int_1() {
+    fun toHHJson_Int_1() {
 
         val root = 1.toInt()
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
         val dt = sut.registry.findPrimitiveByName("Int")!!
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             primitiveObject(dt.qualifiedName("."), root)
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Int_1() {
 
         val dt = sut.registry.findPrimitiveByName("Int")!!
-        val root = json("expected") {
+        val root = hjson("expected") {
             primitiveObject(dt.qualifiedName("."), 1)
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:Int = this.sut.toData(root)
 
@@ -193,28 +193,28 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_Long_1() {
+    fun toHHJson_Long_1() {
 
         val root = 1.toLong()
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
         val dt = sut.registry.findPrimitiveByName("Long")!!
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             primitiveObject(dt.qualifiedName("."), root)
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Long_1() {
 
         val dt = sut.registry.findPrimitiveByName("Long")!!
-        val root = json("expected") {
+        val root = hjson("expected") {
             primitiveObject(dt.qualifiedName("."), 1)
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:Long = this.sut.toData(root)
 
@@ -224,21 +224,21 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_String() {
+    fun toHHJson_String() {
 
         val root = "hello world!"
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = JsonString("hello world!").toFormattedJsonString("  ", "  ")
+        val expected = HJsonString("hello world!").toHJsonString("","")
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_String() {
 
-        val root = JsonString("hello").toFormattedJsonString("  ", "  ")
+        val root = HJsonString("hello").toHJsonString("","")
 
         val actual:String = this.sut.toData(root)
 
@@ -248,21 +248,21 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_String_with_quotes() {
+    fun toHHJson_String_with_quotes() {
 
         val root = "hello \"world!\""
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = JsonString("hello \\\"world!\\\"").toFormattedJsonString("  ", "  ")
+        val expected = HJsonString("hello \\\"world!\\\"").toHJsonString("","")
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_String_with_quotes() {
 
-        val root = JsonString("hello \\\"world!\\\"").toFormattedJsonString("  ", "  ")
+        val root = HJsonString("hello \\\"world!\\\"").toHJsonString("","")
 
         val actual:String = this.sut.toData(root)
 
@@ -272,18 +272,18 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_String_with_linebreak() {
+    fun toHHJson_String_with_linebreak() {
 
         val root = """
             hello
             world!
         """.trimIndent()
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
         val expected = "\"hello\\nworld!\""
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
@@ -302,20 +302,20 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_DateTime() {
+    fun toHHJson_DateTime() {
 
         val now = DateTime.now()
         val root = now
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
         val dt = sut.registry.findPrimitiveByName("DateTime")!!
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
@@ -323,9 +323,9 @@ class test_KSerialiser {
 
         val now = DateTime.now()
         val dt = sut.registry.findPrimitiveByName("DateTime")!!
-        val root = json("expected") {
+        val root = hjson("expected") {
             primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:DateTime = this.sut.toData(root)
 
@@ -335,28 +335,28 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_Array_empty_Int() {
+    fun toHHJson_Array_empty_Int() {
 
         val root = emptyArray<Int>()
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             arrayObject {
 
             }
-        }.toFormattedJsonString("  ", "  ")
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        }.toHJsonString()
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Array_empty_Int() {
 
-        val root = json("expected") {
+        val root = hjson("expected") {
             arrayObject {
 
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual = this.sut.toData(root) as Array<Any>
 
@@ -366,33 +366,33 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_Array() {
+    fun toHHJson_Array() {
 
         val root = arrayOf(1, true, "hello")
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             arrayObject {
                 primitiveObject("kotlin.Int", 1)
                 boolean(true)
                 string("hello")
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Array() {
 
-        val root = json("expected") {
+        val root = hjson("expected") {
             arrayObject {
                 primitiveObject("kotlin.Int", 1)
                 boolean(true)
                 string("hello")
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual = this.sut.toData(root) as Array<Any>
 
@@ -403,33 +403,33 @@ class test_KSerialiser {
 
 
     @Test
-    fun toJson_List() {
+    fun toHHJson_List() {
 
         val root = listOf(1, true, "hello")
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             listObject {
                 primitiveObject("kotlin.Int", 1)
                 boolean(true)
                 string("hello")
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
     }
 
     @Test
     fun toData_List() {
 
-        val root = json("expected") {
+        val root = hjson("expected") {
             listObject {
                 primitiveObject("kotlin.Int", 1)
                 boolean(true)
                 string("hello")
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:List<Any> = this.sut.toData(root)
 
@@ -440,33 +440,33 @@ class test_KSerialiser {
 
 
     @Test
-    fun toJson_Set() {
+    fun toHJson_Set() {
 
         val root = setOf(1, true, "hello")
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             setObject {
                 primitiveObject("kotlin.Int", 1)
                 boolean(true)
                 string("hello")
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Set() {
 
-        val root = json("expected") {
+        val root = hjson("expected") {
             setObject {
                 primitiveObject("kotlin.Int", 1)
                 boolean(true)
                 string("hello")
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:Set<Any> = this.sut.toData(root)
 
@@ -476,33 +476,33 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_Map() {
+    fun toHJson_Map() {
 
         val root = mapOf("a" to 1, "b" to true, "c" to "hello")
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             mapObject {
                 entry({ string("a") }) { primitiveObject("kotlin.Int", 1) }
                 entry({ string("b") }) { boolean(true) }
                 entry({ string("c") }) { string("hello") }
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
     }
 
     @Test
     fun toData_Map() {
 
-        val root = json("expected") {
+        val root = hjson("expected") {
             mapObject {
                 entry({ string("a") }) { primitiveObject("kotlin.Int", 1) }
                 entry("b", true)
                 entry("c", "hello")
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:Map<String,Any> = this.sut.toData(root)
 
@@ -512,15 +512,15 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_A() {
+    fun toHJson_A() {
 
         val root = A("1: hello")
         root.setProp2(5)
         val dtA = sut.registry.findDatatypeByName("A")!!
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
                 property("comp", null)
                 property("prop1", "1: hello")
@@ -529,9 +529,9 @@ class test_KSerialiser {
                     primitiveObject("kotlin.Int", 5)
                 }
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
     }
 
     @Test
@@ -539,14 +539,14 @@ class test_KSerialiser {
 
         val dtA = sut.registry.findDatatypeByName("A")!!
 
-        val json = json("expected") {
+        val json = hjson("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
                 property("prop1", "hello")
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)
                 }
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:A = this.sut.toData(json)
 
@@ -556,7 +556,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_A_2() {
+    fun toHJson_A_2() {
 
         val root = A("1: hello")
         root.setProp2(5)
@@ -564,9 +564,9 @@ class test_KSerialiser {
         root.comp?.refr = root
         val dtA = sut.registry.findDatatypeByName("A")!!
 
-        val actual = this.sut.toJson(root, root)
+        val actual = this.sut.toHJson(root, root)
 
-        val expected = json("expected") {
+        val expected = hjson("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
                 property("comp") {
                     objectReferenceable(dtA.qualifiedName(".")) {
@@ -586,9 +586,9 @@ class test_KSerialiser {
                     primitiveObject("kotlin.Int", 5)
                 }
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
     }
 
     @Test
@@ -596,7 +596,7 @@ class test_KSerialiser {
 
         val dtA = sut.registry.findDatatypeByName("A")!!
 
-        val json = json("expected") {
+        val json = hjson("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
                 property("prop1", "1: hello")
                 property("comp") {
@@ -616,7 +616,7 @@ class test_KSerialiser {
                     primitiveObject("kotlin.Int", 5)
                 }
             }
-        }.toFormattedJsonString("  ", "  ")
+        }.toHJsonString()
 
         val actual:A = this.sut.toData(json)
 

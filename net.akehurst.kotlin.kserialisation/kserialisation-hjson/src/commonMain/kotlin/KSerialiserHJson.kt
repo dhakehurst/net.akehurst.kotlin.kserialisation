@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package net.akehurst.kotlin.kserialisation.json
+package net.akehurst.kotlin.kserialisation.hjson
 
-import net.akehurst.kotlin.json.*
+import net.akehurst.hjson.*
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
 import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.WalkInfo
@@ -26,11 +26,11 @@ import net.akehurst.kotlinx.reflect.ModuleRegistry
 import kotlin.js.JsName
 import kotlin.reflect.KClass
 
-class KSerialiserJsonException : RuntimeException {
+class KSerialiserHJsonException : RuntimeException {
     constructor(message: String) : super(message)
 }
 
-class KSerialiserJson() {
+class KSerialiserHJson() {
 
     internal val reference_cache = mutableMapOf<Any, List<String>>()
 
@@ -92,17 +92,17 @@ class KSerialiserJson() {
     @JsName("registerKotlinStdPrimitives")
     fun registerKotlinStdPrimitives() {
         this.confgureDatatypeModel(DatatypeRegistry.KOTLIN_STD)
-        this.registerPrimitive(Boolean::class, { value -> JsonBoolean(value) }, { json -> json.asBoolean().value })
-        this.registerPrimitiveAsObject(Byte::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
-        this.registerPrimitiveAsObject(Short::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })
-        this.registerPrimitiveAsObject(Int::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toInt() })
-        this.registerPrimitiveAsObject(Long::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toLong() })
-        this.registerPrimitiveAsObject(Float::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toFloat() })
-        this.registerPrimitiveAsObject(Double::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toDouble() })
+        this.registerPrimitive(Boolean::class, { value -> HJsonBoolean(value) }, { json -> json.asBoolean().value })
+        this.registerPrimitiveAsObject(Byte::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
+        this.registerPrimitiveAsObject(Short::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })
+        this.registerPrimitiveAsObject(Int::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toInt() })
+        this.registerPrimitiveAsObject(Long::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toLong() })
+        this.registerPrimitiveAsObject(Float::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toFloat() })
+        this.registerPrimitiveAsObject(Double::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toDouble() })
         this.registerPrimitive(
                 String::class,
                 { value ->
-                    JsonString(value //
+                    HJsonString(value //
                             .replace("\\", "\\\\")
                             .replace("\b", "\\b")
                             .replace("\u000C", "\\f")
@@ -127,58 +127,58 @@ class KSerialiserJson() {
     }
 
     @JsName("registerPrimitive")
-    fun <T : Any> registerPrimitive(cls: KClass<T>, toJson: (value: T) -> JsonValue, toPrimitive: (json: JsonValue) -> T) {
+    fun <T : Any> registerPrimitive(cls: KClass<T>, toHJson: (value: T) -> HJsonValue, toPrimitive: (json: HJsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
-        val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-        this.registry.registerPrimitiveMapper(PrimitiveMapper.create(cls, JsonValue::class, toJson, toPrimitive))
+        val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
+        this.registry.registerPrimitiveMapper(PrimitiveMapper.create(cls, HJsonValue::class, toHJson, toPrimitive))
     }
 
     @JsName("registerPrimitiveAsObject")
-    fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toJson: (value: P) -> JsonValue, fromJson: (json: JsonValue) -> P) {
+    fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toHJson: (value: P) -> HJsonValue, fromHJson: (json: HJsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
-        val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-        val toJson = { value: P ->
-            val obj = JsonUnreferencableObject()
-            obj.setProperty(JsonDocument.TYPE, JsonDocument.PRIMITIVE)
-            obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName(".")))
-            obj.setProperty(JsonDocument.VALUE,toJson(value))
+        val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
+        val toHJson = { value: P ->
+            val obj = HJsonUnreferencableObject()
+            obj.setProperty(HJsonDocument.TYPE, HJsonDocument.PRIMITIVE)
+            obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName(".")))
+            obj.setProperty(HJsonDocument.VALUE,toHJson(value))
             obj
         }
-        val toPrimitive = { json:JsonObject ->
-            val jsonValue = json.property[JsonDocument.VALUE]!!
-            fromJson(jsonValue)
+        val toPrimitive = { json:HJsonObject ->
+            val jsonValue = json.property[HJsonDocument.VALUE]!!
+            fromHJson(jsonValue)
         }
-        val mapper = PrimitiveMapper.create(cls, JsonObject::class, toJson, toPrimitive)
+        val mapper = PrimitiveMapper.create(cls, HJsonObject::class, toHJson, toPrimitive)
         this.registry.registerPrimitiveMapper(mapper)
     }
 
-    @JsName("toJson")
-    fun toJson(root: Any, data: Any): JsonDocument {
+    @JsName("toHJson")
+    fun toHJson(root: Any, data: Any): HJsonDocument {
         this.reference_cache.clear()
-        val doc = JsonDocument("json")
-        var currentObjStack = Stack<JsonValue>()
-        val walker = kompositeWalker<List<String>, JsonValue>(registry) {
+        val doc = HJsonDocument("json")
+        var currentObjStack = Stack<HJsonValue>()
+        val walker = kompositeWalker<List<String>, HJsonValue>(registry) {
             nullValue { path, info ->
-                WalkInfo(info.up, JsonNull)
+                WalkInfo(info.up, HJsonNull)
             }
             primitive { path, info, primitive, mapper ->
                 //TODO: use qualified name when we can!
-                val dt = registry.findPrimitiveByName(primitive::class.simpleName!!) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-                val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(primitive) ?: throw KSerialiserJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
+                val dt = registry.findPrimitiveByName(primitive::class.simpleName!!) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
+                val json = (mapper as PrimitiveMapper<Any, HJsonValue>?)?.toRaw?.invoke(primitive) ?: throw KSerialiserHJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
                 WalkInfo(info.up, json)
             }
             reference { path, info, value, property ->
                 val refPath = calcReferencePath(root, value)
-                val ref = JsonReference(doc,refPath)
+                val ref = HJsonReference(doc,refPath)
                 WalkInfo(path, ref)
             }
             collBegin { path, info, type, coll ->
-                val elements = JsonArray()
+                val elements = HJsonArray()
                 currentObjStack.push(elements)
                 WalkInfo(info.up, elements)
             }
             collElementEnd { path, info, element ->
-                val elements = currentObjStack.peek() as JsonArray
+                val elements = currentObjStack.peek() as HJsonArray
                 elements.addElement(info.acc)
                 //val nObj = listObj.withProperty(ELEMENTS, newList)
                 //currentObjStack.push(nObj)
@@ -186,22 +186,22 @@ class KSerialiserJson() {
             }
             collEnd { path, info, type, coll ->
                 val jsonTypeName = when {
-                    type.isArray -> JsonDocument.ARRAY
-                    type.isList -> JsonDocument.LIST
-                    type.isSet -> JsonDocument.SET
-                    else -> throw KSerialiserJsonException("Unknown type $type")
+                    type.isArray -> HJsonDocument.ARRAY
+                    type.isList -> HJsonDocument.LIST
+                    type.isSet -> HJsonDocument.SET
+                    else -> throw KSerialiserHJsonException("Unknown type $type")
                 }
                 val elements = currentObjStack.pop()
-                val setObj = JsonUnreferencableObject()
-                setObj.setProperty(JsonDocument.TYPE, jsonTypeName)
-                //ELEMENT_TYPE to JsonString(type.elementType.qualifiedName), //needed for deserialising empty Arrays
-                setObj.setProperty(JsonDocument.ELEMENTS, elements)
+                val setObj = HJsonUnreferencableObject()
+                setObj.setProperty(HJsonDocument.TYPE, jsonTypeName)
+                //ELEMENT_TYPE to HJsonString(type.elementType.qualifiedName), //needed for deserialising empty Arrays
+                setObj.setProperty(HJsonDocument.ELEMENTS, elements)
                 WalkInfo(info.up, setObj)
             }
             mapBegin { path, info, map ->
-                val obj = JsonUnreferencableObject()
-                obj.setProperty(JsonDocument.TYPE, JsonDocument.MAP)
-                obj.setProperty(JsonDocument.ELEMENTS, JsonArray())
+                val obj = HJsonUnreferencableObject()
+                obj.setProperty(HJsonDocument.TYPE, HJsonDocument.MAP)
+                obj.setProperty(HJsonDocument.ELEMENTS, HJsonArray())
                 currentObjStack.push(obj)
                 WalkInfo(info.up, obj)
             }
@@ -213,11 +213,11 @@ class KSerialiserJson() {
             mapEntryValueEnd { path, info, entry ->
                 val meKey = currentObjStack.pop()
                 val meValue = info.acc
-                val mapObj = currentObjStack.peek() as JsonObject
-                val mapElements = (mapObj.property[JsonDocument.ELEMENTS] ?: JsonArray()) as JsonArray
-                val neEl = JsonUnreferencableObject()
-                neEl.setProperty(JsonDocument.KEY, meKey)
-                neEl.setProperty(JsonDocument.VALUE, meValue)
+                val mapObj = currentObjStack.peek() as HJsonObject
+                val mapElements = (mapObj.property[HJsonDocument.ELEMENTS] ?: HJsonArray()) as HJsonArray
+                val neEl = HJsonUnreferencableObject()
+                neEl.setProperty(HJsonDocument.KEY, meKey)
+                neEl.setProperty(HJsonDocument.VALUE, meValue)
                 mapElements.addElement(neEl)
                 //mapObj.withProperty(ELEMENTS, newMap)
                 //currentObjStack.push(nObj)
@@ -228,10 +228,10 @@ class KSerialiserJson() {
                 WalkInfo(info.up, obj)
             }
             objectBegin { path, info, obj, datatype ->
-                val json = JsonReferencableObject(doc, path)
+                val json = HJsonReferencableObject(doc, path)
                 reference_cache[obj] = json.path
-                json.setProperty(JsonDocument.TYPE, JsonDocument.OBJECT)
-                json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName(".")))
+                json.setProperty(HJsonDocument.TYPE, HJsonDocument.OBJECT)
+                json.setProperty(HJsonDocument.CLASS, HJsonString(datatype.qualifiedName(".")))
                 currentObjStack.push(json)
                 WalkInfo(path, json)
             }
@@ -244,14 +244,14 @@ class KSerialiserJson() {
             }
             propertyEnd { path, info, property ->
                 val key = path.last()
-                val cuObj = currentObjStack.peek() as JsonObject
+                val cuObj = currentObjStack.peek() as HJsonObject
                 cuObj.setProperty(key as String, info.acc)
                 //currentObjStack.push(nObj)
                 WalkInfo(info.up, cuObj)
             }
         }
 
-        val result = walker.walk(WalkInfo(emptyList(), JsonNull), data)
+        val result = walker.walk(WalkInfo(emptyList(), HJsonNull), data)
         doc.root = result.acc
         return doc
     }
@@ -259,8 +259,8 @@ class KSerialiserJson() {
     @JsName("toData")
     fun <T : Any> toData(jsonString: String): T {
         //TODO: use a bespoke written JSON parser, it will most likely be faster
-        val json = Json.process(jsonString)
-        val conv = FromJsonConverter(this.registry)
+        val json = HJson.process(jsonString)
+        val conv = FromHJsonConverter(this.registry)
         return conv.convertValue(emptyList(), json.root) as T
     }
 
