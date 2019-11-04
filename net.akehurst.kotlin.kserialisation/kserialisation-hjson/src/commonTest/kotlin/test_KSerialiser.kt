@@ -63,7 +63,7 @@ class test_KSerialiser {
             namespace com.soywiz.klock {
               primitive DateTime
             }
-            namespace net.akehurst.kotlin.kserialisation.json {
+            namespace net.akehurst.kotlin.kserialisation.hjson {
                 datatype A {
                     val prop1 : String
                     car comp : A
@@ -90,7 +90,7 @@ class test_KSerialiser {
 
         val expected = HJsonBoolean(true).toHJsonString("","")
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -106,7 +106,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_Boolean_false() {
+    fun toHJson_Boolean_false() {
 
         val root = false
 
@@ -114,7 +114,7 @@ class test_KSerialiser {
 
         val expected = HJsonBoolean(false).toHJsonString("","")
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -130,7 +130,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_Byte_1() {
+    fun toHJson_Byte_1() {
 
         val root = 1.toByte()
         assertEquals("Byte", root::class.simpleName)
@@ -144,7 +144,7 @@ class test_KSerialiser {
             primitiveObject(dt.qualifiedName("."), root)
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -163,7 +163,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_Int_1() {
+    fun toHJson_Int_1() {
 
         val root = 1.toInt()
 
@@ -174,7 +174,7 @@ class test_KSerialiser {
             primitiveObject(dt.qualifiedName("."), root)
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -193,7 +193,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_Long_1() {
+    fun toHJson_Long_1() {
 
         val root = 1.toLong()
 
@@ -205,7 +205,7 @@ class test_KSerialiser {
         }.toHJsonString()
 
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -224,7 +224,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_String() {
+    fun toHJson_String() {
 
         val root = "hello world!"
 
@@ -232,7 +232,7 @@ class test_KSerialiser {
 
         val expected = HJsonString("hello world!").toHJsonString("","")
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -248,21 +248,21 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_String_with_quotes() {
+    fun toHJson_String_with_quotes() {
 
         val root = "hello \"world!\""
 
         val actual = this.sut.toHJson(root, root)
 
-        val expected = HJsonString("hello \\\"world!\\\"").toHJsonString("","")
+        val expected = "\"hello \\\"world!\\\"\""
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
     fun toData_String_with_quotes() {
 
-        val root = HJsonString("hello \\\"world!\\\"").toHJsonString("","")
+        val root = "\"hello \\\"world!\\\"\""
 
         val actual:String = this.sut.toData(root)
 
@@ -272,7 +272,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_String_with_linebreak() {
+    fun toHJson_String_with_linebreak() {
 
         val root = """
             hello
@@ -281,15 +281,15 @@ class test_KSerialiser {
 
         val actual = this.sut.toHJson(root, root)
 
-        val expected = "\"hello\\nworld!\""
+        val expected = "'''hello\nworld!'''"
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
     fun toData_String_with_linebreak() {
 
-        val root = "\"hello\\nworld!\""
+        val root = "'''hello\nworld!'''"
 
         val actual:String = this.sut.toData(root)
 
@@ -302,7 +302,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_DateTime() {
+    fun toHJson_DateTime() {
 
         val now = DateTime.now()
         val root = now
@@ -315,7 +315,7 @@ class test_KSerialiser {
             primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -335,7 +335,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_Array_empty_Int() {
+    fun toHJson_Array_empty_Int() {
 
         val root = emptyArray<Int>()
 
@@ -346,7 +346,7 @@ class test_KSerialiser {
 
             }
         }.toHJsonString()
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -366,7 +366,7 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHHJson_Array() {
+    fun toHJson_Array() {
 
         val root = arrayOf(1, true, "hello")
 
@@ -380,7 +380,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -403,7 +403,7 @@ class test_KSerialiser {
 
 
     @Test
-    fun toHHJson_List() {
+    fun toHJson_List() {
 
         val root = listOf(1, true, "hello")
 
@@ -417,7 +417,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -454,7 +454,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -490,7 +490,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -531,7 +531,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
@@ -588,7 +588,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        assertEquals(expected, actual.toFormattedHJsonString("  ","  "))
+        assertEquals(expected, actual.toHJsonString())
     }
 
     @Test

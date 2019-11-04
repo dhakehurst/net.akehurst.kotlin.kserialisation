@@ -99,31 +99,7 @@ class KSerialiserHJson() {
         this.registerPrimitiveAsObject(Long::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toLong() })
         this.registerPrimitiveAsObject(Float::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toFloat() })
         this.registerPrimitiveAsObject(Double::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toDouble() })
-        this.registerPrimitive(
-                String::class,
-                { value ->
-                    HJsonString(value //
-                            .replace("\\", "\\\\")
-                            .replace("\b", "\\b")
-                            .replace("\u000C", "\\f")
-                            .replace("\n", "\\n")
-                            .replace("\r", "\\r")
-                            .replace("\t", "\\t")
-                            .replace("\"", "\\\"")
-
-                    )
-                },
-                { json ->
-                    json.asString().value //
-                            .replace("\\b", "\b")
-                            .replace("\\f", "\u000C")
-                            .replace("\\n", "\n")
-                            .replace("\\r", "\r")
-                            .replace("\\t", "\t")
-                            .replace("\\\"", "\"")
-                            .replace("\\\\", "\\")
-                }
-        )
+        this.registerPrimitive( String::class, { value ->  HJsonString(value) }, { json -> json.asString().value } )
     }
 
     @JsName("registerPrimitive")
