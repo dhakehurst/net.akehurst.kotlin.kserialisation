@@ -9,11 +9,11 @@ val version_agl:String by project
 
 dependencies {
 
-    commonMainImplementation("net.akehurst.kotlin.komposite:komposite-common:$version_komposite")
+    commonMainApi("net.akehurst.kotlin.hjson:hjson:$version_hjson")
 
+    commonMainImplementation("net.akehurst.kotlin.komposite:komposite-common:$version_komposite")
     commonMainImplementation("net.akehurst.kotlinx:kotlinx-collections:$version_kotlinx")
     commonMainImplementation("net.akehurst.kotlinx:kotlinx-reflect:$version_kotlinx")
-    commonMainImplementation("net.akehurst.kotlin.hjson:hjson:$version_hjson")
 
 
     commonTestImplementation ("${group_klock}:klock:${version_klock}")

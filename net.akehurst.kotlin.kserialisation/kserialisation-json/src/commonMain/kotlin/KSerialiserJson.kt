@@ -44,7 +44,7 @@ class KSerialiserJson() {
         return if (reference_cache.containsKey(targetValue)) {
             reference_cache[targetValue]!!
         } else {
-            var resultPath:List<String>? = null //TODO: terminate walking early if result found
+            var resultPath: List<String>? = null //TODO: terminate walking early if result found
             val walker = kompositeWalker<List<String>, Boolean>(registry) {
                 collBegin { path, info, type, coll ->
                     WalkInfo(info.up, info.acc)
@@ -72,7 +72,7 @@ class KSerialiserJson() {
 
             try {
                 val result = walker.walk(WalkInfo(emptyList(), false), root)
-            } catch (e:FoundReferenceException) {
+            } catch (e: FoundReferenceException) {
 
             }
             resultPath ?: listOf("${'$'}unknown ${targetValue::class.simpleName}")
@@ -99,31 +99,7 @@ class KSerialiserJson() {
         this.registerPrimitiveAsObject(Long::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toLong() })
         this.registerPrimitiveAsObject(Float::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toFloat() })
         this.registerPrimitiveAsObject(Double::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toDouble() })
-        this.registerPrimitive(
-                String::class,
-                { value ->
-                    JsonString(value //
-                            .replace("\\", "\\\\")
-                            .replace("\b", "\\b")
-                            .replace("\u000C", "\\f")
-                            .replace("\n", "\\n")
-                            .replace("\r", "\\r")
-                            .replace("\t", "\\t")
-                            .replace("\"", "\\\"")
-
-                    )
-                },
-                { json ->
-                    json.asString().value //
-                            .replace("\\b", "\b")
-                            .replace("\\f", "\u000C")
-                            .replace("\\n", "\n")
-                            .replace("\\r", "\r")
-                            .replace("\\t", "\t")
-                            .replace("\\\"", "\"")
-                            .replace("\\\\", "\\")
-                }
-        )
+        this.registerPrimitive(String::class, { value -> JsonString(value) }, { json -> json.asString().value })
     }
 
     @JsName("registerPrimitive")
@@ -141,10 +117,10 @@ class KSerialiserJson() {
             val obj = JsonUnreferencableObject()
             obj.setProperty(JsonDocument.TYPE, JsonDocument.PRIMITIVE)
             obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName(".")))
-            obj.setProperty(JsonDocument.VALUE,toJson(value))
+            obj.setProperty(JsonDocument.VALUE, toJson(value))
             obj
         }
-        val toPrimitive = { json:JsonObject ->
+        val toPrimitive = { json: JsonObject ->
             val jsonValue = json.property[JsonDocument.VALUE]!!
             fromJson(jsonValue)
         }
@@ -163,13 +139,15 @@ class KSerialiserJson() {
             }
             primitive { path, info, primitive, mapper ->
                 //TODO: use qualified name when we can!
-                val dt = registry.findPrimitiveByName(primitive::class.simpleName!!) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-                val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(primitive) ?: throw KSerialiserJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
+                val dt = registry.findPrimitiveByName(primitive::class.simpleName!!)
+                        ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+                val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(primitive)
+                        ?: throw KSerialiserJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
                 WalkInfo(info.up, json)
             }
             reference { path, info, value, property ->
                 val refPath = calcReferencePath(root, value)
-                val ref = JsonReference(doc,refPath)
+                val ref = JsonReference(doc, refPath)
                 WalkInfo(path, ref)
             }
             collBegin { path, info, type, coll ->

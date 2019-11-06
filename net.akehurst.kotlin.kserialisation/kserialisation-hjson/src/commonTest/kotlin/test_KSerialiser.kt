@@ -78,7 +78,7 @@ class test_KSerialiser {
                 { value -> HJsonNumber(value.unixMillisDouble.toString()) }, //
                 { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
         )
-        sut.registerModule("net.akehurst.kotlin.kserialisation-kserialisation-json-test")
+        sut.registerModule("net.akehurst.kotlin.kserialisation-kserialisation-hjson-test")
     }
 
     @Test
@@ -238,7 +238,7 @@ class test_KSerialiser {
     @Test
     fun toData_String() {
 
-        val root = HJsonString("hello").toHJsonString("","")
+        val root = "\"hello\""
 
         val actual:String = this.sut.toData(root)
 

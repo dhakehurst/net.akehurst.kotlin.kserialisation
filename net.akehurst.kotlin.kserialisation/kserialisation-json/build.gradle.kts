@@ -9,6 +9,8 @@ val version_json = "1.0.0"
 
 dependencies {
 
+    commonMainApi("net.akehurst.kotlin.json:json:$version_json")
+
     commonMainImplementation("net.akehurst.kotlin.komposite:komposite-common:$version_komposite")
 
     commonMainImplementation("net.akehurst.kotlinx:kotlinx-collections:$version_kotlinx")
