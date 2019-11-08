@@ -254,7 +254,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toHJson(root, root)
 
-        val expected = "\"hello \\\"world!\\\"\""
+        val expected = "hello \\\"world!\\\""
 
         assertEquals(expected, actual.toHJsonString())
     }

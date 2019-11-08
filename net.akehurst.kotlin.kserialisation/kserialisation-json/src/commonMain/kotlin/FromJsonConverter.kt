@@ -43,8 +43,6 @@ class FromJsonConverter(
     }
 
     private fun convertPrimitive(json: JsonValue, typeName: String): Any {
-        //val dt = this.registry.findPrimitiveByName(typeName) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-       // val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
         val mapper = this.registry.findPrimitiveMapperFor(typeName) ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
         return (mapper as PrimitiveMapper<Any, JsonValue>).toPrimitive(json)
     }
@@ -147,9 +145,6 @@ class FromJsonConverter(
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
         //TODO: use qualified name when we can
-        //val dt = this.registry.findPrimitiveByName(sn) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-        //val func = this.primitiveFromJson[dt] ?: throw KSerialiserJsonException("Do not know how to convert ${sn} from json, did you register its converter")
-        //return func(json)
         val mapper = this.registry.findPrimitiveMapperFor(sn) ?: throw KSerialiserJsonException("Do not know how to convert ${sn} from json, did you register its converter")
         return (mapper as PrimitiveMapper<Any, JsonObject>).toPrimitive(json)
 
@@ -179,7 +174,7 @@ class FromJsonConverter(
             resolvedReference[path] = obj
 
             // TODO: change this to enable nonExplicit properties, once JS reflection works
-            dt.explicitNonIdentityProperties.forEach {
+            dt.allExplicitNonIdentityProperties.forEach {
                 val jsonPropValue = json.property[it.name]
                 if (null != jsonPropValue) {
                     val value = this.convertValue(path + it.name, jsonPropValue)
