@@ -116,19 +116,19 @@ class FromJsonConverter(
             val type = json.property[JsonDocument.TYPE]
             when (type) {
                 JsonDocument.ARRAY -> {
-                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray()).toTypedArray()
                 }
                 JsonDocument.LIST -> {
-                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray())
                 }
                 JsonDocument.SET -> {
-                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray()).toSet()
                 }
                 JsonDocument.MAP -> {
-                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no {KSerialiserJson.ELEMENTS} property found")
+                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ELEMENTS} property found")
                     convertMap(path, elements.asArray())
                 }
                 JsonDocument.OBJECT -> convertObject2Object(path, json)
@@ -186,17 +186,20 @@ class FromJsonConverter(
     }
 
     private fun convertList(path: List<String>, json: JsonArray): List<*> {
+        val path_elements = path + JsonDocument.ELEMENTS
         return json.elements.mapIndexed { index, it ->
-            this.convertValue(path + "$index", it)
+            this.convertValue(path_elements + "$index", it)
         }
     }
 
     private fun convertMap(path: List<String>, json: JsonArray): Map<*, *> {
+        val path_elements = path + JsonDocument.ELEMENTS
         return json.elements.mapIndexed { index, jme ->
+            val path_entry = path_elements + "${index}"
             val jKey = jme.asObject().property[JsonDocument.KEY]!!
             val jValue = jme.asObject().property[JsonDocument.VALUE]!!
-            val pathk = path + "key" //TODO: this is not correct
-            val pathv = path + "${index}"
+            val pathk = path_entry + JsonDocument.KEY
+            val pathv = path_entry + JsonDocument.VALUE
             val key = this.convertValue(pathk, jKey)
             val value = this.convertValue(pathv, jValue)
             Pair(key, value)

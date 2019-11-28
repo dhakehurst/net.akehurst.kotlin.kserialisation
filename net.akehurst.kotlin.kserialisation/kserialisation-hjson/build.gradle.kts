@@ -1,4 +1,4 @@
-val version_hjson = "1.0.0"
+val version_hjson:String by project
 val version_kotlinx:String by project
 val version_komposite:String by project
 
