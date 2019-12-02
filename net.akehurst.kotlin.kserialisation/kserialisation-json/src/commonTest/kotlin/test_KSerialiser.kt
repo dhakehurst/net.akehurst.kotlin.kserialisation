@@ -78,7 +78,7 @@ class test_KSerialiser {
                 { value -> JsonNumber(value.unixMillisDouble.toString()) }, //
                 { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
         )
-        sut.registerModule("net.akehurst.kotlin.kserialisation-kserialisation-json-test")
+        sut.registerModule("net.akehurst.kotlin.kserialisation:kserialisation-json-test")
     }
 
     @Test
@@ -254,7 +254,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val expected = JsonString("hello \\\"world!\\\"").toFormattedJsonString("  ", "  ")
+        val expected = "\"hello \\\"world!\\\"\""
 
         assertEquals(expected, actual.toFormattedJsonString("  ","  "))
     }
@@ -262,7 +262,7 @@ class test_KSerialiser {
     @Test
     fun toData_String_with_quotes() {
 
-        val root = JsonString("hello \\\"world!\\\"").toFormattedJsonString("  ", "  ")
+        val root = JsonString("hello \"world!\"").toFormattedJsonString("  ", "  ")
 
         val actual:String = this.sut.toData(root)
 
@@ -593,7 +593,7 @@ class test_KSerialiser {
 
     @Test
     fun toData_A_2() {
-
+        //FIXME: this does not work in JS tests because the getters/setters are not included as properties by kotlinx-reflect!
         val dtA = sut.registry.findDatatypeByName("A")!!
 
         val json = json("expected") {

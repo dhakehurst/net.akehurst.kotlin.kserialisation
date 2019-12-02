@@ -1,5 +1,7 @@
+import net.akehurst.kotlin.kt2ts.plugin.gradle.GenerateDynamicRequire
+
 plugins {
-    id("net.akehurst.kotlin.kt2ts") version "1.1.0"
+    id("net.akehurst.kotlin.kt2ts") version "1.2.0"
 }
 
 val version_komposite:String by project
@@ -31,8 +33,17 @@ dependencies {
 }
 
 kt2ts {
-    localJvmName.set("jvm8")
+    jvmTargetName.set("jvm8")
     classPatterns.set(listOf(
             "net.akehurst.kotlin.kserialisation.json.*"
+    ))
+}
+
+project.tasks.create<GenerateDynamicRequire>(GenerateDynamicRequire.NAME) {
+    group = "generate"
+    dependsOn("jsTestClasses")
+    tgtDirectory.set(rootProject.layout.buildDirectory.dir("js/packages_imported/net.akehurst.kotlinx-kotlinx-reflect/1.2.0"))
+    dynamicImport.set(listOf(
+            "net.akehurst.kotlin.kserialisation:kserialisation-json-test"
     ))
 }
