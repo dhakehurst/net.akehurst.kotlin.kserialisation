@@ -85,8 +85,7 @@ class KSerialiserJson() {
     }
 
     @JsName("registerModule")
-    // must be inline beacuse ModuleRegistry.register must be inline
-    inline fun registerModule(moduleName: String) {
+    fun registerModule(moduleName: String) {
         ModuleRegistry.register(moduleName)
     }
 
