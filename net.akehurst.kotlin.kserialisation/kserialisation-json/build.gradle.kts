@@ -1,9 +1,5 @@
 import net.akehurst.kotlin.kt2ts.plugin.gradle.GenerateDynamicRequire
 
-plugins {
-    id("net.akehurst.kotlin.kt2ts") version "1.2.0"
-}
-
 val version_komposite:String by project
 //val version_agl:String by project
 
