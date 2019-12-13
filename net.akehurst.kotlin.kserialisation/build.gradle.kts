@@ -52,6 +52,7 @@ subprojects {
     apply(plugin = "com.jfrog.bintray")
 
     repositories {
+        mavenLocal()
         mavenCentral()
         jcenter()
     }
