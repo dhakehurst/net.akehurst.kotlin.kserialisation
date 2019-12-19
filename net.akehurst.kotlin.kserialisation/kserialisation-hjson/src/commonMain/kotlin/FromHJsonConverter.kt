@@ -78,7 +78,7 @@ class FromHJsonConverter(
                         }
                         HJsonDocument.MAP -> {
                             if (null != index) {
-                                root.property[HJsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(HJsonDocument.VALUE)
+                                root.property[HJsonDocument.ENTRIES]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(HJsonDocument.VALUE)
                             } else {
                                 throw KSerialiserHJsonException("Path error in reference")
                             }
@@ -118,19 +118,19 @@ class FromHJsonConverter(
             val type = json.property[HJsonDocument.TYPE]
             when (type) {
                 HJsonDocument.ARRAY -> {
-                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no {KSerialiserHJson.ELEMENTS} property found")
+                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray()).toTypedArray()
                 }
                 HJsonDocument.LIST -> {
-                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no {KSerialiserHJson.ELEMENTS} property found")
+                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray())
                 }
                 HJsonDocument.SET -> {
-                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no {KSerialiserHJson.ELEMENTS} property found")
+                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray()).toSet()
                 }
                 HJsonDocument.MAP -> {
-                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no {KSerialiserHJson.ELEMENTS} property found")
+                    val elements = json.property[HJsonDocument.ENTRIES] ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ENTRIES} property found")
                     convertMap(path, elements.asArray())
                 }
                 HJsonDocument.OBJECT -> convertObject2Object(path, json)

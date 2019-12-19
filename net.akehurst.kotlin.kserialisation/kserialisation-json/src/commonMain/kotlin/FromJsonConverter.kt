@@ -76,7 +76,7 @@ class FromJsonConverter(
                         }
                         JsonDocument.MAP -> {
                             if (null != index) {
-                                root.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(JsonDocument.VALUE)
+                                root.property[JsonDocument.ENTRIES]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(JsonDocument.VALUE)
                             } else {
                                 throw KSerialiserJsonException("Path error in reference")
                             }
@@ -128,7 +128,7 @@ class FromJsonConverter(
                     convertList(path, elements.asArray()).toSet()
                 }
                 JsonDocument.MAP -> {
-                    val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ELEMENTS} property found")
+                    val elements = json.property[JsonDocument.ENTRIES] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ENTRIES} property found")
                     convertMap(path, elements.asArray())
                 }
                 JsonDocument.OBJECT -> convertObject2Object(path, json)
@@ -193,7 +193,7 @@ class FromJsonConverter(
     }
 
     private fun convertMap(path: List<String>, json: JsonArray): Map<*, *> {
-        val path_elements = path + JsonDocument.ELEMENTS
+        val path_elements = path + JsonDocument.ENTRIES
         return json.elements.mapIndexed { index, jme ->
             val path_entry = path_elements + "${index}"
             val jKey = jme.asObject().property[JsonDocument.KEY]!!

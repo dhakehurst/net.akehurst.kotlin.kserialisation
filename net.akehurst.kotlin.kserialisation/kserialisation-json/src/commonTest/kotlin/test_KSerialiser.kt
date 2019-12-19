@@ -522,8 +522,8 @@ class test_KSerialiser {
 
         val expected = json("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
-                property("comp", null)
                 property("prop1", "1: hello")
+                property("comp", null)
                 property("refr", null)
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)
@@ -569,9 +569,10 @@ class test_KSerialiser {
         val expected = json("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
                 property("comp") {
+                    property("prop1", "1: hello")
                     objectReferenceable(dtA.qualifiedName(".")) {
-                        property("comp", null)
                         property("prop1", "1.3")
+                        property("comp", null)
                         property("refr") {
                             reference("/")
                         }
@@ -580,7 +581,6 @@ class test_KSerialiser {
                         }
                     }
                 }
-                property("prop1", "1: hello")
                 property("refr", null)
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)

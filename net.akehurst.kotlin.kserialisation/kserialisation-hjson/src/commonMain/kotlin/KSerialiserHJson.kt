@@ -177,7 +177,7 @@ class KSerialiserHJson() {
             mapBegin { path, info, map ->
                 val obj = HJsonUnreferencableObject()
                 obj.setProperty(HJsonDocument.TYPE, HJsonDocument.MAP)
-                obj.setProperty(HJsonDocument.ELEMENTS, HJsonArray())
+                obj.setProperty(HJsonDocument.ENTRIES, HJsonArray())
                 currentObjStack.push(obj)
                 WalkInfo(info.up, obj)
             }
@@ -190,7 +190,7 @@ class KSerialiserHJson() {
                 val meKey = currentObjStack.pop()
                 val meValue = info.acc
                 val mapObj = currentObjStack.peek() as HJsonObject
-                val mapElements = (mapObj.property[HJsonDocument.ELEMENTS] ?: HJsonArray()) as HJsonArray
+                val mapElements = (mapObj.property[HJsonDocument.ENTRIES] ?: HJsonArray()) as HJsonArray
                 val neEl = HJsonUnreferencableObject()
                 neEl.setProperty(HJsonDocument.KEY, meKey)
                 neEl.setProperty(HJsonDocument.VALUE, meValue)

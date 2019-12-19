@@ -179,7 +179,7 @@ class KSerialiserJson() {
             mapBegin { path, info, map ->
                 val obj = JsonUnreferencableObject()
                 obj.setProperty(JsonDocument.TYPE, JsonDocument.MAP)
-                obj.setProperty(JsonDocument.ELEMENTS, JsonArray())
+                obj.setProperty(JsonDocument.ENTRIES, JsonArray())
                 currentObjStack.push(obj)
                 WalkInfo(info.up, obj)
             }
@@ -192,7 +192,7 @@ class KSerialiserJson() {
                 val meKey = currentObjStack.pop()
                 val meValue = info.acc
                 val mapObj = currentObjStack.peek() as JsonObject
-                val mapElements = (mapObj.property[JsonDocument.ELEMENTS] ?: JsonArray()) as JsonArray
+                val mapElements = (mapObj.property[JsonDocument.ENTRIES] ?: JsonArray()) as JsonArray
                 val neEl = JsonUnreferencableObject()
                 neEl.setProperty(JsonDocument.KEY, meKey)
                 neEl.setProperty(JsonDocument.VALUE, meValue)
