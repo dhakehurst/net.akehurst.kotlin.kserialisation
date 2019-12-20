@@ -134,6 +134,12 @@ class KSerialiserHJson() {
         val doc = HJsonDocument("json")
         var currentObjStack = Stack<HJsonValue>()
         val walker = kompositeWalker<List<String>, HJsonValue>(registry) {
+            configure {
+                ELEMENTS = HJsonDocument.ELEMENTS
+                ENTRIES = HJsonDocument.ENTRIES
+                KEY = HJsonDocument.KEY
+                VALUE = HJsonDocument.VALUE
+            }
             nullValue { path, info ->
                 WalkInfo(info.up, HJsonNull)
             }

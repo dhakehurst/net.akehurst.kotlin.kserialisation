@@ -134,6 +134,12 @@ class KSerialiserJson() {
         val doc = JsonDocument("json")
         var currentObjStack = Stack<JsonValue>()
         val walker = kompositeWalker<List<String>, JsonValue>(registry) {
+            configure {
+                ELEMENTS = JsonDocument.ELEMENTS
+                ENTRIES = JsonDocument.ENTRIES
+                KEY = JsonDocument.KEY
+                VALUE = JsonDocument.VALUE
+            }
             nullValue { path, info ->
                 WalkInfo(info.up, JsonNull)
             }

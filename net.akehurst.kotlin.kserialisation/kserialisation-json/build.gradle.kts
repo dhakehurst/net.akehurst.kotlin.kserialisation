@@ -1,11 +1,7 @@
 import net.akehurst.kotlin.kt2ts.plugin.gradle.GenerateDynamicRequire
 
 val version_komposite:String by project
-//val version_agl:String by project
-
-val group_klock:String by project
 val version_klock:String by project
-
 val version_kotlinx:String by project
 val version_json:String by project
 
@@ -20,12 +16,8 @@ dependencies {
     commonMainImplementation("net.akehurst.kotlin.json:json:$version_json")
 
 
-    commonTestImplementation ("${group_klock}:klock:${version_klock}")
+    commonTestImplementation ("com.soywiz.korlibs.klock:klock:${version_klock}")
 
-
-    // because IntelliJ won't resolve Implementation dependencies at runtime!
-    commonTestImplementation(kotlin("reflect"))
-    commonTestImplementation("net.akehurst.kotlin.komposite:komposite-processor:$version_komposite")
 }
 
 kt2ts {
