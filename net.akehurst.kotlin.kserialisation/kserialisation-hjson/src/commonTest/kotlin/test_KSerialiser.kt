@@ -132,8 +132,14 @@ class test_KSerialiser {
     @Test
     fun toHJson_Byte_1() {
 
-        val root = 1.toByte()
+        assertEquals("Byte", Byte::class.simpleName)
+        assertEquals("kotlin.Byte", sut.registry.findPrimitiveByClass(Byte::class)?.qualifiedName("."))
+
+        val root:Byte = 1.toByte()
         assertEquals("Byte", root::class.simpleName)
+
+        val x:Any = root
+        assertEquals("Byte", x::class.simpleName) //This needs to pass or rest of test will fail
 
         val actual = this.sut.toHJson(root, root)
 

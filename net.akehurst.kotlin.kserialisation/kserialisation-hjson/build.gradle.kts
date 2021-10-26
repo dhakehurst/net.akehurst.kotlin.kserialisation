@@ -21,4 +21,5 @@ dependencies {
     commonTestImplementation(kotlin("reflect"))
     commonTestImplementation("net.akehurst.kotlin.komposite:komposite-processor:$version_komposite")
     commonTestImplementation("net.akehurst.language:agl-processor:${version_agl}")
+
 }

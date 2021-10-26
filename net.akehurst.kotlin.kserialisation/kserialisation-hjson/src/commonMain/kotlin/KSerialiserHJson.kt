@@ -84,10 +84,10 @@ class KSerialiserHJson() {
         registry.registerFromConfigString(config, emptyMap())
     }
 
-    @JsName("registerModule")
-    fun registerModule(moduleName: String) {
-        ModuleRegistry.register(moduleName)
-    }
+    //@JsName("registerModule")
+    //fun registerModule(moduleName: String) {
+    //    ModuleRegistry.register(moduleName)
+    //}
 
     @JsName("registerKotlinStdPrimitives")
     fun registerKotlinStdPrimitives() {
@@ -130,6 +130,7 @@ class KSerialiserHJson() {
 
     @JsName("toHJson")
     fun toHJson(root: Any, data: Any): HJsonDocument {
+        println("*** root = $root (${root::class}")
         this.reference_cache.clear()
         val doc = HJsonDocument("json")
         var currentObjStack = Stack<HJsonValue>()
@@ -144,8 +145,9 @@ class KSerialiserHJson() {
                 WalkInfo(info.up, HJsonNull)
             }
             primitive { path, info, primitive, mapper ->
-                //TODO: use qualified name when we can!
+                //TODO: use qualified name when/IF JS reflection make it possible!
                 val dt = registry.findPrimitiveByName(primitive::class.simpleName!!) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
+                println("*** found primitive ${primitive::class.simpleName!!} = $dt")
                 val json = (mapper as PrimitiveMapper<Any, HJsonValue>?)?.toRaw?.invoke(primitive) ?: throw KSerialiserHJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
                 WalkInfo(info.up, json)
             }

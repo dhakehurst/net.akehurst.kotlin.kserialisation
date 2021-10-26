@@ -18,19 +18,20 @@ package net.akehurst.kotlin.kserialisation.json
 
 import com.soywiz.klock.DateTime
 import net.akehurst.kotlin.json.*
+import net.akehurst.kotlinx.reflect.ModuleRegistry
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class A(
-        val prop1: String
+internal class TestClassAAA(
+        internal val prop1: String
 ) {
 
     private var _privProp: Int = -1
 
-    var comp: A? = null
-    var refr: A? = null
+    internal var comp: TestClassAAA? = null
+    internal var refr: TestClassAAA? = null
 
     fun getProp2(): Int {
         return this._privProp
@@ -46,16 +47,16 @@ class A(
 
     override fun equals(other: Any?): Boolean {
         return when (other) {
-            is A -> this.prop1 == other.prop1
+            is TestClassAAA -> this.prop1 == other.prop1
             else -> false
         }
     }
 }
 
-class test_KSerialiser {
+internal class test_KSerialiser {
 
 
-    val sut = KSerialiserJson()
+    private val sut = KSerialiserJson()
 
     @BeforeTest
     fun setup() {
@@ -64,7 +65,7 @@ class test_KSerialiser {
               primitive DateTime
             }
             namespace net.akehurst.kotlin.kserialisation.json {
-                datatype A {
+                datatype TestClassAAA {
                     val prop1 : String
                     car comp : A
                     var refr : A
@@ -514,9 +515,9 @@ class test_KSerialiser {
     @Test
     fun toJson_A() {
 
-        val root = A("1: hello")
+        val root = TestClassAAA("1: hello")
         root.setProp2(5)
-        val dtA = sut.registry.findDatatypeByName("A")!!
+        val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
 
         val actual = this.sut.toJson(root, root)
 
@@ -537,7 +538,7 @@ class test_KSerialiser {
     @Test
     fun toData_A() {
 
-        val dtA = sut.registry.findDatatypeByName("A")!!
+        val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
 
         val json = json("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
@@ -548,9 +549,9 @@ class test_KSerialiser {
             }
         }.toFormattedJsonString("  ", "  ")
 
-        val actual:A = this.sut.toData(json)
+        val actual:TestClassAAA = this.sut.toData(json)
 
-        val expected = A("hello")
+        val expected = TestClassAAA("hello")
 
         assertEquals(expected, actual)
     }
@@ -558,18 +559,18 @@ class test_KSerialiser {
     @Test
     fun toJson_A_2() {
 
-        val root = A("1: hello")
+        val root = TestClassAAA("1: hello")
         root.setProp2(5)
-        root.comp = A("1.3")
+        root.comp = TestClassAAA("1.3")
         root.comp?.refr = root
-        val dtA = sut.registry.findDatatypeByName("A")!!
+        val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
 
         val actual = this.sut.toJson(root, root)
 
         val expected = json("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
+                property("prop1", "1: hello")
                 property("comp") {
-                    property("prop1", "1: hello")
                     objectReferenceable(dtA.qualifiedName(".")) {
                         property("prop1", "1.3")
                         property("comp", null)
@@ -594,7 +595,10 @@ class test_KSerialiser {
     @Test
     fun toData_A_2() {
         //FIXME: this does not work in JS tests because the getters/setters are not included as properties by kotlinx-reflect!
-        val dtA = sut.registry.findDatatypeByName("A")!!
+        val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
+        println("dta = $dtA")
+        println(ModuleRegistry.registeredClasses)
+        println("dta = ${dtA.clazz}")
 
         val json = json("expected") {
             objectReferenceable(dtA.qualifiedName(".")) {
@@ -618,11 +622,11 @@ class test_KSerialiser {
             }
         }.toFormattedJsonString("  ", "  ")
 
-        val actual:A = this.sut.toData(json)
+        val actual:TestClassAAA = this.sut.toData(json)
 
-        val expected = A("1: hello")
+        val expected = TestClassAAA("1: hello")
         expected.setProp2(5)
-        expected.comp = A("1.3")
+        expected.comp = TestClassAAA("1.3")
         expected.comp?.refr = expected
 
         assertEquals(expected, actual)

@@ -34,7 +34,7 @@ class KSerialiserJson() {
 
     internal val reference_cache = mutableMapOf<Any, List<String>>()
 
-    val registry = DatatypeRegistry()
+    internal val registry = DatatypeRegistry()
 
     class FoundReferenceException : RuntimeException {
         constructor() : super()
@@ -84,12 +84,10 @@ class KSerialiserJson() {
         registry.registerFromConfigString(config, emptyMap())
     }
 
-    @JsName("registerModule")
-    fun registerModule(moduleName: String) {
-        ModuleRegistry.register(moduleName)
-    }
+    //fun registerModule(moduleName: String) {
+    //    ModuleRegistry.register(moduleName)
+    //}
 
-    @JsName("registerKotlinStdPrimitives")
     fun registerKotlinStdPrimitives() {
         this.confgureDatatypeModel(DatatypeRegistry.KOTLIN_STD)
         this.registerPrimitive(Boolean::class, { value -> JsonBoolean(value) }, { json -> json.asBoolean().value })
@@ -102,14 +100,12 @@ class KSerialiserJson() {
         this.registerPrimitive(String::class, { value -> JsonString(value) }, { json -> json.asString().value })
     }
 
-    @JsName("registerPrimitive")
     fun <T : Any> registerPrimitive(cls: KClass<T>, toJson: (value: T) -> JsonValue, toPrimitive: (json: JsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
         this.registry.registerPrimitiveMapper(PrimitiveMapper.create(cls, JsonValue::class, toJson, toPrimitive))
     }
 
-    @JsName("registerPrimitiveAsObject")
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toJson: (value: P) -> JsonValue, fromJson: (json: JsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
@@ -128,7 +124,6 @@ class KSerialiserJson() {
         this.registry.registerPrimitiveMapper(mapper)
     }
 
-    @JsName("toJson")
     fun toJson(root: Any, data: Any): JsonDocument {
         this.reference_cache.clear()
         val doc = JsonDocument("json")
@@ -240,13 +235,11 @@ class KSerialiserJson() {
         return doc
     }
 
-    @JsName("toData")
     fun <T : Any> toData(jsonString: String): T {
         //TODO: use a bespoke written JSON parser, it will most likely be faster
         val json = Json.process(jsonString)
         val conv = FromJsonConverter(this.registry)
         return conv.convertValue(emptyList(), json.root) as T
     }
-
 
 }
