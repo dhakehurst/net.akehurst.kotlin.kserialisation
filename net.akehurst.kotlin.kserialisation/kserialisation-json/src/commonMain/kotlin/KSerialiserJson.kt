@@ -22,8 +22,6 @@ import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.WalkInfo
 import net.akehurst.kotlin.komposite.common.kompositeWalker
 import net.akehurst.kotlinx.collections.Stack
-import net.akehurst.kotlinx.reflect.ModuleRegistry
-import kotlin.js.JsName
 import kotlin.reflect.KClass
 
 class KSerialiserJsonException : RuntimeException {
@@ -109,9 +107,9 @@ class KSerialiserJson() {
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toJson: (value: P) -> JsonValue, fromJson: (json: JsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
-        val toJson = { value: P ->
+        val toJsonMpr = { value: P ->
             val obj = JsonUnreferencableObject()
-            obj.setProperty(JsonDocument.TYPE, JsonDocument.PRIMITIVE)
+            obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.PRIMITIVE.asJsonString)
             obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName(".")))
             obj.setProperty(JsonDocument.VALUE, toJson(value))
             obj
@@ -120,7 +118,7 @@ class KSerialiserJson() {
             val jsonValue = json.property[JsonDocument.VALUE]!!
             fromJson(jsonValue)
         }
-        val mapper = PrimitiveMapper.create(cls, JsonObject::class, toJson, toPrimitive)
+        val mapper = PrimitiveMapper.create(cls, JsonObject::class, toJsonMpr, toPrimitive)
         this.registry.registerPrimitiveMapper(mapper)
     }
 
@@ -140,11 +138,26 @@ class KSerialiserJson() {
             }
             primitive { path, info, primitive, mapper ->
                 //TODO: use qualified name when we can!
-                val dt = registry.findPrimitiveByName(primitive::class.simpleName!!)
-                        ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+                val clsName = primitive::class.simpleName!!
+                val dt = registry.findPrimitiveByName(clsName)
+                    ?: throw KSerialiserJsonException("The primitive '${clsName}' is not defined in the Komposite configuration")
                 val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(primitive)
-                        ?: throw KSerialiserJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
+                    ?: throw KSerialiserJsonException("Do not know how to convert '${clsName}' to json, did you register its converter")
                 WalkInfo(info.up, json)
+            }
+            enum { path, info, enum ->
+                val clsName = enum::class.simpleName!!
+                val dt = registry.findEnumByName(clsName)
+                    ?: throw KSerialiserJsonException("The enum '${clsName}' is not defined in the Komposite configuration")
+                val value = JsonString(enum.name)
+
+                val obj = JsonUnreferencableObject()
+                obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.ENUM.asJsonString)
+                obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName(".")))
+                obj.setProperty(JsonDocument.VALUE, value)
+                obj
+
+                WalkInfo(info.up, obj)
             }
             reference { path, info, value, property ->
                 val refPath = calcReferencePath(root, value)
@@ -165,9 +178,9 @@ class KSerialiserJson() {
             }
             collEnd { path, info, type, coll ->
                 val jsonTypeName = when {
-                    type.isArray -> JsonDocument.ARRAY
-                    type.isList -> JsonDocument.LIST
-                    type.isSet -> JsonDocument.SET
+                    type.isArray -> JsonDocument.ComplexObjectKind.ARRAY.asJsonString
+                    type.isList -> JsonDocument.ComplexObjectKind.LIST.asJsonString
+                    type.isSet -> JsonDocument.ComplexObjectKind.SET.asJsonString
                     else -> throw KSerialiserJsonException("Unknown type $type")
                 }
                 val elements = currentObjStack.pop()
@@ -179,7 +192,7 @@ class KSerialiserJson() {
             }
             mapBegin { path, info, map ->
                 val obj = JsonUnreferencableObject()
-                obj.setProperty(JsonDocument.TYPE, JsonDocument.MAP)
+                obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.MAP.asJsonString)
                 obj.setProperty(JsonDocument.ENTRIES, JsonArray())
                 currentObjStack.push(obj)
                 WalkInfo(info.up, obj)
@@ -209,7 +222,7 @@ class KSerialiserJson() {
             objectBegin { path, info, obj, datatype ->
                 val json = JsonReferencableObject(doc, path)
                 reference_cache[obj] = json.path
-                json.setProperty(JsonDocument.TYPE, JsonDocument.OBJECT)
+                json.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.OBJECT.asJsonString)
                 json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName(".")))
                 currentObjStack.push(json)
                 WalkInfo(path, json)

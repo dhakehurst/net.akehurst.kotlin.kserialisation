@@ -18,7 +18,7 @@ package net.akehurst.kotlin.kserialisation.json
 
 import com.soywiz.klock.DateTime
 import net.akehurst.kotlin.json.*
-import net.akehurst.kotlinx.reflect.ModuleRegistry
+import net.akehurst.kotlinx.reflect.KotlinxReflect
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,8 +53,9 @@ internal class TestClassAAA(
     }
 }
 
-internal class test_KSerialiser {
+internal enum class TestEnumEEE { RED, GREEN, BLUE }
 
+internal class test_KSerialiser {
 
     private val sut = KSerialiserJson()
 
@@ -65,11 +66,12 @@ internal class test_KSerialiser {
               primitive DateTime
             }
             namespace net.akehurst.kotlin.kserialisation.json {
+                enum TestEnumEEE
                 datatype TestClassAAA {
-                    val prop1 : String
-                    car comp : A
-                    var refr : A
-                    var prop2  : Int
+                    composite-val prop1 : String
+                    composite-var comp : A
+                    reference-var refr : A
+                    composite-var prop2  : Int
                 }
             }
         """.trimIndent())
@@ -79,7 +81,8 @@ internal class test_KSerialiser {
                 { value -> JsonNumber(value.unixMillisDouble.toString()) }, //
                 { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
         )
-        sut.registerModule("net.akehurst.kotlin.kserialisation:kserialisation-json-test")
+        KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.json.TestClassAAA",TestClassAAA::class)
+        KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.json.TestEnumEEE",TestEnumEEE::class)
     }
 
     @Test
@@ -513,6 +516,33 @@ internal class test_KSerialiser {
     }
 
     @Test
+    fun toJson_Enum() {
+        val root = TestEnumEEE.RED
+        val dtE = sut.registry.findEnumByClass(TestEnumEEE::class)
+
+        val actual = this.sut.toJson(root,root)
+
+        val expected = json("expected") {
+            enumObject("net.akehurst.kotlin.kserialisation.json.TestEnumEEE",TestEnumEEE.RED)
+        }.toFormattedJsonString("  ", "  ")
+        assertEquals(expected, actual.toFormattedJsonString("  ","  "))
+    }
+
+    @Test
+    fun toData_Enum() {
+        val dtE = sut.registry.findEnumByClass(TestEnumEEE::class)
+        val json = json("expected") {
+            enumObject("net.akehurst.kotlin.kserialisation.json.TestEnumEEE",TestEnumEEE.RED)
+        }.toJsonString()
+
+        val actual:TestEnumEEE = this.sut.toData(json)
+
+        val expected = TestEnumEEE.RED
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun toJson_A() {
 
         val root = TestClassAAA("1: hello")
@@ -597,7 +627,7 @@ internal class test_KSerialiser {
         //FIXME: this does not work in JS tests because the getters/setters are not included as properties by kotlinx-reflect!
         val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
         println("dta = $dtA")
-        println(ModuleRegistry.registeredClasses)
+        println(KotlinxReflect.registeredClasses)
         println("dta = ${dtA.clazz}")
 
         val json = json("expected") {

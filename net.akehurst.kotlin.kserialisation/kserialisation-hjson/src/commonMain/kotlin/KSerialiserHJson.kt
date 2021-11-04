@@ -22,7 +22,6 @@ import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.WalkInfo
 import net.akehurst.kotlin.komposite.common.kompositeWalker
 import net.akehurst.kotlinx.collections.Stack
-import net.akehurst.kotlinx.reflect.ModuleRegistry
 import kotlin.js.JsName
 import kotlin.reflect.KClass
 
