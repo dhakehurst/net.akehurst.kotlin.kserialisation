@@ -18,19 +18,20 @@ package net.akehurst.kotlin.kserialisation.hjson
 
 import com.soywiz.klock.DateTime
 import net.akehurst.hjson.*
+import net.akehurst.kotlinx.reflect.KotlinxReflect
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class A(
-        val prop1: String
+internal class TestClassAAA(
+    internal val prop1: String
 ) {
 
     private var _privProp: Int = -1
 
-    var comp: A? = null
-    var refr: A? = null
+    internal var comp: TestClassAAA? = null
+    internal var refr: TestClassAAA? = null
 
     fun getProp2(): Int {
         return this._privProp
@@ -46,7 +47,7 @@ class A(
 
     override fun equals(other: Any?): Boolean {
         return when (other) {
-            is A -> this.prop1 == other.prop1
+            is TestClassAAA -> this.prop1 == other.prop1
             else -> false
         }
     }
@@ -78,7 +79,7 @@ class test_KSerialiser {
                 { value -> HJsonNumber(value.unixMillisDouble.toString()) }, //
                 { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
         )
-        sut.registerModule("net.akehurst.kotlin.kserialisation-kserialisation-hjson-test")
+        KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.json.TestClassAAA",TestClassAAA::class)
     }
 
     @Test
@@ -520,7 +521,7 @@ class test_KSerialiser {
     @Test
     fun toHJson_A() {
 
-        val root = A("1: hello")
+        val root = TestClassAAA("1: hello")
         root.setProp2(5)
         val dtA = sut.registry.findDatatypeByName("A")!!
 
@@ -554,9 +555,9 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual:A = this.sut.toData(json)
+        val actual:TestClassAAA = this.sut.toData(json)
 
-        val expected = A("hello")
+        val expected = TestClassAAA("hello")
 
         assertEquals(expected, actual)
     }
@@ -564,9 +565,9 @@ class test_KSerialiser {
     @Test
     fun toHJson_A_2() {
 
-        val root = A("1: hello")
+        val root = TestClassAAA("1: hello")
         root.setProp2(5)
-        root.comp = A("1.3")
+        root.comp = TestClassAAA("1.3")
         root.comp?.refr = root
         val dtA = sut.registry.findDatatypeByName("A")!!
 
@@ -624,11 +625,11 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual:A = this.sut.toData(json)
+        val actual:TestClassAAA = this.sut.toData(json)
 
-        val expected = A("1: hello")
+        val expected = TestClassAAA("1: hello")
         expected.setProp2(5)
-        expected.comp = A("1.3")
+        expected.comp = TestClassAAA("1.3")
         expected.comp?.refr = expected
 
         assertEquals(expected, actual)
