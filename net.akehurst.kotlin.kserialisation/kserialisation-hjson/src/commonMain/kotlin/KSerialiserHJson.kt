@@ -17,6 +17,7 @@
 package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
+import net.akehurst.kotlin.komposite.api.DatatypeModel
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
 import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.WalkInfo
@@ -78,19 +79,18 @@ class KSerialiserHJson() {
         }
     }
 
-    fun confgureDatatypeModel(config: String) {
+    fun confgureFromKompositeString(kompositeModel: String) {
         //TODO: mappers!
-        registry.registerFromConfigString(config, emptyMap())
+        registry.registerFromConfigString(kompositeModel, emptyMap())
     }
-
-    //@JsName("registerModule")
-    //fun registerModule(moduleName: String) {
-    //    ModuleRegistry.register(moduleName)
-    //}
+    fun confgureFromKompositeModel(kompositeModel: DatatypeModel) {
+        //TODO: mappers!
+        registry.registerFromKompositeModel(kompositeModel, emptyMap())
+    }
 
     @JsName("registerKotlinStdPrimitives")
     fun registerKotlinStdPrimitives() {
-        this.confgureDatatypeModel(DatatypeRegistry.KOTLIN_STD)
+        this.registry.registerFromKompositeModel(DatatypeRegistry.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> HJsonBoolean(value) }, { json -> json.asBoolean().value })
         this.registerPrimitiveAsObject(Byte::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
         this.registerPrimitiveAsObject(Short::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })

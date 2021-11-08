@@ -6,6 +6,7 @@ val version_json:String by project
 dependencies {
 
     commonMainApi("net.akehurst.kotlin.json:json:$version_json")
+    commonMainApi("net.akehurst.kotlin.komposite:komposite-processor:$version_komposite")
 
     commonMainImplementation("net.akehurst.kotlin.komposite:komposite-common:$version_komposite")
 
