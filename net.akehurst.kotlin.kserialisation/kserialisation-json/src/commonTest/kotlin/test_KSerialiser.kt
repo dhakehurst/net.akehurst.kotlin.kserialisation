@@ -145,7 +145,7 @@ internal class test_KSerialiser {
         assertEquals("Byte", dt.name)
 
         val expected = json("expected") {
-            primitiveObject(dt.qualifiedName("."), root)
+            primitiveObject(dt.qualifiedName, root)
         }.toFormattedJsonString("  ", "  ")
 
         assertEquals(expected, actual.toFormattedJsonString("  ","  "))
@@ -156,7 +156,7 @@ internal class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Byte")!!
         val root = json("expected") {
-            primitiveObject(dt.qualifiedName("."), 1)
+            primitiveObject(dt.qualifiedName, 1)
         }.toFormattedJsonString("  ", "  ")
 
         val actual:Byte = this.sut.toData(root)
@@ -175,7 +175,7 @@ internal class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Int")!!
         val expected = json("expected") {
-            primitiveObject(dt.qualifiedName("."), root)
+            primitiveObject(dt.qualifiedName, root)
         }.toFormattedJsonString("  ", "  ")
 
         assertEquals(expected, actual.toFormattedJsonString("  ","  "))
@@ -186,7 +186,7 @@ internal class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Int")!!
         val root = json("expected") {
-            primitiveObject(dt.qualifiedName("."), 1)
+            primitiveObject(dt.qualifiedName, 1)
         }.toFormattedJsonString("  ", "  ")
 
         val actual:Int = this.sut.toData(root)
@@ -205,7 +205,7 @@ internal class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Long")!!
         val expected = json("expected") {
-            primitiveObject(dt.qualifiedName("."), root)
+            primitiveObject(dt.qualifiedName, root)
         }.toFormattedJsonString("  ", "  ")
 
 
@@ -217,7 +217,7 @@ internal class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Long")!!
         val root = json("expected") {
-            primitiveObject(dt.qualifiedName("."), 1)
+            primitiveObject(dt.qualifiedName, 1)
         }.toFormattedJsonString("  ", "  ")
 
         val actual:Long = this.sut.toData(root)
@@ -316,7 +316,7 @@ internal class test_KSerialiser {
         val dt = sut.registry.findPrimitiveByName("DateTime")!!
 
         val expected = json("expected") {
-            primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
+            primitiveObject(dt.qualifiedName, now.unixMillisDouble)
         }.toFormattedJsonString("  ", "  ")
 
         assertEquals(expected, actual.toFormattedJsonString("  ","  "))
@@ -328,7 +328,7 @@ internal class test_KSerialiser {
         val now = DateTime.now()
         val dt = sut.registry.findPrimitiveByName("DateTime")!!
         val root = json("expected") {
-            primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
+            primitiveObject(dt.qualifiedName, now.unixMillisDouble)
         }.toFormattedJsonString("  ", "  ")
 
         val actual:DateTime = this.sut.toData(root)
@@ -552,7 +552,7 @@ internal class test_KSerialiser {
         val actual = this.sut.toJson(root, root)
 
         val expected = json("expected") {
-            objectReferenceable(dtA.qualifiedName(".")) {
+            objectReferenceable(dtA.qualifiedName) {
                 property("prop1", "1: hello")
                 property("comp", null)
                 property("refr", null)
@@ -571,7 +571,7 @@ internal class test_KSerialiser {
         val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
 
         val json = json("expected") {
-            objectReferenceable(dtA.qualifiedName(".")) {
+            objectReferenceable(dtA.qualifiedName) {
                 property("prop1", "hello")
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)
@@ -598,10 +598,10 @@ internal class test_KSerialiser {
         val actual = this.sut.toJson(root, root)
 
         val expected = json("expected") {
-            objectReferenceable(dtA.qualifiedName(".")) {
+            objectReferenceable(dtA.qualifiedName) {
                 property("prop1", "1: hello")
                 property("comp") {
-                    objectReferenceable(dtA.qualifiedName(".")) {
+                    objectReferenceable(dtA.qualifiedName) {
                         property("prop1", "1.3")
                         property("comp", null)
                         property("refr") {
@@ -631,10 +631,10 @@ internal class test_KSerialiser {
         println("dta = ${dtA.clazz}")
 
         val json = json("expected") {
-            objectReferenceable(dtA.qualifiedName(".")) {
+            objectReferenceable(dtA.qualifiedName) {
                 property("prop1", "1: hello")
                 property("comp") {
-                    objectReferenceable(dtA.qualifiedName(".")) {
+                    objectReferenceable(dtA.qualifiedName) {
                         property("prop1", "1.3")
                         property("prop3", null)
                         property("refr") {

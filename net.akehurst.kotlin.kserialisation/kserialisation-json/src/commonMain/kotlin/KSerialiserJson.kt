@@ -111,7 +111,7 @@ class KSerialiserJson() {
         val toJsonMpr = { value: P ->
             val obj = JsonUnreferencableObject()
             obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.PRIMITIVE.asJsonString)
-            obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName(".")))
+            obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName))
             obj.setProperty(JsonDocument.VALUE, toJson(value))
             obj
         }
@@ -154,7 +154,7 @@ class KSerialiserJson() {
 
                 val obj = JsonUnreferencableObject()
                 obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.ENUM.asJsonString)
-                obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName(".")))
+                obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName))
                 obj.setProperty(JsonDocument.VALUE, value)
                 obj
 
@@ -224,7 +224,7 @@ class KSerialiserJson() {
                 val json = JsonReferencableObject(doc, path)
                 reference_cache[obj] = json.path
                 json.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.OBJECT.asJsonString)
-                json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName(".")))
+                json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName))
                 currentObjStack.push(json)
                 WalkInfo(path, json)
             }

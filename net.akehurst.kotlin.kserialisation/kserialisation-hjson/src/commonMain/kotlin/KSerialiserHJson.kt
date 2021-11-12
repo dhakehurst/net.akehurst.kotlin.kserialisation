@@ -115,7 +115,7 @@ class KSerialiserHJson() {
         val toHJson = { value: P ->
             val obj = HJsonUnreferencableObject()
             obj.setProperty(HJsonDocument.TYPE, HJsonDocument.PRIMITIVE)
-            obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName(".")))
+            obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName))
             obj.setProperty(HJsonDocument.VALUE,toHJson(value))
             obj
         }
@@ -214,7 +214,7 @@ class KSerialiserHJson() {
                 val json = HJsonReferencableObject(doc, path)
                 reference_cache[obj] = json.path
                 json.setProperty(HJsonDocument.TYPE, HJsonDocument.OBJECT)
-                json.setProperty(HJsonDocument.CLASS, HJsonString(datatype.qualifiedName(".")))
+                json.setProperty(HJsonDocument.CLASS, HJsonString(datatype.qualifiedName))
                 currentObjStack.push(json)
                 WalkInfo(path, json)
             }

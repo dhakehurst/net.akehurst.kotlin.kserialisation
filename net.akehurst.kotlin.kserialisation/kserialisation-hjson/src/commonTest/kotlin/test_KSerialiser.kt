@@ -134,7 +134,7 @@ class test_KSerialiser {
     fun toHJson_Byte_1() {
 
         assertEquals("Byte", Byte::class.simpleName)
-        assertEquals("kotlin.Byte", sut.registry.findPrimitiveByClass(Byte::class)?.qualifiedName("."))
+        assertEquals("kotlin.Byte", sut.registry.findPrimitiveByClass(Byte::class)?.qualifiedName)
 
         val root:Byte = 1.toByte()
         assertEquals("Byte", root::class.simpleName)
@@ -148,7 +148,7 @@ class test_KSerialiser {
         assertEquals("Byte", dt.name)
 
         val expected = hjson("expected") {
-            primitiveObject(dt.qualifiedName("."), root)
+            primitiveObject(dt.qualifiedName, root)
         }.toHJsonString()
 
         assertEquals(expected, actual.toHJsonString())
@@ -159,7 +159,7 @@ class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Byte")!!
         val root = hjson("expected") {
-            primitiveObject(dt.qualifiedName("."), 1)
+            primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
 
         val actual:Byte = this.sut.toData(root)
@@ -178,7 +178,7 @@ class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Int")!!
         val expected = hjson("expected") {
-            primitiveObject(dt.qualifiedName("."), root)
+            primitiveObject(dt.qualifiedName, root)
         }.toHJsonString()
 
         assertEquals(expected, actual.toHJsonString())
@@ -189,7 +189,7 @@ class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Int")!!
         val root = hjson("expected") {
-            primitiveObject(dt.qualifiedName("."), 1)
+            primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
 
         val actual:Int = this.sut.toData(root)
@@ -208,7 +208,7 @@ class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Long")!!
         val expected = hjson("expected") {
-            primitiveObject(dt.qualifiedName("."), root)
+            primitiveObject(dt.qualifiedName, root)
         }.toHJsonString()
 
 
@@ -220,7 +220,7 @@ class test_KSerialiser {
 
         val dt = sut.registry.findPrimitiveByName("Long")!!
         val root = hjson("expected") {
-            primitiveObject(dt.qualifiedName("."), 1)
+            primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
 
         val actual:Long = this.sut.toData(root)
@@ -319,7 +319,7 @@ class test_KSerialiser {
         val dt = sut.registry.findPrimitiveByName("DateTime")!!
 
         val expected = hjson("expected") {
-            primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
+            primitiveObject(dt.qualifiedName, now.unixMillisDouble)
         }.toHJsonString()
 
         assertEquals(expected, actual.toHJsonString())
@@ -331,7 +331,7 @@ class test_KSerialiser {
         val now = DateTime.now()
         val dt = sut.registry.findPrimitiveByName("DateTime")!!
         val root = hjson("expected") {
-            primitiveObject(dt.qualifiedName("."), now.unixMillisDouble)
+            primitiveObject(dt.qualifiedName, now.unixMillisDouble)
         }.toHJsonString()
 
         val actual:DateTime = this.sut.toData(root)
@@ -528,7 +528,7 @@ class test_KSerialiser {
         val actual = this.sut.toHJson(root, root)
 
         val expected = hjson("expected") {
-            objectReferenceable(dtA.qualifiedName(".")) {
+            objectReferenceable(dtA.qualifiedName) {
                 property("prop1", "1: hello")
                 property("comp", null)
                 property("refr", null)
@@ -547,7 +547,7 @@ class test_KSerialiser {
         val dtA = sut.registry.findDatatypeByName("A")!!
 
         val json = hjson("expected") {
-            objectReferenceable(dtA.qualifiedName(".")) {
+            objectReferenceable(dtA.qualifiedName) {
                 property("prop1", "hello")
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)
@@ -574,10 +574,10 @@ class test_KSerialiser {
         val actual = this.sut.toHJson(root, root)
 
         val expected = hjson("expected") {
-            objectReferenceable(dtA.qualifiedName(".")) {
+            objectReferenceable(dtA.qualifiedName) {
                 property("prop1", "1: hello")
                 property("comp") {
-                    objectReferenceable(dtA.qualifiedName(".")) {
+                    objectReferenceable(dtA.qualifiedName) {
                         property("prop1", "1.3")
                         property("comp", null)
                         property("refr") {
@@ -604,10 +604,10 @@ class test_KSerialiser {
         val dtA = sut.registry.findDatatypeByName("A")!!
 
         val json = hjson("expected") {
-            objectReferenceable(dtA.qualifiedName(".")) {
+            objectReferenceable(dtA.qualifiedName) {
                 property("prop1", "1: hello")
                 property("comp") {
-                    objectReferenceable(dtA.qualifiedName(".")) {
+                    objectReferenceable(dtA.qualifiedName) {
                         property("prop1", "1.3")
                         property("prop3", null)
                         property("refr") {
