@@ -19,16 +19,16 @@ import com.github.gmazzo.gradle.plugins.BuildConfigExtension
 import java.io.File
 
 plugins {
-    kotlin("multiplatform") version ("1.6.0-RC") apply false
-    id("org.jetbrains.dokka") version ("1.4.32") apply false
-    id("com.github.gmazzo.buildconfig") version("3.0.0") apply false
-    id("nu.studer.credentials") version ("2.1")
+    kotlin("multiplatform") version ("1.7.0") apply false
+    id("org.jetbrains.dokka") version ("1.7.0") apply false
+    id("com.github.gmazzo.buildconfig") version("3.1.0") apply false
+    id("nu.studer.credentials") version ("3.0")
 }
 
 allprojects {
 
     val version_project: String by project
-    val group_project = "${rootProject.name}"
+    val group_project = rootProject.name
 
     group = group_project
     version = version_project
