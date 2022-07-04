@@ -42,7 +42,7 @@ class test_JsonProcessor {
         val actual = Json.process(jsonString)
 
         val expected = json("json") {
-            primitive(false)
+            boolean(false)
         }
 
         assertEquals(expected, actual)
@@ -57,7 +57,7 @@ class test_JsonProcessor {
         val actual = Json.process(jsonString)
 
         val expected = json("json") {
-            primitive(true)
+            boolean(true)
         }
 
         assertEquals(expected, actual)
@@ -72,7 +72,7 @@ class test_JsonProcessor {
         val actual = Json.process(jsonString)
 
         val expected = json("json") {
-            primitive(1)
+            number(1)
         }
 
         assertEquals(expected, actual)
@@ -87,7 +87,7 @@ class test_JsonProcessor {
         val actual = Json.process(jsonString)
 
         val expected = json("json") {
-            primitive("hello")
+            string("hello")
         }
 
         assertEquals(expected, actual)
@@ -119,9 +119,9 @@ class test_JsonProcessor {
 
         val expected = json("json") {
             arrayJson {
-                primitive(1)
-                primitive(true)
-                primitive("hello")
+                number(1)
+                boolean(true)
+                string("hello")
                 objectJson { }
             }
         }

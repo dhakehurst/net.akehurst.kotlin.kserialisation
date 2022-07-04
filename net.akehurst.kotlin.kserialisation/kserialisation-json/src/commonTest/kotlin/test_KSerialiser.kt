@@ -61,7 +61,7 @@ internal class test_KSerialiser {
 
     @BeforeTest
     fun setup() {
-        this.sut.confgureDatatypeModel("""
+        this.sut.confgureFromKompositeString("""
             namespace com.soywiz.klock {
               primitive DateTime
             }
@@ -533,7 +533,7 @@ internal class test_KSerialiser {
         val dtE = sut.registry.findEnumByClass(TestEnumEEE::class)
         val json = json("expected") {
             enumObject("net.akehurst.kotlin.kserialisation.json.TestEnumEEE",TestEnumEEE.RED)
-        }.toJsonString()
+        }.toStringJson()
 
         val actual:TestEnumEEE = this.sut.toData(json)
 
