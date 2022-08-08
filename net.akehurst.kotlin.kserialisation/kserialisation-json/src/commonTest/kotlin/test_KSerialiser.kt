@@ -18,6 +18,7 @@ package net.akehurst.kotlin.kserialisation.json
 
 import com.soywiz.klock.DateTime
 import net.akehurst.kotlin.json.*
+import net.akehurst.kotlinx.reflect.EnumValuesFunction
 import net.akehurst.kotlinx.reflect.KotlinxReflect
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -82,7 +83,7 @@ internal class test_KSerialiser {
                 { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
         )
         KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.json.TestClassAAA",TestClassAAA::class)
-        KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.json.TestEnumEEE",TestEnumEEE::class)
+        KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.json.TestEnumEEE",TestEnumEEE::class, TestEnumEEE::values as EnumValuesFunction)
     }
 
     @Test

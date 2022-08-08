@@ -19,11 +19,14 @@ import com.github.gmazzo.gradle.plugins.BuildConfigExtension
 import java.io.File
 
 plugins {
-    kotlin("multiplatform") version ("1.7.0") apply false
-    id("org.jetbrains.dokka") version ("1.7.0") apply false
+    kotlin("multiplatform") version ("1.7.10") apply false
+    id("org.jetbrains.dokka") version ("1.7.10") apply false
     id("com.github.gmazzo.buildconfig") version("3.1.0") apply false
     id("nu.studer.credentials") version ("3.0")
 }
+val kotlin_languageVersion = "1.7"
+val kotlin_apiVersion:String = "1.7"
+val jvmTargetVersion = JavaVersion.VERSION_1_8.toString()
 
 allprojects {
 
@@ -48,7 +51,11 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.multiplatform")
 
     repositories {
-        mavenLocal()
+        mavenLocal {
+            content{
+                includeGroupByRegex("net\\.akehurst.+")
+            }
+        }
         mavenCentral()
     }
 
@@ -68,12 +75,16 @@ subprojects {
         jvm("jvm8") {
             val main by compilations.getting {
                 kotlinOptions {
-                    jvmTarget = JavaVersion.VERSION_1_8.toString()
+                    languageVersion = kotlin_languageVersion
+                    apiVersion = kotlin_apiVersion
+                    jvmTarget = jvmTargetVersion
                 }
             }
             val test by compilations.getting {
                 kotlinOptions {
-                    jvmTarget = JavaVersion.VERSION_1_8.toString()
+                    languageVersion = kotlin_languageVersion
+                    apiVersion = kotlin_apiVersion
+                    jvmTarget = jvmTargetVersion
                 }
             }
         }

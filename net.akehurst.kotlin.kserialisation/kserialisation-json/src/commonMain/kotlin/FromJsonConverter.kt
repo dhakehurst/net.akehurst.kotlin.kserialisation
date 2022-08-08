@@ -137,7 +137,7 @@ class FromJsonConverter(
                 }
                 JsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json)
                 JsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json)
-                JsonDocument.ComplexObjectKind.ENUM -> convertObject2Enum(path, json)
+                JsonDocument.ComplexObjectKind.ENUM -> convertObject2Enum(path, json) ?: throw KSerialiserJsonException("Incorrect JSON, no enum value found for ${json.toFormattedJsonString("","")}")
                 else -> {
                     convertObject2Object(path, json)
                 }
@@ -155,7 +155,7 @@ class FromJsonConverter(
 
     }
 
-    private fun convertObject2Enum(path: List<String>, json: JsonObject): Enum<*> {
+    private fun convertObject2Enum(path: List<String>, json: JsonObject): Enum<*>? {
         val clsName = json.property[JsonDocument.CLASS]!!.asString().value
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
