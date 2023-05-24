@@ -19,3 +19,9 @@ dependencies {
     "commonTestImplementation"(kotlin("reflect"))
     "commonTestImplementation"("net.akehurst.kotlin.komposite:komposite-processor:$version_komposite")
 }
+
+exportPublic {
+    exportPatterns.set(listOf(
+        "net.akehurst.kotlin.kserialisation.bytes.**",
+    ))
+}

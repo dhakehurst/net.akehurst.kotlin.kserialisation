@@ -19,14 +19,15 @@ import com.github.gmazzo.gradle.plugins.BuildConfigExtension
 import java.io.File
 
 plugins {
-    kotlin("multiplatform") version ("1.7.20-Beta") apply false
-    id("org.jetbrains.dokka") version ("1.7.10") apply false
+    kotlin("multiplatform") version ("1.9.0-Beta") apply false
+    id("org.jetbrains.dokka") version ("1.8.10") apply false
     id("com.github.gmazzo.buildconfig") version("3.1.0") apply false
     id("nu.studer.credentials") version ("3.0")
+    id("net.akehurst.kotlin.gradle.plugin.exportPublic") version("1.9.0-Beta") apply false
 }
-val kotlin_languageVersion = "1.7"
-val kotlin_apiVersion:String = "1.7"
-val jvmTargetVersion = JavaVersion.VERSION_1_8.toString()
+val kotlin_languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8
+val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8
+val jvmTargetVersion = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
 
 allprojects {
 
@@ -49,6 +50,7 @@ subprojects {
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "com.github.gmazzo.buildconfig")
     apply(plugin = "org.jetbrains.kotlin.multiplatform")
+    apply(plugin = "net.akehurst.kotlin.gradle.plugin.exportPublic")
 
     repositories {
         mavenLocal {
@@ -74,17 +76,17 @@ subprojects {
     configure<KotlinMultiplatformExtension> {
         jvm("jvm8") {
             val main by compilations.getting {
-                kotlinOptions {
-                    languageVersion = kotlin_languageVersion
-                    apiVersion = kotlin_apiVersion
-                    jvmTarget = jvmTargetVersion
+                compilerOptions.configure {
+                    languageVersion.set(kotlin_languageVersion)
+                    apiVersion.set(kotlin_apiVersion)
+                    jvmTarget.set(jvmTargetVersion)
                 }
             }
             val test by compilations.getting {
-                kotlinOptions {
-                    languageVersion = kotlin_languageVersion
-                    apiVersion = kotlin_apiVersion
-                    jvmTarget = jvmTargetVersion
+                compilerOptions.configure {
+                    languageVersion.set(kotlin_languageVersion)
+                    apiVersion.set(kotlin_apiVersion)
+                    jvmTarget.set(jvmTargetVersion)
                 }
             }
         }
@@ -98,6 +100,12 @@ subprojects {
     dependencies {
         "commonTestImplementation"(kotlin("test"))
         "commonTestImplementation"(kotlin("test-annotations-common"))
+    }
+
+    configure<SigningExtension> {
+        useGpgCmd()
+        val publishing = project.properties["publishing"] as PublishingExtension
+        sign(publishing.publications)
     }
 
 }

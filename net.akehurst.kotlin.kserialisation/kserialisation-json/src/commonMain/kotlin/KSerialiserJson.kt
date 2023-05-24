@@ -33,7 +33,7 @@ class KSerialiserJson() {
 
     internal val reference_cache = mutableMapOf<Any, List<String>>()
 
-    internal val registry = DatatypeRegistry()
+    val registry = DatatypeRegistry()
 
     class FoundReferenceException : RuntimeException {
         constructor() : super()

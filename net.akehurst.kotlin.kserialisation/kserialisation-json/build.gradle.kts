@@ -17,3 +17,9 @@ dependencies {
 
     commonTestImplementation ("com.soywiz.korlibs.klock:klock:${version_klock}")
 }
+
+exportPublic {
+    exportPatterns.set(listOf(
+        "net.akehurst.kotlin.kserialisation.json.**",
+    ))
+}

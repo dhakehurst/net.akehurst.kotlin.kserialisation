@@ -23,3 +23,9 @@ dependencies {
     commonTestImplementation("net.akehurst.language:agl-processor:${version_agl}")
 
 }
+
+exportPublic {
+    exportPatterns.set(listOf(
+        "net.akehurst.kotlin.kserialisation.hjson.**",
+    ))
+}

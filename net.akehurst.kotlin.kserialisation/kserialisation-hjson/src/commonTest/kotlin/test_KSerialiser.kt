@@ -16,7 +16,8 @@
 
 package net.akehurst.kotlin.kserialisation.hjson
 
-import com.soywiz.klock.DateTime
+
+import korlibs.time.DateTime
 import net.akehurst.hjson.*
 import net.akehurst.kotlinx.reflect.KotlinxReflect
 import kotlin.test.BeforeTest
@@ -77,7 +78,7 @@ class test_KSerialiser {
         this.sut.registerKotlinStdPrimitives()
         this.sut.registerPrimitiveAsObject(DateTime::class, //
                 { value -> HJsonNumber(value.unixMillisDouble.toString()) }, //
-                { json -> DateTime.fromUnix(json.asNumber().toDouble()) }
+                { json -> DateTime.fromUnixMillis(json.asNumber().toDouble()) }
         )
         KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.hjson.TestClassAAA",TestClassAAA::class)
     }
