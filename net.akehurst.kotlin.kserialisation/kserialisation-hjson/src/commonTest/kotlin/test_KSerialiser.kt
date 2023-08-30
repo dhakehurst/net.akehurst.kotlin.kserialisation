@@ -68,8 +68,8 @@ class test_KSerialiser {
             namespace net.akehurst.kotlin.kserialisation.hjson {
                 datatype TestClassAAA {
                     composite-val prop1 : String
-                    composite-var comp : A
-                    reference-var refr : A
+                    composite-var comp : TestClassAAA?
+                    reference-var refr : TestClassAAA?
                     composite-var prop2  : Int
                 }
             }

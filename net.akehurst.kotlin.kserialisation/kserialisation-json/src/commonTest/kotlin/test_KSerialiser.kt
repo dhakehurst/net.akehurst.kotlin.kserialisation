@@ -23,8 +23,6 @@ import net.akehurst.kotlin.kserialisation.json.test.TestClassAAA
 import net.akehurst.kotlin.kserialisation.json.test.TestEnumEEE
 import net.akehurst.kotlinx.reflect.EnumValuesFunction
 import net.akehurst.kotlinx.reflect.KotlinxReflect
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -113,7 +111,8 @@ internal class test_KSerialiser {
     @Test
     fun toJson_Byte_1() {
 
-        val root = 1.toByte()
+        val root:Any = 1.toByte()
+        println("class.simpleName: ${root::class.simpleName}")
         assertEquals("Byte", root::class.simpleName)
 
         val actual = this.sut.toJson(root, root)
