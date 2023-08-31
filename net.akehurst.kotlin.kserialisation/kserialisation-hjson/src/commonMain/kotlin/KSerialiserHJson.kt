@@ -79,16 +79,16 @@ class KSerialiserHJson() {
         }
     }
 
-    fun confgureFromKompositeString(kompositeModel: String) {
+    fun configureFromKompositeString(kompositeModel: String) {
         //TODO: mappers!
         registry.registerFromConfigString(kompositeModel, emptyMap())
     }
-    fun confgureFromKompositeModel(kompositeModel: DatatypeModel) {
+
+    fun configureFromKompositeModel(kompositeModel: DatatypeModel) {
         //TODO: mappers!
         registry.registerFromKompositeModel(kompositeModel, emptyMap())
     }
 
-    @JsName("registerKotlinStdPrimitives")
     fun registerKotlinStdPrimitives() {
         this.registry.registerFromKompositeModel(DatatypeRegistry.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> HJsonBoolean(value) }, { json -> json.asBoolean().value })
@@ -101,14 +101,12 @@ class KSerialiserHJson() {
         this.registerPrimitive( String::class, { value ->  HJsonString(value) }, { json -> json.asString().value } )
     }
 
-    @JsName("registerPrimitive")
     fun <T : Any> registerPrimitive(cls: KClass<T>, toHJson: (value: T) -> HJsonValue, toPrimitive: (json: HJsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
         this.registry.registerPrimitiveMapper(PrimitiveMapper.create(cls, HJsonValue::class, toHJson, toPrimitive))
     }
 
-    @JsName("registerPrimitiveAsObject")
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toHJson: (value: P) -> HJsonValue, fromHJson: (json: HJsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
@@ -127,7 +125,6 @@ class KSerialiserHJson() {
         this.registry.registerPrimitiveMapper(mapper)
     }
 
-    @JsName("toHJson")
     fun toHJson(root: Any, data: Any): HJsonDocument {
         println("*** root = $root (${root::class}")
         this.reference_cache.clear()
@@ -239,12 +236,11 @@ class KSerialiserHJson() {
         return doc
     }
 
-    @JsName("toData")
-    fun <T : Any> toData(jsonString: String): T {
+    fun <T : Any> toData(jsonString: String, targetKlass: KClass<T>? = null): T {
         //TODO: use a bespoke written JSON parser, it will most likely be faster
         val json = HJson.process(jsonString)
         val conv = FromHJsonConverter(this.registry)
-        return conv.convertValue(emptyList(), json.root) as T
+        return conv.convertTo(emptyList(), json.root, targetKlass) as T
     }
 
 

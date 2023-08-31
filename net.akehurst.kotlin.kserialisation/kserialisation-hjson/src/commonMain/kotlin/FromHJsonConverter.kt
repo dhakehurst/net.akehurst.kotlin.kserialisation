@@ -18,34 +18,42 @@ package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
+import net.akehurst.kotlin.komposite.api.TypeDeclaration
 import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.construct
 import net.akehurst.kotlin.komposite.common.set
+import kotlin.reflect.KClass
 
 
 class FromHJsonConverter(
-        val registry: DatatypeRegistry
+    val registry: DatatypeRegistry
 ) {
 
     private val resolvedReference = mutableMapOf<List<String>, Any>()
 
-    fun convertValue(path: List<String>, json: HJsonValue): Any? {
-        return when (json) {
+    fun <T : Any> convertTo(path: List<String>, hjson: HJsonValue, targetKlass: KClass<T>? = null): T? {
+        val targetType = targetKlass?.let { registry.findTypeDeclarationByClass(it) }
+        return convertValue(path, hjson, targetType) as T?
+    }
+
+    private fun convertValue(path: List<String>, hjson: HJsonValue, targetType: TypeDeclaration?): Any? {
+        return when (hjson) {
             is HJsonNull -> null
-            is HJsonString -> convertPrimitive(json, "String")
+            is HJsonString -> convertPrimitive(hjson, "String")
             is HJsonNumber -> throw KSerialiserHJsonException("HJsonNumber cannot be converted, not enough type information, please register a primitiveAsObject converter")
-            is HJsonBoolean -> convertPrimitive(json, "Boolean")
-            is HJsonArray -> convertList(path, json).toTypedArray()
-            is HJsonObject -> convertObject(path, json)
-            is HJsonReference -> convertReference(path, json)
-            else -> throw KSerialiserHJsonException("Cannot convert $json")
+            is HJsonBoolean -> convertPrimitive(hjson, "Boolean")
+            is HJsonArray -> convertList(path, hjson).toTypedArray()
+            is HJsonObject -> convertObject(path, hjson, targetType)
+            is HJsonReference -> convertReference(path, hjson)
+            else -> throw KSerialiserHJsonException("Cannot convert $hjson")
         }
     }
 
     private fun convertPrimitive(json: HJsonValue, typeName: String): Any {
         //val dt = this.registry.findPrimitiveByName(typeName) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
-       // val func = this.primitiveFromHJson[dt] ?: throw KSerialiserHJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
-        val mapper = this.registry.findPrimitiveMapperFor(typeName) ?: throw KSerialiserHJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
+        // val func = this.primitiveFromHJson[dt] ?: throw KSerialiserHJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
+        val mapper = this.registry.findPrimitiveMapperFor(typeName)
+            ?: throw KSerialiserHJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
         return (mapper as PrimitiveMapper<Any, HJsonValue>).toPrimitive(json)
     }
 
@@ -69,6 +77,7 @@ class FromHJsonConverter(
                                 throw KSerialiserHJsonException("Path error in reference")
                             }
                         }
+
                         HJsonDocument.SET -> {
                             if (null != index) {
                                 root.property[HJsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)
@@ -76,16 +85,20 @@ class FromHJsonConverter(
                                 throw KSerialiserHJsonException("Path error in reference")
                             }
                         }
+
                         HJsonDocument.MAP -> {
                             if (null != index) {
-                                root.property[HJsonDocument.ENTRIES]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(HJsonDocument.VALUE)
+                                root.property[HJsonDocument.ENTRIES]?.asArray()?.elements?.get(index)
+                                    ?.asObject()?.property?.get(HJsonDocument.VALUE)
                             } else {
                                 throw KSerialiserHJsonException("Path error in reference")
                             }
                         }
+
                         else -> throw KSerialiserHJsonException("findByReference doesn't know what to do with a ${type}")
                     }
                 }
+
                 else -> null
             }
             if (null == json) {
@@ -107,36 +120,44 @@ class FromHJsonConverter(
             resolvedReference[json.refPath]
         } else {
             val resolved = json.target
-            convertValue(json.refPath, resolved)
+            convertValue(json.refPath, resolved, null)
         }
     }
 
-    private fun convertObject(path: List<String>, json: HJsonObject): Any {
+    private fun convertObject(path: List<String>, json: HJsonObject, targetType: TypeDeclaration?): Any {
         return if (resolvedReference.containsKey(path)) {
             resolvedReference[path]!!
         } else {
             val type = json.property[HJsonDocument.TYPE]
             when (type) {
                 HJsonDocument.ARRAY -> {
-                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
+                    val elements = json.property[HJsonDocument.ELEMENTS]
+                        ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray()).toTypedArray()
                 }
+
                 HJsonDocument.LIST -> {
-                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
+                    val elements = json.property[HJsonDocument.ELEMENTS]
+                        ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray())
                 }
+
                 HJsonDocument.SET -> {
-                    val elements = json.property[HJsonDocument.ELEMENTS] ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
+                    val elements = json.property[HJsonDocument.ELEMENTS]
+                        ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ELEMENTS} property found")
                     convertList(path, elements.asArray()).toSet()
                 }
+
                 HJsonDocument.MAP -> {
-                    val elements = json.property[HJsonDocument.ENTRIES] ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ENTRIES} property found")
+                    val elements = json.property[HJsonDocument.ENTRIES]
+                        ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.ENTRIES} property found")
                     convertMap(path, elements.asArray())
                 }
-                HJsonDocument.OBJECT -> convertObject2Object(path, json)
+
+                HJsonDocument.OBJECT -> convertObject2Object(path, json, targetType)
                 HJsonDocument.PRIMITIVE -> convertObject2Primitive(path, json)
                 else -> {
-                    convertObject2Object(path, json)
+                    convertObject2Object(path, json, targetType)
                 }
             }
         }
@@ -150,13 +171,16 @@ class FromHJsonConverter(
         //val dt = this.registry.findPrimitiveByName(sn) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
         //val func = this.primitiveFromHJson[dt] ?: throw KSerialiserHJsonException("Do not know how to convert ${sn} from json, did you register its converter")
         //return func(json)
-        val mapper = this.registry.findPrimitiveMapperFor(sn) ?: throw KSerialiserHJsonException("Do not know how to convert ${sn} from json, did you register its converter")
+        val mapper = this.registry.findPrimitiveMapperFor(sn)
+            ?: throw KSerialiserHJsonException("Do not know how to convert ${sn} from json, did you register its converter")
         return (mapper as PrimitiveMapper<Any, HJsonObject>).toPrimitive(json)
 
     }
 
-    private fun convertObject2Object(path: List<String>, json: HJsonObject): Any {
-        val clsName = json.property[HJsonDocument.CLASS]!!.asString().value
+    private fun convertObject2Object(path: List<String>, json: HJsonObject, targetType: TypeDeclaration?): Any {
+        val clsName = json.property[HJsonDocument.CLASS]?.asString()?.value
+            ?: targetType?.qualifiedName
+            ?: error("Cannot determine target type for HJson object")
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
         //TODO: use ns
@@ -169,7 +193,8 @@ class FromHJsonConverter(
                 if (null == jsonPropValue) {
                     null
                 } else {
-                    val v = this.convertValue(path + it.name, jsonPropValue)
+                    val propDt = it.propertyType.declaration
+                    val v = this.convertValue(path + it.name, jsonPropValue, propDt)
                     v
                 }
             }
@@ -182,7 +207,8 @@ class FromHJsonConverter(
             dt.explicitNonIdentityProperties.forEach {
                 val jsonPropValue = json.property[it.name]
                 if (null != jsonPropValue) {
-                    val value = this.convertValue(path + it.name, jsonPropValue)
+                    val propDt = it.propertyType.declaration
+                    val value = this.convertValue(path + it.name, jsonPropValue, propDt)
                     it.set(obj, value)
                 }
             }
@@ -192,7 +218,7 @@ class FromHJsonConverter(
 
     private fun convertList(path: List<String>, json: HJsonArray): List<*> {
         return json.elements.mapIndexed { index, it ->
-            this.convertValue(path + "$index", it)
+            this.convertValue(path + "$index", it, null)
         }
     }
 
@@ -202,8 +228,8 @@ class FromHJsonConverter(
             val jValue = jme.asObject().property[HJsonDocument.VALUE]!!
             val pathk = path + "key" //TODO: this is not correct
             val pathv = path + "${index}"
-            val key = this.convertValue(pathk, jKey)
-            val value = this.convertValue(pathv, jValue)
+            val key = this.convertValue(pathk, jKey, null)
+            val value = this.convertValue(pathv, jValue, null)
             Pair(key, value)
         }.associate { it }
     }

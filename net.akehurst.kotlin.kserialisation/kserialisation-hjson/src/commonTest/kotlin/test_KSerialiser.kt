@@ -61,7 +61,7 @@ class test_KSerialiser {
 
     @BeforeTest
     fun setup() {
-        this.sut.confgureFromKompositeString("""
+        this.sut.configureFromKompositeString("""
             namespace com.soywiz.klock {
               primitive DateTime
             }
@@ -100,7 +100,7 @@ class test_KSerialiser {
 
         val root = HJsonBoolean(true).toHJsonString("","")
 
-        val actual:Boolean = this.sut.toData(root)
+        val actual:Boolean = this.sut.toData(root, Boolean::class)
 
         val expected = true
 
@@ -124,7 +124,7 @@ class test_KSerialiser {
 
         val root = HJsonBoolean(false).toHJsonString("","")
 
-        val actual:Boolean = this.sut.toData(root)
+        val actual:Boolean = this.sut.toData(root, Boolean::class)
 
         val expected = false
 
@@ -163,7 +163,7 @@ class test_KSerialiser {
             primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
 
-        val actual:Byte = this.sut.toData(root)
+        val actual:Byte = this.sut.toData(root, Byte::class)
 
         val expected = 1.toByte()
 
@@ -193,7 +193,7 @@ class test_KSerialiser {
             primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
 
-        val actual:Int = this.sut.toData(root)
+        val actual:Int = this.sut.toData(root, Int::class)
 
         val expected = 1.toInt()
 
@@ -224,7 +224,7 @@ class test_KSerialiser {
             primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
 
-        val actual:Long = this.sut.toData(root)
+        val actual:Long = this.sut.toData(root, Long::class)
 
         val expected = 1.toLong()
 
@@ -248,7 +248,7 @@ class test_KSerialiser {
 
         val root = "\"hello\""
 
-        val actual:String = this.sut.toData(root)
+        val actual:String = this.sut.toData(root, String::class)
 
         val expected = "hello"
 
@@ -272,7 +272,7 @@ class test_KSerialiser {
 
         val root = "\"hello \\\"world!\\\"\""
 
-        val actual:String = this.sut.toData(root)
+        val actual:String = this.sut.toData(root, String::class)
 
         val expected = "hello \"world!\""
 
@@ -299,7 +299,7 @@ class test_KSerialiser {
 
         val root = "'''hello\nworld!'''"
 
-        val actual:String = this.sut.toData(root)
+        val actual:String = this.sut.toData(root, String::class)
 
         val expected = """
             hello
@@ -335,7 +335,7 @@ class test_KSerialiser {
             primitiveObject(dt.qualifiedName, now.unixMillisDouble)
         }.toHJsonString()
 
-        val actual:DateTime = this.sut.toData(root)
+        val actual:DateTime = this.sut.toData(root, DateTime::class)
 
         val expected = now
 
@@ -366,7 +366,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual = this.sut.toData(root) as Array<Any>
+        val actual = this.sut.toData(root, Array::class) as Array<Any>
 
         val expected = emptyArray<Int>()
 
@@ -402,7 +402,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual = this.sut.toData(root) as Array<Any>
+        val actual = this.sut.toData(root, Array::class) as Array<Any>
 
         val expected = arrayOf(1, true, "hello")
 
@@ -439,7 +439,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual:List<Any> = this.sut.toData(root)
+        val actual:List<Any> = this.sut.toData(root, List::class) as List<Any>
 
         val expected = listOf(1, true, "hello")
 
@@ -476,7 +476,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual:Set<Any> = this.sut.toData(root)
+        val actual:Set<Any> = this.sut.toData(root, Set::class) as Set<Any>
 
         val expected = setOf(1, true, "hello")
 
@@ -512,7 +512,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual:Map<String,Any> = this.sut.toData(root)
+        val actual:Map<String,Any> = this.sut.toData(root, Map::class) as Map<String, Any>
 
         val expected = mapOf("a" to 1, "b" to true, "c" to "hello")
 
@@ -556,7 +556,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual:TestClassAAA = this.sut.toData(json)
+        val actual:TestClassAAA = this.sut.toData(json, TestClassAAA::class)
 
         val expected = TestClassAAA("hello")
 
@@ -612,7 +612,7 @@ class test_KSerialiser {
                         property("prop1", "1.3")
                         property("prop3", null)
                         property("refr") {
-                            reference("/")
+                            reference("#/")
                         }
                         property("prop2") {
                             primitiveObject("kotlin.Int", -1)
@@ -626,7 +626,7 @@ class test_KSerialiser {
             }
         }.toHJsonString()
 
-        val actual:TestClassAAA = this.sut.toData(json)
+        val actual:TestClassAAA = this.sut.toData(json, TestClassAAA::class)
 
         val expected = TestClassAAA("1: hello")
         expected.setProp2(5)
