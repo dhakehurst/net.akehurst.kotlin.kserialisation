@@ -249,11 +249,11 @@ class KSerialiserJson() {
         return doc
     }
 
-    fun <T : Any> toData(jsonString: String): T {
+    fun <T : Any> toData(jsonString: String, targetKlass: KClass<T>? = null): T {
         //TODO: use a bespoke written JSON parser, it will most likely be faster
         val json = Json.process(jsonString)
         val conv = FromJsonConverter(this.registry)
-        return conv.convertValue(emptyList(), json.root) as T
+        return conv.convertTo(emptyList(), json.root, targetKlass) as T
     }
 
 }

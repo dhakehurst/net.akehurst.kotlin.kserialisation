@@ -18,10 +18,12 @@ package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.json.*
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
+import net.akehurst.kotlin.komposite.api.TypeInstance
 import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.construct
 import net.akehurst.kotlin.komposite.common.set
 import net.akehurst.kotlin.komposite.common.valueOf
+import kotlin.reflect.KClass
 
 
 class FromJsonConverter(
@@ -30,22 +32,45 @@ class FromJsonConverter(
 
     private val resolvedReference = mutableMapOf<List<String>, Any>()
 
-    fun convertValue(path: List<String>, json: JsonValue): Any? {
+    fun <T : Any> convertTo(path: List<String>, json: JsonValue, targetKlass: KClass<T>? = null): T? {
+        val targetType = targetKlass?.let { registry.findTypeDeclarationByClass(it) }
+        val type = targetType?.instance()
+        return convertValue(path, json, type) as T?
+    }
+
+   private fun convertValue(path: List<String>, json: JsonValue, targetType: TypeInstance?): Any? {
         return when (json) {
             is JsonNull -> null
             is JsonString -> convertPrimitive(json, "String")
-            is JsonNumber -> throw KSerialiserJsonException("JsonNumber cannot be converted, not enough type information, please register a primitiveAsObject converter")
+            is JsonNumber -> convertNumber(json, targetType)
             is JsonBoolean -> convertPrimitive(json, "Boolean")
-            is JsonArray -> convertList(path, json).toTypedArray()
-            is JsonObject -> convertObject(path, json)
+            is JsonArray -> convertList(path, json, targetType).toTypedArray()
+            is JsonObject -> convertObject(path, json, targetType)
             is JsonReference -> convertReference(path, json)
             else -> throw KSerialiserJsonException("Cannot convert $json")
         }
     }
 
+    private fun convertNumber(json: JsonNumber, targetType: TypeInstance?): Any {
+        return when {
+            null != targetType && targetType.declaration.isPrimitive -> when (targetType.declaration.name) {
+                "Int" -> json.toInt()
+                "Double" -> json.toDouble()
+                "Long" -> json.toLong()
+                "Float" -> json.toFloat()
+                "Byte" -> json.toByte()
+                "Short" -> json.toShort()
+                else -> error("HJsonNumber cannot be converted, not a std type, please use a primitiveAsObject converter")
+            }
+
+            else -> json.toDouble()
+            //else -> error("HJsonNumber cannot be converted, not enough type information, please register a primitiveAsObject converter")
+        }
+    }
+
     private fun convertPrimitive(json: JsonValue, typeName: String): Any {
-        val mapper =
-            this.registry.findPrimitiveMapperFor(typeName) ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
+        val mapper = this.registry.findPrimitiveMapperFor(typeName)
+                ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
         return (mapper as PrimitiveMapper<Any, JsonValue>).toPrimitive(json)
     }
 
@@ -70,6 +95,7 @@ class FromJsonConverter(
                                 throw KSerialiserJsonException("Path error in reference")
                             }
                         }
+
                         JsonDocument.ComplexObjectKind.SET -> {
                             if (null != index) {
                                 json.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)
@@ -77,6 +103,7 @@ class FromJsonConverter(
                                 throw KSerialiserJsonException("Path error in reference")
                             }
                         }
+
                         JsonDocument.ComplexObjectKind.MAP -> {
                             if (null != index) {
                                 json.property[JsonDocument.ENTRIES]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(JsonDocument.VALUE)
@@ -84,9 +111,11 @@ class FromJsonConverter(
                                 throw KSerialiserJsonException("Path error in reference")
                             }
                         }
+
                         else -> throw KSerialiserJsonException("findByReference doesn't know what to do with a ${type}")
                     }
                 }
+
                 else -> null
             }
             if (null == json) {
@@ -108,11 +137,11 @@ class FromJsonConverter(
             resolvedReference[json.refPath]
         } else {
             val resolved = json.target
-            convertValue(json.refPath, resolved)
+            convertValue(json.refPath, resolved, null)
         }
     }
 
-    private fun convertObject(path: List<String>, json: JsonObject): Any {
+    private fun convertObject(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
         return if (resolvedReference.containsKey(path)) {
             resolvedReference[path]!!
         } else {
@@ -121,31 +150,35 @@ class FromJsonConverter(
             when (kind) {
                 JsonDocument.ComplexObjectKind.ARRAY -> {
                     val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ELEMENTS} property found")
-                    convertList(path, elements.asArray()).toTypedArray()
+                    convertList(path, elements.asArray(), targetType).toTypedArray()
                 }
+
                 JsonDocument.ComplexObjectKind.LIST -> {
                     val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ELEMENTS} property found")
-                    convertList(path, elements.asArray())
+                    convertList(path, elements.asArray(), targetType)
                 }
+
                 JsonDocument.ComplexObjectKind.SET -> {
                     val elements = json.property[JsonDocument.ELEMENTS] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ELEMENTS} property found")
-                    convertList(path, elements.asArray()).toSet()
+                    convertList(path, elements.asArray(), targetType).toSet()
                 }
+
                 JsonDocument.ComplexObjectKind.MAP -> {
                     val elements = json.property[JsonDocument.ENTRIES] ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.ENTRIES} property found")
-                    convertMap(path, elements.asArray())
+                    convertMap(path, elements.asArray(), targetType)
                 }
-                JsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json)
-                JsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json)
-                JsonDocument.ComplexObjectKind.ENUM -> convertObject2Enum(path, json) ?: throw KSerialiserJsonException("Incorrect JSON, no enum value found for ${json.toFormattedJsonString("","")}")
+
+                JsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json, targetType)
+                JsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json, targetType)
+                JsonDocument.ComplexObjectKind.ENUM -> convertObject2Enum(path, json) ?: throw KSerialiserJsonException("Incorrect JSON, no enum value found for ${json.toFormattedJsonString("", "")}")
                 else -> {
-                    convertObject2Object(path, json)
+                    convertObject2Object(path, json, targetType)
                 }
             }
         }
     }
 
-    private fun convertObject2Primitive(path: List<String>, json: JsonObject): Any {
+    private fun convertObject2Primitive(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
         val clsName = json.property[JsonDocument.CLASS]!!.asString().value
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
@@ -165,9 +198,10 @@ class FromJsonConverter(
         return et.valueOf(value)
     }
 
-
-    private fun convertObject2Object(path: List<String>, json: JsonObject): Any {
-        val clsName = json.property[JsonDocument.CLASS]!!.asString().value
+    private fun convertObject2Object(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
+        val clsName = json.property[JsonDocument.CLASS]?.asString()?.value
+            ?: targetType?.declaration?.qualifiedName
+            ?: error("Cannot determine target type for Json object")
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
         //TODO: use ns
@@ -180,7 +214,8 @@ class FromJsonConverter(
                 if (null == jsonPropValue) {
                     null
                 } else {
-                    val v = this.convertValue(path + it.name, jsonPropValue)
+                    val propType = it.propertyType
+                    val v = this.convertValue(path + it.name, jsonPropValue, propType)
                     v
                 }
             }
@@ -193,7 +228,8 @@ class FromJsonConverter(
             dt.allExplicitNonIdentityProperties.forEach {
                 val jsonPropValue = json.property[it.name]
                 if (null != jsonPropValue) {
-                    val value = this.convertValue(path + it.name, jsonPropValue)
+                    val propType = it.propertyType
+                    val value = this.convertValue(path + it.name, jsonPropValue, propType)
                     it.set(obj, value)
                 }
             }
@@ -201,14 +237,15 @@ class FromJsonConverter(
         }
     }
 
-    private fun convertList(path: List<String>, json: JsonArray): List<*> {
+    private fun convertList(path: List<String>, json: JsonArray, targetType: TypeInstance?): List<*> {
+        val elementType = targetType?.arguments?.firstOrNull()
         val path_elements = path + JsonDocument.ELEMENTS
         return json.elements.mapIndexed { index, it ->
-            this.convertValue(path_elements + "$index", it)
+            this.convertValue(path_elements + "$index", it, elementType)
         }
     }
 
-    private fun convertMap(path: List<String>, json: JsonArray): Map<*, *> {
+    private fun convertMap(path: List<String>, json: JsonArray, targetType: TypeInstance?): Map<*, *> {
         val path_elements = path + JsonDocument.ENTRIES
         return json.elements.mapIndexed { index, jme ->
             val path_entry = path_elements + "${index}"
@@ -216,8 +253,8 @@ class FromJsonConverter(
             val jValue = jme.asObject().property[JsonDocument.VALUE]!!
             val pathk = path_entry + JsonDocument.KEY
             val pathv = path_entry + JsonDocument.VALUE
-            val key = this.convertValue(pathk, jKey)
-            val value = this.convertValue(pathv, jValue)
+            val key = this.convertValue(pathk, jKey, null)
+            val value = this.convertValue(pathv, jValue, null)
             Pair(key, value)
         }.associate { it }
     }

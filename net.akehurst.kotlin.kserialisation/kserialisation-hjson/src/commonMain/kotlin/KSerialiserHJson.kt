@@ -44,7 +44,7 @@ class KSerialiserHJson() {
         return if (reference_cache.containsKey(targetValue)) {
             reference_cache[targetValue]!!
         } else {
-            var resultPath:List<String>? = null //TODO: terminate walking early if result found
+            var resultPath: List<String>? = null //TODO: terminate walking early if result found
             val walker = kompositeWalker<List<String>, Boolean>(registry) {
                 collBegin { path, info, type, coll ->
                     WalkInfo(info.up, info.acc)
@@ -72,7 +72,7 @@ class KSerialiserHJson() {
 
             try {
                 val result = walker.walk(WalkInfo(emptyList(), false), root)
-            } catch (e:FoundReferenceException) {
+            } catch (e: FoundReferenceException) {
 
             }
             resultPath ?: listOf("${'$'}unknown ${targetValue::class.simpleName}")
@@ -98,7 +98,7 @@ class KSerialiserHJson() {
         this.registerPrimitiveAsObject(Long::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toLong() })
         this.registerPrimitiveAsObject(Float::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toFloat() })
         this.registerPrimitiveAsObject(Double::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toDouble() })
-        this.registerPrimitive( String::class, { value ->  HJsonString(value) }, { json -> json.asString().value } )
+        this.registerPrimitive(String::class, { value -> HJsonString(value) }, { json -> json.asString().value })
     }
 
     fun <T : Any> registerPrimitive(cls: KClass<T>, toHJson: (value: T) -> HJsonValue, toPrimitive: (json: HJsonValue) -> T) {
@@ -110,18 +110,24 @@ class KSerialiserHJson() {
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toHJson: (value: P) -> HJsonValue, fromHJson: (json: HJsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
-        val toHJson = { value: P ->
+        val toHJsonObj = { value: P ->
             val obj = HJsonUnreferencableObject()
             obj.setProperty(HJsonDocument.TYPE, HJsonDocument.PRIMITIVE)
             obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName))
-            obj.setProperty(HJsonDocument.VALUE,toHJson(value))
+            obj.setProperty(HJsonDocument.VALUE, toHJson(value))
             obj
         }
-        val toPrimitive = { json:HJsonObject ->
-            val jsonValue = json.property[HJsonDocument.VALUE]!!
-            fromHJson(jsonValue)
+        val toPrimitive = { hjson: HJsonValue ->
+            when (hjson) {
+                is HJsonObject -> {
+                    val value = hjson.property[HJsonDocument.VALUE]!!
+                    fromHJson(value)
+                }
+
+                else -> fromHJson(hjson)
+            }
         }
-        val mapper = PrimitiveMapper.create(cls, HJsonObject::class, toHJson, toPrimitive)
+        val mapper = PrimitiveMapper.create(cls, HJsonObject::class, toHJsonObj, toPrimitive)
         this.registry.registerPrimitiveMapper(mapper)
     }
 
@@ -149,7 +155,7 @@ class KSerialiserHJson() {
             }
             reference { path, info, value, property ->
                 val refPath = calcReferencePath(root, value)
-                val ref = HJsonReference(doc,refPath)
+                val ref = HJsonReference(doc, refPath)
                 WalkInfo(path, ref)
             }
             collBegin { path, info, type, coll ->
