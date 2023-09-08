@@ -56,7 +56,6 @@ internal class TestClassAAA(
 
 class test_KSerialiser {
 
-
     val sut = KSerialiserHJson()
 
     @BeforeTest
@@ -66,6 +65,8 @@ class test_KSerialiser {
               primitive DateTime
             }
             namespace net.akehurst.kotlin.kserialisation.hjson {
+                import kotlin
+            
                 datatype TestClassAAA {
                     composite-val prop1 : String
                     composite-var comp : TestClassAAA?
@@ -81,6 +82,7 @@ class test_KSerialiser {
                 { json -> DateTime.fromUnixMillis(json.asNumber().toDouble()) }
         )
         KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.hjson.TestClassAAA",TestClassAAA::class)
+        this.sut.registry.resolveImports()
     }
 
     @Test
@@ -135,7 +137,7 @@ class test_KSerialiser {
     fun toHJson_Byte_1() {
 
         assertEquals("Byte", Byte::class.simpleName)
-        assertEquals("kotlin.Byte", sut.registry.findPrimitiveByClass(Byte::class)?.qualifiedName)
+        assertEquals("kotlin.Byte", sut.registry.findTypeDeclarationByKClass(Byte::class)?.qualifiedName)
 
         val root:Byte = 1.toByte()
         assertEquals("Byte", root::class.simpleName)
@@ -145,7 +147,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toHJson(root, root)
 
-        val dt = sut.registry.findPrimitiveByName("Byte")!!
+        val dt = sut.registry.findFirstByNameOrNull("Byte")!!
         assertEquals("Byte", dt.name)
 
         val expected = hjson("expected") {
@@ -158,7 +160,7 @@ class test_KSerialiser {
     @Test
     fun toData_Byte_1() {
 
-        val dt = sut.registry.findPrimitiveByName("Byte")!!
+        val dt = sut.registry.findFirstByNameOrNull("Byte")!!
         val root = hjson("expected") {
             primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
@@ -177,7 +179,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toHJson(root, root)
 
-        val dt = sut.registry.findPrimitiveByName("Int")!!
+        val dt = sut.registry.findFirstByNameOrNull("Int")!!
         val expected = hjson("expected") {
             primitiveObject(dt.qualifiedName, root)
         }.toHJsonString()
@@ -188,7 +190,7 @@ class test_KSerialiser {
     @Test
     fun toData_Int_1() {
 
-        val dt = sut.registry.findPrimitiveByName("Int")!!
+        val dt = sut.registry.findFirstByNameOrNull("Int")!!
         val root = hjson("expected") {
             primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
@@ -207,7 +209,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toHJson(root, root)
 
-        val dt = sut.registry.findPrimitiveByName("Long")!!
+        val dt = sut.registry.findFirstByNameOrNull("Long")!!
         val expected = hjson("expected") {
             primitiveObject(dt.qualifiedName, root)
         }.toHJsonString()
@@ -219,7 +221,7 @@ class test_KSerialiser {
     @Test
     fun toData_Long_1() {
 
-        val dt = sut.registry.findPrimitiveByName("Long")!!
+        val dt = sut.registry.findFirstByNameOrNull("Long")!!
         val root = hjson("expected") {
             primitiveObject(dt.qualifiedName, 1)
         }.toHJsonString()
@@ -317,7 +319,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toHJson(root, root)
 
-        val dt = sut.registry.findPrimitiveByName("DateTime")!!
+        val dt = sut.registry.findFirstByNameOrNull("DateTime")!!
 
         val expected = hjson("expected") {
             primitiveObject(dt.qualifiedName, now.unixMillisDouble)
@@ -330,7 +332,7 @@ class test_KSerialiser {
     fun toData_DateTime() {
 
         val now = DateTime.now()
-        val dt = sut.registry.findPrimitiveByName("DateTime")!!
+        val dt = sut.registry.findFirstByNameOrNull("DateTime")!!
         val root = hjson("expected") {
             primitiveObject(dt.qualifiedName, now.unixMillisDouble)
         }.toHJsonString()
@@ -524,7 +526,7 @@ class test_KSerialiser {
 
         val root = TestClassAAA("1: hello")
         root.setProp2(5)
-        val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
+        val dtA = sut.registry.findFirstByNameOrNull("TestClassAAA")!!
 
         val actual = this.sut.toHJson(root, root)
 
@@ -545,7 +547,7 @@ class test_KSerialiser {
     @Test
     fun toData_A() {
 
-        val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
+        val dtA = sut.registry.findFirstByNameOrNull("TestClassAAA")!!
 
         val json = hjson("expected") {
             objectReferenceable(dtA.qualifiedName) {
@@ -570,7 +572,7 @@ class test_KSerialiser {
         root.setProp2(5)
         root.comp = TestClassAAA("1.3")
         root.comp?.refr = root
-        val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
+        val dtA = sut.registry.findFirstByNameOrNull("TestClassAAA")!!
 
         val actual = this.sut.toHJson(root, root)
 
@@ -602,7 +604,7 @@ class test_KSerialiser {
     @Test
     fun toData_A_2() {
 
-        val dtA = sut.registry.findDatatypeByName("TestClassAAA")!!
+        val dtA = sut.registry.findFirstByNameOrNull("TestClassAAA")!!
 
         val json = hjson("expected") {
             objectReferenceable(dtA.qualifiedName) {

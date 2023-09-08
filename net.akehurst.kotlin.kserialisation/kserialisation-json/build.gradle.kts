@@ -7,13 +7,10 @@ dependencies {
 
     commonMainApi("net.akehurst.kotlin.json:json:$version_json")
     commonMainApi("net.akehurst.kotlin.komposite:komposite-processor:$version_komposite")
-
-    commonMainImplementation("net.akehurst.kotlin.komposite:komposite-common:$version_komposite")
+    commonMainApi("net.akehurst.kotlin.komposite:komposite-common:$version_komposite")
 
     commonMainImplementation("net.akehurst.kotlinx:kotlinx-collections:$version_kotlinx")
     commonMainImplementation("net.akehurst.kotlinx:kotlinx-reflect:$version_kotlinx")
-    commonMainImplementation("net.akehurst.kotlin.json:json:$version_json")
-
 
     commonTestImplementation ("com.soywiz.korlibs.klock:klock:${version_klock}")
 }

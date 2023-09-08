@@ -17,13 +17,12 @@
 package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
-import net.akehurst.kotlin.komposite.api.DatatypeModel
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry
+import net.akehurst.kotlin.komposite.common.DatatypeRegistry2
 import net.akehurst.kotlin.komposite.common.WalkInfo
 import net.akehurst.kotlin.komposite.common.kompositeWalker
 import net.akehurst.kotlinx.collections.Stack
-import kotlin.js.JsName
+import net.akehurst.language.typemodel.api.TypeModel
 import kotlin.reflect.KClass
 
 class KSerialiserHJsonException : RuntimeException {
@@ -34,7 +33,7 @@ class KSerialiserHJson() {
 
     internal val reference_cache = mutableMapOf<Any, List<String>>()
 
-    val registry = DatatypeRegistry()
+    val registry = DatatypeRegistry2()
 
     class FoundReferenceException : RuntimeException {
         constructor() : super()
@@ -84,13 +83,13 @@ class KSerialiserHJson() {
         registry.registerFromConfigString(kompositeModel, emptyMap())
     }
 
-    fun configureFromKompositeModel(kompositeModel: DatatypeModel) {
+    fun configureFromKompositeModel(kompositeModel: TypeModel) {
         //TODO: mappers!
         registry.registerFromKompositeModel(kompositeModel, emptyMap())
     }
 
     fun registerKotlinStdPrimitives() {
-        this.registry.registerFromKompositeModel(DatatypeRegistry.KOTLIN_STD_MODEL, emptyMap())
+        this.registry.registerFromKompositeModel(DatatypeRegistry2.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> HJsonBoolean(value) }, { json -> json.asBoolean().value })
         this.registerPrimitiveAsObject(Byte::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
         this.registerPrimitiveAsObject(Short::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })
@@ -103,13 +102,13 @@ class KSerialiserHJson() {
 
     fun <T : Any> registerPrimitive(cls: KClass<T>, toHJson: (value: T) -> HJsonValue, toPrimitive: (json: HJsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
-        val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
+        val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
         this.registry.registerPrimitiveMapper(PrimitiveMapper.create(cls, HJsonValue::class, toHJson, toPrimitive))
     }
 
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toHJson: (value: P) -> HJsonValue, fromHJson: (json: HJsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
-        val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
+        val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
         val toHJsonObj = { value: P ->
             val obj = HJsonUnreferencableObject()
             obj.setProperty(HJsonDocument.TYPE, HJsonDocument.PRIMITIVE)
@@ -148,7 +147,7 @@ class KSerialiserHJson() {
             }
             primitive { path, info, primitive, mapper ->
                 //TODO: use qualified name when/IF JS reflection make it possible!
-                val dt = registry.findPrimitiveByName(primitive::class.simpleName!!) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
+                val dt = registry.findTypeDeclarationByKClass(primitive::class) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
                 println("*** found primitive ${primitive::class.simpleName!!} = $dt")
                 val json = (mapper as PrimitiveMapper<Any, HJsonValue>?)?.toRaw?.invoke(primitive) ?: throw KSerialiserHJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
                 WalkInfo(info.up, json)

@@ -17,12 +17,12 @@
 package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.json.*
-import net.akehurst.kotlin.komposite.api.DatatypeModel
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry
+import net.akehurst.kotlin.komposite.common.DatatypeRegistry2
 import net.akehurst.kotlin.komposite.common.WalkInfo
 import net.akehurst.kotlin.komposite.common.kompositeWalker
 import net.akehurst.kotlinx.collections.Stack
+import net.akehurst.language.typemodel.api.TypeModel
 import kotlin.reflect.KClass
 
 class KSerialiserJsonException : RuntimeException {
@@ -33,7 +33,7 @@ class KSerialiserJson() {
 
     internal val reference_cache = mutableMapOf<Any, List<String>>()
 
-    val registry = DatatypeRegistry()
+    val registry = DatatypeRegistry2()
 
     class FoundReferenceException : RuntimeException {
         constructor() : super()
@@ -82,13 +82,13 @@ class KSerialiserJson() {
         //TODO: mappers!
         registry.registerFromConfigString(kompositeModel, emptyMap())
     }
-    fun confgureFromKompositeModel(kompositeModel: DatatypeModel) {
+    fun confgureFromKompositeModel(kompositeModel: TypeModel) {
         //TODO: mappers!
         registry.registerFromKompositeModel(kompositeModel, emptyMap())
     }
 
     fun registerKotlinStdPrimitives() {
-        this.registry.registerFromKompositeModel(DatatypeRegistry.KOTLIN_STD_MODEL, emptyMap())
+        this.registry.registerFromKompositeModel(DatatypeRegistry2.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> JsonBoolean(value) }, { json -> json.asBoolean().value })
         this.registerPrimitiveAsObject(Byte::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
         this.registerPrimitiveAsObject(Short::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })
@@ -101,13 +101,13 @@ class KSerialiserJson() {
 
     fun <T : Any> registerPrimitive(cls: KClass<T>, toJson: (value: T) -> JsonValue, toPrimitive: (json: JsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
-        val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+        val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
         this.registry.registerPrimitiveMapper(PrimitiveMapper.create(cls, JsonValue::class, toJson, toPrimitive))
     }
 
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toJson: (value: P) -> JsonValue, fromJson: (json: JsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
-        val dt = this.registry.findPrimitiveByClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+        val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
         val toJsonMpr = { value: P ->
             val obj = JsonUnreferencableObject()
             obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.PRIMITIVE.asJsonString)
@@ -140,7 +140,7 @@ class KSerialiserJson() {
             primitive { path, info, primitive, mapper ->
                 //TODO: use qualified name when we can!
                 val clsName = primitive::class.simpleName!!
-                val dt = registry.findPrimitiveByName(clsName)
+                val dt = registry.findFirstByNameOrNull(clsName)
                     ?: throw KSerialiserJsonException("The primitive '${clsName}' is not defined in the Komposite configuration")
                 val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(primitive)
                     ?: throw KSerialiserJsonException("Do not know how to convert '${clsName}' to json, did you register its converter")
@@ -148,7 +148,7 @@ class KSerialiserJson() {
             }
             enum { path, info, enum ->
                 val clsName = enum::class.simpleName!!
-                val dt = registry.findEnumByName(clsName)
+                val dt = registry.findFirstByNameOrNull(clsName)
                     ?: throw KSerialiserJsonException("The enum '${clsName}' is not defined in the Komposite configuration")
                 val value = JsonString(enum.name)
 
