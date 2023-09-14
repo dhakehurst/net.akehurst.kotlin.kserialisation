@@ -225,7 +225,7 @@ class FromJsonConverter(
         resolvedReference[path] = obj
 
         // TODO: change this to enable nonExplicit properties, once JS reflection works
-        val memberProps = dt.property.values.filter {
+        val memberProps = dt.allProperty.values.filter {
             it.characteristics.any { it==PropertyCharacteristic.MEMBER }
         }
         memberProps.forEach {

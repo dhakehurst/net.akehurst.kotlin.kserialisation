@@ -108,4 +108,9 @@ subprojects {
         sign(publishing.publications)
     }
 
+
+    configurations.all {
+        // Check for updates every build
+        resolutionStrategy.cacheChangingModulesFor(0, "seconds")
+    }
 }
