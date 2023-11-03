@@ -35,7 +35,7 @@ internal class test_KSerialiser {
 
     @BeforeTest
     fun setup() {
-        this.sut.confgureFromKompositeString(
+        this.sut.configureFromKompositeString(
             """
             namespace korlibs.time {
               primitive DateTime

@@ -78,17 +78,17 @@ class KSerialiserJson() {
         }
     }
 
-    fun confgureFromKompositeString(kompositeModel: String) {
+    fun configureFromKompositeString(kompositeModel: String) {
         //TODO: mappers!
         registry.registerFromConfigString(kompositeModel, emptyMap())
     }
-    fun confgureFromKompositeModel(kompositeModel: TypeModel) {
+    fun configureFromTypeModel(typeModel: TypeModel) {
         //TODO: mappers!
-        registry.registerFromKompositeModel(kompositeModel, emptyMap())
+        registry.registerFromTypeModel(typeModel, emptyMap())
     }
 
     fun registerKotlinStdPrimitives() {
-        this.registry.registerFromKompositeModel(DatatypeRegistry2.KOTLIN_STD_MODEL, emptyMap())
+        this.registry.registerFromTypeModel(DatatypeRegistry2.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> JsonBoolean(value) }, { json -> json.asBoolean().value })
         this.registerPrimitiveAsObject(Byte::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
         this.registerPrimitiveAsObject(Short::class, { value -> JsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })

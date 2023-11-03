@@ -83,13 +83,13 @@ class KSerialiserHJson() {
         registry.registerFromConfigString(kompositeModel, emptyMap())
     }
 
-    fun configureFromKompositeModel(kompositeModel: TypeModel) {
+    fun configureFromTypeModel(kompositeModel: TypeModel) {
         //TODO: mappers!
-        registry.registerFromKompositeModel(kompositeModel, emptyMap())
+        registry.registerFromTypeModel(kompositeModel, emptyMap())
     }
 
     fun registerKotlinStdPrimitives() {
-        this.registry.registerFromKompositeModel(DatatypeRegistry2.KOTLIN_STD_MODEL, emptyMap())
+        this.registry.registerFromTypeModel(DatatypeRegistry2.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> HJsonBoolean(value) }, { json -> json.asBoolean().value })
         this.registerPrimitiveAsObject(Byte::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
         this.registerPrimitiveAsObject(Short::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })

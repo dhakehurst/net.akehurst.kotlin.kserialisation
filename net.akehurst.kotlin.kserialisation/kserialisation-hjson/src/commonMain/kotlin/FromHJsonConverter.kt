@@ -210,7 +210,7 @@ class FromHJsonConverter(
         if (null == dt) {
             throw KSerialiserHJsonException("")
         } else {
-            val constructorProps = dt.property.values.filter {
+            val constructorProps = dt.property.filter {
                 it.characteristics.any { it==PropertyCharacteristic.IDENTITY || it==PropertyCharacteristic.CONSTRUCTOR }
             }.sortedBy { it.index }
             val consArgs = constructorProps.map {

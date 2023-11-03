@@ -19,10 +19,13 @@ println("Gradle: ${GradleVersion.current()}")
 println("JVM: ${org.gradle.internal.jvm.Jvm.current()} '${org.gradle.internal.jvm.Jvm.current().javaHome}'")
 println("===============================================")
 
-
 pluginManagement {
     repositories {
-        mavenLocal()
+        mavenLocal {
+            content{
+                includeGroupByRegex("net\\.akehurst.+")
+            }
+        }
         gradlePluginPortal()
     }
 }

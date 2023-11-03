@@ -206,7 +206,7 @@ class FromJsonConverter(
         val sn = clsName.substringAfterLast(".")
         //TODO: use ns
         val dt = registry.findFirstByNameOrNull(sn) as DataType? ?: error("Cannot find datatype $clsName, is it in the registered Konfigurations")
-        val constructorProps = dt.property.values.filter {
+        val constructorProps = dt.property.filter {
             it.characteristics.any { it==PropertyCharacteristic.IDENTITY || it==PropertyCharacteristic.CONSTRUCTOR }
         }.sortedBy { it.index }
         val consArgs = constructorProps.map {
