@@ -18,10 +18,7 @@ package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.json.*
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry2
-import net.akehurst.kotlin.komposite.common.construct
-import net.akehurst.kotlin.komposite.common.set
-import net.akehurst.kotlin.komposite.common.valueOf
+import net.akehurst.kotlin.komposite.common.*
 import net.akehurst.language.typemodel.api.*
 import kotlin.reflect.KClass
 
@@ -34,7 +31,7 @@ class FromJsonConverter(
 
     fun <T : Any> convertTo(path: List<String>, json: JsonValue, targetKlass: KClass<T>? = null): T? {
         val targetType = targetKlass?.let { registry.findTypeDeclarationByKClass(it) }
-        val type = targetType?.instance()
+        val type = targetType?.type()
         return convertValue(path, json, type) as T?
     }
 
@@ -47,13 +44,13 @@ class FromJsonConverter(
             is JsonArray -> convertList(path, json, targetType).toTypedArray()
             is JsonObject -> convertObject(path, json, targetType)
             is JsonReference -> convertReference(path, json)
-            else -> throw KSerialiserJsonException("Cannot convert $json")
+            else -> error("Cannot convert $json")
         }
     }
 
     private fun convertNumber(json: JsonNumber, targetType: TypeInstance?): Any {
         return when {
-            null != targetType && targetType.type is PrimitiveType -> when (targetType.type.name) {
+            null != targetType && targetType.declaration is PrimitiveType -> when (targetType.typeName) {
                 "Int" -> json.toInt()
                 "Double" -> json.toDouble()
                 "Long" -> json.toLong()
@@ -74,23 +71,23 @@ class FromJsonConverter(
         return (mapper as PrimitiveMapper<Any, JsonValue>).toPrimitive(json)
     }
 
-    private fun findByReference(json: JsonValue, path: List<String>): JsonValue? {
+    private fun findByReference(root: JsonValue, path: List<String>): JsonValue? {
         return if (path.isEmpty()) {
-            json
+            root
         } else {
             val head = path.first()
             val tail = path.drop(1)
             val index = head.toIntOrNull()
-            val json = when (json) {
-                is JsonArray -> if (null != index) json.elements[index] else throw KSerialiserJsonException("Path error in reference") //TODO: better error
+            val json = when (root) {
+                is JsonArray -> if (null != index) root.elements[index] else throw KSerialiserJsonException("Path error in reference") //TODO: better error
                 is JsonObject -> {
-                    val type = json.property[JsonDocument.TYPE]?.asString()?.value ?: error("Json property '${JsonDocument.TYPE}'Should be a JsonString value")
+                    val type = root.property[JsonDocument.TYPE]?.asString()?.value ?: error("Json property '${JsonDocument.TYPE}'Should be a JsonString value")
                     val kind = JsonDocument.ComplexObjectKind.valueOf(type.substringAfter("\$"))
                     when (kind) {
-                        JsonDocument.ComplexObjectKind.OBJECT -> json.property[head]
+                        JsonDocument.ComplexObjectKind.OBJECT -> root.property[head]
                         JsonDocument.ComplexObjectKind.LIST -> {
                             if (null != index) {
-                                json.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)
+                                root.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)
                             } else {
                                 throw KSerialiserJsonException("Path error in reference")
                             }
@@ -98,7 +95,7 @@ class FromJsonConverter(
 
                         JsonDocument.ComplexObjectKind.SET -> {
                             if (null != index) {
-                                json.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)
+                                root.property[JsonDocument.ELEMENTS]?.asArray()?.elements?.get(index)
                             } else {
                                 throw KSerialiserJsonException("Path error in reference")
                             }
@@ -106,7 +103,7 @@ class FromJsonConverter(
 
                         JsonDocument.ComplexObjectKind.MAP -> {
                             if (null != index) {
-                                json.property[JsonDocument.ENTRIES]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(JsonDocument.VALUE)
+                                root.property[JsonDocument.ENTRIES]?.asArray()?.elements?.get(index)?.asObject()?.property?.get(JsonDocument.VALUE)
                             } else {
                                 throw KSerialiserJsonException("Path error in reference")
                             }
@@ -200,41 +197,49 @@ class FromJsonConverter(
 
     private fun convertObject2Object(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
         val clsName = json.property[JsonDocument.CLASS]?.asString()?.value
-            ?: targetType?.type?.qualifiedName
+            ?: targetType?.qualifiedTypeName
             ?: error("Cannot determine target type for Json object")
         val ns = clsName.substringBeforeLast(".")
         val sn = clsName.substringAfterLast(".")
         //TODO: use ns
-        val dt = registry.findFirstByNameOrNull(sn) as DataType? ?: error("Cannot find datatype $clsName, is it in the registered Konfigurations")
-        val constructorProps = dt.property.filter {
-            it.characteristics.any { it==PropertyCharacteristic.IDENTITY || it==PropertyCharacteristic.CONSTRUCTOR }
-        }.sortedBy { it.index }
-        val consArgs = constructorProps.map {
-            val jsonPropValue = json.property[it.name]
-            if (null == jsonPropValue) {
-                null
-            } else {
-                val propType = it.typeInstance
-                val v = this.convertValue(path + it.name, jsonPropValue, propType)
-                v
-            }
-        }
+        val dt = registry.findFirstByNameOrNull(sn)
+        val obj = when(dt) {
+            null -> error("Cannot find datatype $clsName, is it in the registered Konfigurations")
+            is SingletonType -> dt.objectInstance()
+            is DataType -> {
+                val constructorProps = dt.property.filter {
+                    it.characteristics.any { it==PropertyCharacteristic.IDENTITY || it==PropertyCharacteristic.CONSTRUCTOR }
+                }.sortedBy { it.index }
+                val consArgs = constructorProps.map {
+                    val jsonPropValue = json.property[it.name]
+                    if (null == jsonPropValue) {
+                        null
+                    } else {
+                        val propType = it.typeInstance
+                        val v = this.convertValue(path + it.name, jsonPropValue, propType)
+                        v
+                    }
+                }
 
-        val obj = dt.construct(*consArgs.toTypedArray()) //TODO: need better error when this fails
-        // add resolved reference path ASAP, so that we avoid recursion if possible
-        resolvedReference[path] = obj
+                val obj = dt.construct(*consArgs.toTypedArray()) //TODO: need better error when this fails
+                // add resolved reference path ASAP, so that we avoid recursion if possible
+                resolvedReference[path] = obj
 
-        // TODO: change this to enable nonExplicit properties, once JS reflection works
-        val memberProps = dt.allProperty.values.filter {
-            it.characteristics.any { it==PropertyCharacteristic.MEMBER }
-        }
-        memberProps.forEach {
-            val jsonPropValue = json.property[it.name]
-            if (null != jsonPropValue) {
-                val propType = it.typeInstance
-                val value = this.convertValue(path + it.name, jsonPropValue, propType)
-                it.set(obj, value)
+                // TODO: change this to enable nonExplicit properties, once JS reflection works
+                val memberProps = dt.allProperty.values.filter {
+                    it.characteristics.any { it==PropertyCharacteristic.MEMBER }
+                }
+                memberProps.forEach {
+                    val jsonPropValue = json.property[it.name]
+                    if (null != jsonPropValue) {
+                        val propType = it.typeInstance
+                        val value = this.convertValue(path + it.name, jsonPropValue, propType)
+                        it.set(obj, value)
+                    }
+                }
+                obj
             }
+            else -> error("Internal error: Cannot construct ''$clsName', '${dt::class.simpleName}' is not handled")
         }
         return obj
     }
