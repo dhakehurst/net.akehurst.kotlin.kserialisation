@@ -48,6 +48,15 @@ class KSerialiserJson() {
         } else {
             var resultPath: List<String>? = null //TODO: terminate walking early if result found
             val walker = kompositeWalker<List<String>, Boolean>(registry) {
+                singleton { path, info, obj, datatype ->
+                    reference_cache[obj] = path
+                    if (obj == targetValue) {
+                        resultPath = path
+                        throw FoundReferenceException()
+                        // TODO: find a way to terminate the walk!
+                    }
+                    WalkInfo(info.up, obj == targetValue)
+                }
                 collBegin { path, info, type, coll ->
                     WalkInfo(info.up, info.acc)
                 }
@@ -171,7 +180,6 @@ class KSerialiserJson() {
                 reference_cache[obj] = json.path
                 json.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.OBJECT.asJsonString)
                 json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName))
-                currentObjStack.push(json)
                 WalkInfo(path, json)
             }
             collBegin { path, info, type, coll ->
