@@ -1,16 +1,13 @@
-val version_komposite:String by project
 val version_klock:String by project
-val version_kotlinx:String by project
-val version_json:String by project
 
 dependencies {
 
-    commonMainApi("net.akehurst.kotlin.json:json:$version_json")
-    commonMainApi("net.akehurst.kotlin.komposite:komposite-processor:$version_komposite")
-    commonMainApi("net.akehurst.kotlin.komposite:komposite-common:$version_komposite")
+    commonMainApi(libs.nak.json)
+    commonMainApi(libs.nak.komposite.processor)
+    commonMainApi(libs.nak.komposite.common)
 
-    commonMainImplementation("net.akehurst.kotlinx:kotlinx-collections:$version_kotlinx")
-    commonMainImplementation("net.akehurst.kotlinx:kotlinx-reflect:$version_kotlinx")
+    commonMainImplementation(libs.nak.kotlinx.collections)
+    commonMainImplementation(libs.nak.kotlinx.reflect)
 
     commonTestImplementation ("com.soywiz.korlibs.klock:klock:${version_klock}")
 }

@@ -1,0 +1,31 @@
+[versions]
+project = "2.0.20"
+
+kotlin = "2.0.20"
+dokka = "1.9.10"
+exportPublic = "2.0.20"
+buildconfig = "5.4.0"
+credentials = "3.0"
+
+nal-agl-processor = "4.2.0.20"
+nak-komposite = "2.0.20"
+nak-hjson = "2.0.20"
+nak-json = "2.0.20"
+nak-kotlinx = "2.0.20"
+
+[libraries]
+nal-agl-processor = { module = "net.akehurst.language:agl-processor", version.ref = "nal-agl-processor" }
+
+nak-komposite-common = { module = "net.akehurst.kotlin.komposite:komposite-common", version.ref = "nak-komposite" }
+nak-komposite-processor = { module = "net.akehurst.kotlin.komposite:komposite-processor", version.ref = "nak-komposite" }
+nak-hjson = { module = "net.akehurst.kotlin.hjson:hjson", version.ref = "nak-hjson" }
+nak-json = { module = "net.akehurst.kotlin.json:json", version.ref = "nak-json" }
+nak-kotlinx-collections = { module = "net.akehurst.kotlinx:kotlinx-collections", version.ref = "nak-kotlinx" }
+nak-kotlinx-reflect = { module = "net.akehurst.kotlinx:kotlinx-reflect", version.ref = "nak-kotlinx" }
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+buildconfig =  { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
+credentials =  { id = "nu.studer.credentials", version.ref = "credentials" }
+exportPublic =  { id = "net.akehurst.kotlin.gradle.plugin.exportPublic", version.ref = "exportPublic" }

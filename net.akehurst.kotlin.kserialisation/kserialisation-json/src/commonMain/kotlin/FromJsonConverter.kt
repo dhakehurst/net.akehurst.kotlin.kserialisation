@@ -19,12 +19,14 @@ package net.akehurst.kotlin.kserialisation.json
 import net.akehurst.kotlin.json.*
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
 import net.akehurst.kotlin.komposite.common.*
+import net.akehurst.language.api.language.base.QualifiedName
+import net.akehurst.language.api.language.base.SimpleName
 import net.akehurst.language.typemodel.api.*
 import kotlin.reflect.KClass
 
 
 class FromJsonConverter(
-    val registry: DatatypeRegistry2
+    val registry: DatatypeRegistry
 ) {
 
     private val resolvedReference = mutableMapOf<List<String>, Any>()
@@ -50,7 +52,7 @@ class FromJsonConverter(
 
     private fun convertNumber(json: JsonNumber, targetType: TypeInstance?): Any {
         return when {
-            null != targetType && targetType.declaration is PrimitiveType -> when (targetType.typeName) {
+            null != targetType && targetType.declaration is PrimitiveType -> when (targetType.typeName.value) {
                 "Int" -> json.toInt()
                 "Double" -> json.toDouble()
                 "Long" -> json.toLong()
@@ -188,7 +190,7 @@ class FromJsonConverter(
     private fun convertObject2Enum(path: List<String>, json: JsonObject): Enum<*>? {
         val clsName = json.property[JsonDocument.CLASS]!!.asString().value
         val ns = clsName.substringBeforeLast(".")
-        val sn = clsName.substringAfterLast(".")
+        val sn = SimpleName(clsName.substringAfterLast("."))
         //TODO: use qualified name when we can
         val et = registry.findFirstByNameOrNull(sn) as EnumType? ?: error("Cannot find enum $clsName, is it in the konfiguration")
         val value = json.property[JsonDocument.VALUE]!!.asString().value
@@ -196,11 +198,11 @@ class FromJsonConverter(
     }
 
     private fun convertObject2Object(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
-        val clsName = json.property[JsonDocument.CLASS]?.asString()?.value
+        val clsName = json.property[JsonDocument.CLASS]?.asString()?.value?.let { QualifiedName(it) }
             ?: targetType?.qualifiedTypeName
             ?: error("Cannot determine target type for Json object")
-        val ns = clsName.substringBeforeLast(".")
-        val sn = clsName.substringAfterLast(".")
+        val ns = clsName.front
+        val sn = clsName.last
         //TODO: use ns
         val dt = registry.findFirstByNameOrNull(sn)
         val obj = when(dt) {
@@ -211,12 +213,12 @@ class FromJsonConverter(
                     it.characteristics.any { it==PropertyCharacteristic.IDENTITY || it==PropertyCharacteristic.CONSTRUCTOR }
                 }.sortedBy { it.index }
                 val consArgs = constructorProps.map {
-                    val jsonPropValue = json.property[it.name]
+                    val jsonPropValue = json.property[it.name.value]
                     if (null == jsonPropValue) {
                         null
                     } else {
                         val propType = it.typeInstance
-                        val v = this.convertValue(path + it.name, jsonPropValue, propType)
+                        val v = this.convertValue(path + it.name.value, jsonPropValue, propType)
                         v
                     }
                 }
@@ -230,10 +232,10 @@ class FromJsonConverter(
                     it.characteristics.any { it==PropertyCharacteristic.MEMBER }
                 }
                 memberProps.forEach {
-                    val jsonPropValue = json.property[it.name]
+                    val jsonPropValue = json.property[it.name.value]
                     if (null != jsonPropValue) {
                         val propType = it.typeInstance
-                        val value = this.convertValue(path + it.name, jsonPropValue, propType)
+                        val value = this.convertValue(path + it.name.value, jsonPropValue, propType)
                         it.set(obj, value)
                     }
                 }

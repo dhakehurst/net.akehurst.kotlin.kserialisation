@@ -18,16 +18,17 @@ package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry2
+import net.akehurst.kotlin.komposite.common.DatatypeRegistry
 import net.akehurst.kotlin.komposite.common.construct
 import net.akehurst.kotlin.komposite.common.objectInstance
 import net.akehurst.kotlin.komposite.common.set
+import net.akehurst.language.api.language.base.QualifiedName
 import net.akehurst.language.typemodel.api.*
 import kotlin.reflect.KClass
 
 
 class FromHJsonConverter(
-    val registry: DatatypeRegistry2
+    val registry: DatatypeRegistry
 ) {
 
     private val resolvedReference = mutableMapOf<List<String>, Any>()
@@ -41,9 +42,9 @@ class FromHJsonConverter(
     private fun convertValue(path: List<String>, hjson: HJsonValue, targetType: TypeInstance?): Any? {
         return when (hjson) {
             is HJsonNull -> null
-            is HJsonString -> convertPrimitive(hjson, targetType?.typeName ?: "String")
+            is HJsonString -> convertPrimitive(hjson, targetType?.typeName?.value ?: "String")
             is HJsonNumber -> convertNumber(hjson, targetType)
-            is HJsonBoolean -> convertPrimitive(hjson, targetType?.typeName ?: "Boolean")
+            is HJsonBoolean -> convertPrimitive(hjson, targetType?.typeName?.value ?: "Boolean")
             is HJsonArray -> convertList(path, hjson, targetType).toTypedArray()
             is HJsonObject -> convertObject(path, hjson, targetType)
             is HJsonReference -> convertReference(path, hjson)
@@ -53,7 +54,7 @@ class FromHJsonConverter(
 
     private fun convertNumber(hjson: HJsonNumber, targetType: TypeInstance?): Any {
         return when {
-            null != targetType && targetType.declaration is PrimitiveType -> when (targetType.typeName) {
+            null != targetType && targetType.declaration is PrimitiveType -> when (targetType.typeName.value) {
                 "Int" -> hjson.toInt()
                 "Double" -> hjson.toDouble()
                 "Long" -> hjson.toLong()
@@ -200,12 +201,12 @@ class FromHJsonConverter(
     }
 
     private fun convertObject2Object(path: List<String>, json: HJsonObject, targetType: TypeInstance?): Any {
-        val clsName = json.property[HJsonDocument.CLASS]?.asString()?.value
+        val clsName = json.property[HJsonDocument.CLASS]?.asString()?.value?.let { QualifiedName(it) }
             ?: targetType?.qualifiedTypeName
             ?: error("Cannot determine target type for HJson object")
-        val ns = clsName.substringBeforeLast(".")
-        val sn = clsName.substringAfterLast(".")
-        //TODO: use ns
+        val ns = clsName.front.value
+        val sn = clsName.last
+        //TODO: use ns and Qualified name when JS supports it
         val dt = registry.findFirstByNameOrNull(sn)
         return when (dt) {
             null -> error("Cannot find datatype $clsName, is it in the konfiguration")
@@ -215,12 +216,12 @@ class FromHJsonConverter(
                     it.characteristics.any { it == PropertyCharacteristic.IDENTITY || it == PropertyCharacteristic.CONSTRUCTOR }
                 }.sortedBy { it.index }
                 val consArgs = constructorProps.map {
-                    val jsonPropValue = json.property[it.name]
+                    val jsonPropValue = json.property[it.name.value]
                     if (null == jsonPropValue) {
                         null
                     } else {
                         val propType = it.typeInstance
-                        val v = this.convertValue(path + it.name, jsonPropValue, propType)
+                        val v = this.convertValue(path + it.name.value, jsonPropValue, propType)
                         v
                     }
                 }
@@ -234,10 +235,10 @@ class FromHJsonConverter(
                     it.characteristics.any { it == PropertyCharacteristic.MEMBER }
                 }
                 memberProps.forEach {
-                    val jsonPropValue = json.property[it.name]
+                    val jsonPropValue = json.property[it.name.value]
                     if (null != jsonPropValue) {
                         val propType = it.typeInstance
-                        val value = this.convertValue(path + it.name, jsonPropValue, propType)
+                        val value = this.convertValue(path + it.name.value, jsonPropValue, propType)
                         it.set(obj, value)
                     }
                 }

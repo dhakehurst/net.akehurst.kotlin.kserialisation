@@ -15,27 +15,33 @@
  */
 
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import com.github.gmazzo.gradle.plugins.BuildConfigExtension
+import com.github.gmazzo.buildconfig.BuildConfigExtension
 import java.io.File
 
 plugins {
-    kotlin("multiplatform") version ("1.9.22") apply false
-    id("org.jetbrains.dokka") version ("1.9.10") apply false
-    id("com.github.gmazzo.buildconfig") version("4.1.2") apply false
-    id("nu.studer.credentials") version ("3.0")
-    id("net.akehurst.kotlin.gradle.plugin.exportPublic") version("1.9.22") apply false
+    alias(libs.plugins.kotlin) apply false
+    alias(libs.plugins.dokka) apply false
+    alias(libs.plugins.buildconfig) apply false
+    alias(libs.plugins.credentials) apply true
+    alias(libs.plugins.exportPublic) apply false
 }
-val kotlin_languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_9
-val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_9
+val kotlin_languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0
+val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0
 val jvmTargetVersion = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
 
 allprojects {
 
-    val version_project: String by project
-    val group_project = rootProject.name
+    repositories {
+        mavenLocal {
+            content{
+                includeGroupByRegex("net\\.akehurst.+")
+            }
+        }
+        mavenCentral()
+    }
 
-    group = group_project
-    version = version_project
+    group = rootProject.name
+    version = rootProject.libs.versions.project.get()
 
     project.layout.buildDirectory = File(rootProject.projectDir, ".gradle-build/${project.name}")
 
@@ -51,15 +57,6 @@ subprojects {
     apply(plugin = "com.github.gmazzo.buildconfig")
     apply(plugin = "org.jetbrains.kotlin.multiplatform")
     apply(plugin = "net.akehurst.kotlin.gradle.plugin.exportPublic")
-
-    repositories {
-        mavenLocal {
-            content{
-                includeGroupByRegex("net\\.akehurst.+")
-            }
-        }
-        mavenCentral()
-    }
 
     configure<BuildConfigExtension> {
         val now = java.time.Instant.now()
@@ -95,6 +92,7 @@ subprojects {
             nodejs()
             browser()
         }
+        macosArm64()
     }
 
     dependencies {

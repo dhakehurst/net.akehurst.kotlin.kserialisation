@@ -18,13 +18,14 @@ package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
 import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry2
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry2.Companion.isKotlinArray
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry2.Companion.isKotlinList
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry2.Companion.isKotlinSet
+import net.akehurst.kotlin.komposite.common.DatatypeRegistry
+import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinArray
+import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinList
+import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinSet
 import net.akehurst.kotlin.komposite.common.WalkInfo
 import net.akehurst.kotlin.komposite.common.kompositeWalker
 import net.akehurst.kotlinx.collections.Stack
+import net.akehurst.language.api.language.base.SimpleName
 import net.akehurst.language.typemodel.api.TypeModel
 import kotlin.reflect.KClass
 
@@ -36,7 +37,7 @@ class KSerialiserHJson() {
 
     internal val reference_cache = mutableMapOf<Any, List<String>>()
 
-    val registry = DatatypeRegistry2()
+    val registry = DatatypeRegistry()
 
     class FoundReferenceException : RuntimeException {
         constructor() : super()
@@ -97,7 +98,7 @@ class KSerialiserHJson() {
     }
 
     fun registerKotlinStdPrimitives() {
-        this.registry.registerFromTypeModel(DatatypeRegistry2.KOTLIN_STD_MODEL, emptyMap())
+        this.registry.registerFromTypeModel(DatatypeRegistry.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> HJsonBoolean(value) }, { json -> json.asBoolean().value })
         this.registerPrimitiveAsObject(Byte::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toByte() })
         this.registerPrimitiveAsObject(Short::class, { value -> HJsonNumber(value.toString()) }, { json -> json.asNumber().toShort() })
@@ -120,7 +121,7 @@ class KSerialiserHJson() {
         val toHJsonObj = { value: P ->
             val obj = HJsonUnreferencableObject()
             obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.PRIMITIVE.asHJsonString)
-            obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName))
+            obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName.value))
             obj.setProperty(HJsonDocument.VALUE, toHJson(value))
             obj
         }
@@ -161,14 +162,14 @@ class KSerialiserHJson() {
                 WalkInfo(info.up, json)
             }
             enum { path, info, enum ->
-                val clsName = enum::class.simpleName!!
+                val clsName = SimpleName(enum::class.simpleName!!)
                 val dt = registry.findFirstByNameOrNull(clsName)
                     ?: error("The enum '${clsName}' is not defined in the Komposite configuration")
                 val value = HJsonString(enum.name)
 
                 val obj = HJsonUnreferencableObject()
                 obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.ENUM.asHJsonString)
-                obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName))
+                obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName.value))
                 obj.setProperty(HJsonDocument.VALUE, value)
                 WalkInfo(info.up, obj)
             }
@@ -181,7 +182,7 @@ class KSerialiserHJson() {
                 val json = HJsonReferencableObject(doc, path)
                 reference_cache[obj] = json.path
                 json.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString)
-                json.setProperty(HJsonDocument.CLASS, HJsonString(datatype.qualifiedName))
+                json.setProperty(HJsonDocument.CLASS, HJsonString(datatype.qualifiedName.value))
                 WalkInfo(path, json)
             }
             collBegin { path, info, type, coll ->
@@ -243,7 +244,7 @@ class KSerialiserHJson() {
                 val json = HJsonReferencableObject(doc, path)
                 reference_cache[obj] = json.path
                 json.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString)
-                json.setProperty(HJsonDocument.CLASS, HJsonString(datatype.qualifiedName))
+                json.setProperty(HJsonDocument.CLASS, HJsonString(datatype.qualifiedName.value))
                 currentObjStack.push(json)
                 WalkInfo(path, json)
             }
