@@ -17,16 +17,21 @@
 package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.json.*
-import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinArray
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinList
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinSet
-import net.akehurst.kotlin.komposite.common.WalkInfo
-import net.akehurst.kotlin.komposite.common.kompositeWalker
 import net.akehurst.kotlinx.collections.Stack
-import net.akehurst.language.api.language.base.SimpleName
+import net.akehurst.language.base.api.SimpleName
+import net.akehurst.kotlinx.komposite.common.DatatypeRegistry
+import net.akehurst.kotlinx.komposite.common.PrimitiveMapper
+import net.akehurst.kotlinx.komposite.common.WalkInfo
+import net.akehurst.kotlinx.komposite.common.kompositeWalker
 import net.akehurst.language.typemodel.api.TypeModel
+import kotlin.collections.List
+import kotlin.collections.Set
+import kotlin.collections.emptyList
+import kotlin.collections.emptyMap
+import kotlin.collections.last
+import kotlin.collections.listOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 import kotlin.reflect.KClass
 
 class KSerialiserJsonException : RuntimeException {
@@ -58,10 +63,10 @@ class KSerialiserJson() {
                     }
                     WalkInfo(info.up, obj == targetValue)
                 }
-                collBegin { path, info, type, coll ->
+                collBegin { path, info, coll,type,et ->
                     WalkInfo(info.up, info.acc)
                 }
-                mapBegin { path, info, map ->
+                mapBegin { path, info, map, type, kt,vt ->
                     WalkInfo(info.up, info.acc)
                 }
                 //               mapEntryValueBegin { key, info, entry ->
@@ -147,23 +152,18 @@ class KSerialiserJson() {
                 KEY = JsonDocument.KEY
                 VALUE = JsonDocument.VALUE
             }
-            nullValue { path, info ->
+            nullValue { path, info, t ->
                 WalkInfo(info.up, JsonNull)
             }
-            primitive { path, info, primitive, mapper ->
+            primitive { path, info, data, dt, mapper ->
                 //TODO: use qualified name when we can!
-                val clsName = SimpleName(primitive::class.simpleName!!)
-                val dt = registry.findFirstByNameOrNull(clsName)
-                    ?: error("The primitive '${clsName}' is not defined in the Komposite configuration")
-                val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(primitive)
+                val clsName = SimpleName(data::class.simpleName!!)
+                val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(data)
                     ?: error("Do not know how to convert '${clsName}' to json, did you register its converter")
                 WalkInfo(info.up, json)
             }
-            enum { path, info, enum ->
-                val clsName = SimpleName(enum::class.simpleName!!)
-                val dt = registry.findFirstByNameOrNull(clsName)
-                    ?: error("The enum '${clsName}' is not defined in the Komposite configuration")
-                val value = JsonString(enum.name)
+            enum { path, info, data, dt ->
+                val value = JsonString(data.name)
 
                 val obj = JsonUnreferencableObject()
                 obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.ENUM.asJsonString)
@@ -183,24 +183,24 @@ class KSerialiserJson() {
                 json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName.value))
                 WalkInfo(path, json)
             }
-            collBegin { path, info, type, coll ->
+            collBegin { path, info, data, dt, et ->
                 val elements = JsonArray()
                 currentObjStack.push(elements)
                 WalkInfo(info.up, elements)
             }
-            collElementEnd { path, info, element ->
+            collElementEnd { path, info, element, et ->
                 val elements = currentObjStack.peek() as JsonArray
                 elements.addElement(info.acc)
                 //val nObj = listObj.withProperty(ELEMENTS, newList)
                 //currentObjStack.push(nObj)
                 WalkInfo(info.up, elements)
             }
-            collEnd { path, info, type, coll ->
-                val jsonTypeName = when {
-                    type.isKotlinArray -> JsonDocument.ComplexObjectKind.ARRAY.asJsonString
-                    type.isKotlinList -> JsonDocument.ComplexObjectKind.LIST.asJsonString
-                    type.isKotlinSet -> JsonDocument.ComplexObjectKind.SET.asJsonString
-                    else -> throw KSerialiserJsonException("Unknown type $type")
+            collEnd { path, info, data, dt, et ->
+                val jsonTypeName = when(data) {
+                    is Array<*> -> JsonDocument.ComplexObjectKind.ARRAY.asJsonString
+                    is Set<*> -> JsonDocument.ComplexObjectKind.SET.asJsonString
+                    is List<*> -> JsonDocument.ComplexObjectKind.LIST.asJsonString
+                    else -> throw KSerialiserJsonException("Unknown type $dt")
                 }
                 val elements = currentObjStack.pop()
                 val setObj = JsonUnreferencableObject()
@@ -209,19 +209,19 @@ class KSerialiserJson() {
                 setObj.setProperty(JsonDocument.ELEMENTS, elements)
                 WalkInfo(info.up, setObj)
             }
-            mapBegin { path, info, map ->
+            mapBegin { path, info, data, dt, kt, vt ->
                 val obj = JsonUnreferencableObject()
                 obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.MAP.asJsonString)
                 obj.setProperty(JsonDocument.ENTRIES, JsonArray())
                 currentObjStack.push(obj)
                 WalkInfo(info.up, obj)
             }
-            mapEntryKeyEnd { path, info, entry ->
+            mapEntryKeyEnd { path, info, entry, kt, vt ->
                 //push key ontostack
                 currentObjStack.push(info.acc)
                 info
             }
-            mapEntryValueEnd { path, info, entry ->
+            mapEntryValueEnd { path, info, entry, kt, vt ->
                 val meKey = currentObjStack.pop()
                 val meValue = info.acc
                 val mapObj = currentObjStack.peek() as JsonObject
@@ -234,7 +234,7 @@ class KSerialiserJson() {
                 //currentObjStack.push(nObj)
                 WalkInfo(info.up, mapObj)
             }
-            mapEnd { path, info, map ->
+            mapEnd { path, info, data, dt, kt, vt ->
                 val obj = currentObjStack.pop()
                 WalkInfo(info.up, obj)
             }

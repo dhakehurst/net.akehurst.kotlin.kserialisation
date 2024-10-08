@@ -92,7 +92,7 @@ subprojects {
             nodejs()
             browser()
         }
-        macosArm64()
+        //macosArm64()
     }
 
     dependencies {
@@ -101,7 +101,8 @@ subprojects {
     }
 
     configure<SigningExtension> {
-        useGpgCmd()
+        setRequired( {  gradle.taskGraph.hasTask("uploadArchives") })
+        //useGpgCmd()
         val publishing = project.properties["publishing"] as PublishingExtension
         sign(publishing.publications)
     }

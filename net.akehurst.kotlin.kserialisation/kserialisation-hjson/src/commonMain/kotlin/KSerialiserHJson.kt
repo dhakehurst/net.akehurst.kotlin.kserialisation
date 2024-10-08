@@ -17,16 +17,20 @@
 package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
-import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinArray
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinList
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry.Companion.isKotlinSet
-import net.akehurst.kotlin.komposite.common.WalkInfo
-import net.akehurst.kotlin.komposite.common.kompositeWalker
 import net.akehurst.kotlinx.collections.Stack
-import net.akehurst.language.api.language.base.SimpleName
+import net.akehurst.kotlinx.komposite.common.DatatypeRegistry
+import net.akehurst.kotlinx.komposite.common.PrimitiveMapper
+import net.akehurst.kotlinx.komposite.common.WalkInfo
+import net.akehurst.kotlinx.komposite.common.kompositeWalker
 import net.akehurst.language.typemodel.api.TypeModel
+import kotlin.collections.List
+import kotlin.collections.Set
+import kotlin.collections.emptyList
+import kotlin.collections.emptyMap
+import kotlin.collections.last
+import kotlin.collections.listOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 import kotlin.reflect.KClass
 
 class KSerialiserHJsonException : RuntimeException {
@@ -58,10 +62,10 @@ class KSerialiserHJson() {
                     }
                     WalkInfo(info.up, obj == targetValue)
                 }
-                collBegin { path, info, type, coll ->
+                collBegin { path, info, data, dt, et ->
                     WalkInfo(info.up, info.acc)
                 }
-                mapBegin { path, info, map ->
+                mapBegin { path, info, data, dt, kt, vt ->
                     WalkInfo(info.up, info.acc)
                 }
                 objectBegin { path, info, obj, datatype ->
@@ -151,22 +155,17 @@ class KSerialiserHJson() {
                 KEY = HJsonDocument.KEY
                 VALUE = HJsonDocument.VALUE
             }
-            nullValue { path, info ->
+            nullValue { path, info, dt ->
                 WalkInfo(info.up, HJsonNull)
             }
-            primitive { path, info, primitive, mapper ->
+            primitive { path, info, data,dt,  mapper ->
                 //TODO: use qualified name when/IF JS reflection make it possible!
-                val dt = registry.findTypeDeclarationByKClass(primitive::class) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
-                println("*** found primitive ${primitive::class.simpleName!!} = $dt")
-                val json = (mapper as PrimitiveMapper<Any, HJsonValue>?)?.toRaw?.invoke(primitive) ?: throw KSerialiserHJsonException("Do not know how to convert ${primitive::class} to json, did you register its converter")
+                //println("*** found primitive ${primitive::class.simpleName!!} = $dt")
+                val json = (mapper as PrimitiveMapper<Any, HJsonValue>?)?.toRaw?.invoke(data) ?: throw KSerialiserHJsonException("Do not know how to convert ${data::class} to json, did you register its converter")
                 WalkInfo(info.up, json)
             }
-            enum { path, info, enum ->
-                val clsName = SimpleName(enum::class.simpleName!!)
-                val dt = registry.findFirstByNameOrNull(clsName)
-                    ?: error("The enum '${clsName}' is not defined in the Komposite configuration")
-                val value = HJsonString(enum.name)
-
+            enum { path, info, data, dt ->
+                val value = HJsonString(data.name)
                 val obj = HJsonUnreferencableObject()
                 obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.ENUM.asHJsonString)
                 obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName.value))
@@ -185,24 +184,24 @@ class KSerialiserHJson() {
                 json.setProperty(HJsonDocument.CLASS, HJsonString(datatype.qualifiedName.value))
                 WalkInfo(path, json)
             }
-            collBegin { path, info, type, coll ->
+            collBegin { path, info, data, dt, et ->
                 val elements = HJsonArray()
                 currentObjStack.push(elements)
                 WalkInfo(info.up, elements)
             }
-            collElementEnd { path, info, element ->
+            collElementEnd { path, info, element, et ->
                 val elements = currentObjStack.peek() as HJsonArray
                 elements.addElement(info.acc)
                 //val nObj = listObj.withProperty(ELEMENTS, newList)
                 //currentObjStack.push(nObj)
                 WalkInfo(info.up, elements)
             }
-            collEnd { path, info, type, coll ->
-                val jsonTypeName = when {
-                    type.isKotlinArray -> HJsonDocument.ComplexObjectKind.ARRAY.asHJsonString
-                    type.isKotlinList -> HJsonDocument.ComplexObjectKind.LIST.asHJsonString
-                    type.isKotlinSet -> HJsonDocument.ComplexObjectKind.SET.asHJsonString
-                    else -> error("Unknown type $type")
+            collEnd { path, info, data, dt, et ->
+                val jsonTypeName = when(data) {
+                    is Array<*> -> HJsonDocument.ComplexObjectKind.ARRAY.asHJsonString
+                    is Set<*> -> HJsonDocument.ComplexObjectKind.SET.asHJsonString
+                    is List<*> -> HJsonDocument.ComplexObjectKind.LIST.asHJsonString
+                    else -> throw KSerialiserHJsonException("Unknown type $dt")
                 }
                 val elements = currentObjStack.pop()
                 val setObj = HJsonUnreferencableObject()
@@ -211,19 +210,19 @@ class KSerialiserHJson() {
                 setObj.setProperty(HJsonDocument.ELEMENTS, elements)
                 WalkInfo(info.up, setObj)
             }
-            mapBegin { path, info, map ->
+            mapBegin { path, info, data, dt, kt, vt ->
                 val obj = HJsonUnreferencableObject()
                 obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.MAP.asHJsonString)
                 obj.setProperty(HJsonDocument.ENTRIES, HJsonArray())
                 currentObjStack.push(obj)
                 WalkInfo(info.up, obj)
             }
-            mapEntryKeyEnd { path, info, entry ->
+            mapEntryKeyEnd { path, info, entry, kt, vt ->
                 //push key ontostack
                 currentObjStack.push(info.acc)
                 info
             }
-            mapEntryValueEnd { path, info, entry ->
+            mapEntryValueEnd { path, info, entry, kt, vt ->
                 val meKey = currentObjStack.pop()
                 val meValue = info.acc
                 val mapObj = currentObjStack.peek() as HJsonObject
@@ -236,7 +235,7 @@ class KSerialiserHJson() {
                 //currentObjStack.push(nObj)
                 WalkInfo(info.up, mapObj)
             }
-            mapEnd { path, info, map ->
+            mapEnd { path, info, data, dt, kt, vt ->
                 val obj = currentObjStack.pop()
                 WalkInfo(info.up, obj)
             }

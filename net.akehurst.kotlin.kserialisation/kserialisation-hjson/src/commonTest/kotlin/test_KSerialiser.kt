@@ -20,7 +20,7 @@ package net.akehurst.kotlin.kserialisation.hjson
 import korlibs.time.DateTime
 import net.akehurst.hjson.*
 import net.akehurst.kotlinx.reflect.KotlinxReflect
-import net.akehurst.language.api.language.base.SimpleName
+import net.akehurst.language.base.api.SimpleName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -17,10 +17,9 @@
 package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.json.*
-import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.*
-import net.akehurst.language.api.language.base.QualifiedName
-import net.akehurst.language.api.language.base.SimpleName
+import net.akehurst.language.base.api.QualifiedName
+import net.akehurst.language.base.api.SimpleName
+import net.akehurst.kotlinx.komposite.common.*
 import net.akehurst.language.typemodel.api.*
 import kotlin.reflect.KClass
 
@@ -209,10 +208,8 @@ class FromJsonConverter(
             null -> error("Cannot find datatype $clsName, is it in the registered Konfigurations")
             is SingletonType -> dt.objectInstance()
             is DataType -> {
-                val constructorProps = dt.property.filter {
-                    it.characteristics.any { it==PropertyCharacteristic.IDENTITY || it==PropertyCharacteristic.CONSTRUCTOR }
-                }.sortedBy { it.index }
-                val consArgs = constructorProps.map {
+                val constructorParams = dt.constructors[0].parameters
+                val consArgs = constructorParams.map {
                     val jsonPropValue = json.property[it.name.value]
                     if (null == jsonPropValue) {
                         null
@@ -228,9 +225,7 @@ class FromJsonConverter(
                 resolvedReference[path] = obj
 
                 // TODO: change this to enable nonExplicit properties, once JS reflection works
-                val memberProps = dt.allProperty.values.filter {
-                    it.characteristics.any { it==PropertyCharacteristic.MEMBER }
-                }
+                val memberProps = dt.allProperty.values.filter {it.isReadWrite }
                 memberProps.forEach {
                     val jsonPropValue = json.property[it.name.value]
                     if (null != jsonPropValue) {
@@ -250,7 +245,7 @@ class FromJsonConverter(
         val elementType = targetType?.typeArguments?.firstOrNull()
         val path_elements = path + JsonDocument.ELEMENTS
         return json.elements.mapIndexed { index, it ->
-            this.convertValue(path_elements + "$index", it, elementType)
+            this.convertValue(path_elements + "$index", it, elementType?.type)
         }
     }
 

@@ -17,13 +17,12 @@
 package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
-import net.akehurst.kotlin.komposite.api.PrimitiveMapper
-import net.akehurst.kotlin.komposite.common.DatatypeRegistry
-import net.akehurst.kotlin.komposite.common.construct
-import net.akehurst.kotlin.komposite.common.objectInstance
-import net.akehurst.kotlin.komposite.common.set
-import net.akehurst.language.api.language.base.QualifiedName
-import net.akehurst.language.typemodel.api.*
+import net.akehurst.language.base.api.QualifiedName
+import net.akehurst.kotlinx.komposite.common.*
+import net.akehurst.language.typemodel.api.DataType
+import net.akehurst.language.typemodel.api.PrimitiveType
+import net.akehurst.language.typemodel.api.SingletonType
+import net.akehurst.language.typemodel.api.TypeInstance
 import kotlin.reflect.KClass
 
 
@@ -212,10 +211,8 @@ class FromHJsonConverter(
             null -> error("Cannot find datatype $clsName, is it in the konfiguration")
             is SingletonType -> dt.objectInstance()
             is DataType -> {
-                val constructorProps = dt.property.filter {
-                    it.characteristics.any { it == PropertyCharacteristic.IDENTITY || it == PropertyCharacteristic.CONSTRUCTOR }
-                }.sortedBy { it.index }
-                val consArgs = constructorProps.map {
+                val constructorParams = dt.constructors[0].parameters
+                val consArgs = constructorParams.map {
                     val jsonPropValue = json.property[it.name.value]
                     if (null == jsonPropValue) {
                         null
@@ -231,9 +228,7 @@ class FromHJsonConverter(
                 resolvedReference[path] = obj
 
                 // TODO: change this to enable nonExplicit properties, once JS reflection works
-                val memberProps = dt.allProperty.values.filter {
-                    it.characteristics.any { it == PropertyCharacteristic.MEMBER }
-                }
+                val memberProps = dt.allProperty.values.filter { it.isReadWrite }
                 memberProps.forEach {
                     val jsonPropValue = json.property[it.name.value]
                     if (null != jsonPropValue) {
@@ -252,7 +247,7 @@ class FromHJsonConverter(
     private fun convertList(path: List<String>, json: HJsonArray, targetType: TypeInstance?): List<*> {
         val elementType = targetType?.typeArguments?.firstOrNull()
         return json.elements.mapIndexed { index, it ->
-            this.convertValue(path + "$index", it, elementType)
+            this.convertValue(path + "$index", it, elementType?.type)
         }
     }
 

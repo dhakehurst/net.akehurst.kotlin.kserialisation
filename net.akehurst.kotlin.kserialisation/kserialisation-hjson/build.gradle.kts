@@ -3,9 +3,9 @@ val version_klock:String by project
 dependencies {
 
     commonMainApi(libs.nak.hjson)
-    commonMainApi(libs.nak.komposite.processor)
 
-    commonMainImplementation(libs.nak.komposite.common)
+    commonMainImplementation(libs.nal.agl.processor) //for base language stuff
+    commonMainImplementation(libs.nal.kotlinx.komposite) //for komposite walker
     commonMainImplementation(libs.nak.kotlinx.collections)
     commonMainImplementation(libs.nak.kotlinx.reflect)
 
