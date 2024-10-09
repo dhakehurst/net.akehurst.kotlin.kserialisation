@@ -19,6 +19,7 @@ package net.akehurst.kotlin.kserialisation.hjson
 import net.akehurst.hjson.*
 import net.akehurst.language.base.api.QualifiedName
 import net.akehurst.kotlinx.komposite.common.*
+import net.akehurst.language.base.api.SimpleName
 import net.akehurst.language.typemodel.api.DataType
 import net.akehurst.language.typemodel.api.PrimitiveType
 import net.akehurst.language.typemodel.api.SingletonType
@@ -86,7 +87,7 @@ class FromHJsonConverter(
             val json = when (root) {
                 is HJsonArray -> if (null != index) root.elements[index] else throw KSerialiserHJsonException("Path error in reference") //TODO: better error
                 is HJsonObject -> {
-                    val type = root.property[HJsonDocument.TYPE]?.asString()?.value ?: error("Json property '${HJsonDocument.TYPE}'Should be a JsonString value")
+                    val type = root.property[HJsonDocument.KIND]?.asString()?.value ?: error("Json property '${HJsonDocument.KIND}'Should be a JsonString value")
                     val kind = HJsonDocument.ComplexObjectKind.valueOf(type.substringAfter("\$"))
                     when (kind) {
                         HJsonDocument.ComplexObjectKind.OBJECT -> root.property[head]
@@ -148,7 +149,7 @@ class FromHJsonConverter(
         return if (resolvedReference.containsKey(path)) {
             resolvedReference[path]!!
         } else {
-            val type = json.property[HJsonDocument.TYPE]?.asString()?.value ?: error("Json property '${HJsonDocument.TYPE}'Should be a JsonString value")
+            val type = json.property[HJsonDocument.KIND]?.asString()?.value ?: error("Json property '${HJsonDocument.KIND}'Should be a JsonString value")
             val kind = HJsonDocument.ComplexObjectKind.valueOf(type.substringAfter("\$"))
             when (kind) {
                 HJsonDocument.ComplexObjectKind.ARRAY -> {
@@ -175,6 +176,7 @@ class FromHJsonConverter(
                     convertMap(path, elements.asArray(), targetType)
                 }
 
+                HJsonDocument.ComplexObjectKind.SINGLETON -> convertObject2Singleton(path, json, targetType)
                 HJsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json, targetType)
                 HJsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json, targetType)
                 //TODO: HJsonDocument.ENUM -> convertObject2Enum()
@@ -183,6 +185,18 @@ class FromHJsonConverter(
                 }
             }
         }
+    }
+
+    private fun convertObject2Singleton(path: List<String>, json: HJsonObject, targetType: TypeInstance?): Any {
+        val clsName = json.property[HJsonDocument.CLASS]!!.asString().value
+        val ns = clsName.substringBeforeLast(".")
+        val sn = SimpleName(clsName.substringAfterLast("."))
+        //TODO: use qualified name when we can
+        val st = registry.findFirstByNameOrNull(sn) as SingletonType? ?: error("Cannot find SingletonType $clsName, is it in the konfiguration")
+        //val value = json.property[JsonDocument.VALUE]!!.asString().value
+        val obj = st.objectInstance()
+        resolvedReference[path] = obj
+        return obj
     }
 
     private fun convertObject2Primitive(path: List<String>, json: HJsonObject, targetType: TypeInstance?): Any {

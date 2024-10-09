@@ -36,7 +36,7 @@ class FromJsonConverter(
         return convertValue(path, json, type) as T?
     }
 
-   private fun convertValue(path: List<String>, json: JsonValue, targetType: TypeInstance?): Any? {
+    private fun convertValue(path: List<String>, json: JsonValue, targetType: TypeInstance?): Any? {
         return when (json) {
             is JsonNull -> null
             is JsonString -> convertPrimitive(json, "String")
@@ -68,7 +68,7 @@ class FromJsonConverter(
 
     private fun convertPrimitive(json: JsonValue, typeName: String): Any {
         val mapper = this.registry.findPrimitiveMapperBySimpleName(typeName)
-                ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
+            ?: throw KSerialiserJsonException("Do not know how to convert ${typeName} from json, did you register its converter")
         return (mapper as PrimitiveMapper<Any, JsonValue>).toPrimitive(json)
     }
 
@@ -82,7 +82,7 @@ class FromJsonConverter(
             val json = when (root) {
                 is JsonArray -> if (null != index) root.elements[index] else throw KSerialiserJsonException("Path error in reference") //TODO: better error
                 is JsonObject -> {
-                    val type = root.property[JsonDocument.TYPE]?.asString()?.value ?: error("Json property '${JsonDocument.TYPE}'Should be a JsonString value")
+                    val type = root.property[JsonDocument.KIND]?.asString()?.value ?: error("Json property '${JsonDocument.KIND}'Should be a JsonString value")
                     val kind = JsonDocument.ComplexObjectKind.valueOf(type.substringAfter("\$"))
                     when (kind) {
                         JsonDocument.ComplexObjectKind.OBJECT -> root.property[head]
@@ -143,7 +143,7 @@ class FromJsonConverter(
         return if (resolvedReference.containsKey(path)) {
             resolvedReference[path]!!
         } else {
-            val type = json.property[JsonDocument.TYPE]?.asString()?.value ?: error("Json property '${JsonDocument.TYPE}'Should be a JsonString value")
+            val type = json.property[JsonDocument.KIND]?.asString()?.value ?: error("Json property '${JsonDocument.KIND}'Should be a JsonString value")
             val kind = JsonDocument.ComplexObjectKind.valueOf(type.substringAfter("\$"))
             when (kind) {
                 JsonDocument.ComplexObjectKind.ARRAY -> {
@@ -166,6 +166,7 @@ class FromJsonConverter(
                     convertMap(path, elements.asArray(), targetType)
                 }
 
+                JsonDocument.ComplexObjectKind.SINGLETON -> convertObject2Singleton(path, json, targetType)
                 JsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json, targetType)
                 JsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json, targetType)
                 JsonDocument.ComplexObjectKind.ENUM -> convertObject2Enum(path, json) ?: throw KSerialiserJsonException("Incorrect JSON, no enum value found for ${json.toFormattedJsonString("", "")}")
@@ -174,6 +175,18 @@ class FromJsonConverter(
                 }
             }
         }
+    }
+
+    private fun convertObject2Singleton(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
+        val clsName = json.property[JsonDocument.CLASS]!!.asString().value
+        val ns = clsName.substringBeforeLast(".")
+        val sn = SimpleName(clsName.substringAfterLast("."))
+        //TODO: use qualified name when we can
+        val st = registry.findFirstByNameOrNull(sn) as SingletonType? ?: error("Cannot find SingletonType $clsName, is it in the konfiguration")
+        //val value = json.property[JsonDocument.VALUE]!!.asString().value
+        val obj = st.objectInstance()
+        resolvedReference[path] = obj
+        return obj
     }
 
     private fun convertObject2Primitive(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
@@ -204,7 +217,7 @@ class FromJsonConverter(
         val sn = clsName.last
         //TODO: use ns
         val dt = registry.findFirstByNameOrNull(sn)
-        val obj = when(dt) {
+        val obj = when (dt) {
             null -> error("Cannot find datatype $clsName, is it in the registered Konfigurations")
             is SingletonType -> dt.objectInstance()
             is DataType -> {
@@ -225,7 +238,7 @@ class FromJsonConverter(
                 resolvedReference[path] = obj
 
                 // TODO: change this to enable nonExplicit properties, once JS reflection works
-                val memberProps = dt.allProperty.values.filter {it.isReadWrite }
+                val memberProps = dt.allProperty.values.filter { it.isReadWrite }
                 memberProps.forEach {
                     val jsonPropValue = json.property[it.name.value]
                     if (null != jsonPropValue) {
@@ -236,6 +249,7 @@ class FromJsonConverter(
                 }
                 obj
             }
+
             else -> error("Internal error: Cannot construct ''$clsName', '${dt::class.simpleName}' is not handled")
         }
         return obj

@@ -128,7 +128,7 @@ class KSerialiserJson() {
         val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
         val toJsonMpr = { value: P ->
             val obj = JsonUnreferencableObject()
-            obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.PRIMITIVE.asJsonString)
+            obj.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.PRIMITIVE.asJsonString)
             obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName.value))
             obj.setProperty(JsonDocument.VALUE, toJson(value))
             obj
@@ -166,7 +166,7 @@ class KSerialiserJson() {
                 val value = JsonString(data.name)
 
                 val obj = JsonUnreferencableObject()
-                obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.ENUM.asJsonString)
+                obj.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.ENUM.asJsonString)
                 obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName.value))
                 obj.setProperty(JsonDocument.VALUE, value)
                 WalkInfo(info.up, obj)
@@ -179,7 +179,7 @@ class KSerialiserJson() {
             singleton { path, info, obj, datatype ->
                 val json = JsonReferencableObject(doc, path)
                 reference_cache[obj] = json.path
-                json.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.OBJECT.asJsonString)
+                json.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.SINGLETON.asJsonString)
                 json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName.value))
                 WalkInfo(path, json)
             }
@@ -204,14 +204,14 @@ class KSerialiserJson() {
                 }
                 val elements = currentObjStack.pop()
                 val setObj = JsonUnreferencableObject()
-                setObj.setProperty(JsonDocument.TYPE, jsonTypeName)
+                setObj.setProperty(JsonDocument.KIND, jsonTypeName)
                 //ELEMENT_TYPE to JsonString(type.elementType.qualifiedName), //needed for deserialising empty Arrays
                 setObj.setProperty(JsonDocument.ELEMENTS, elements)
                 WalkInfo(info.up, setObj)
             }
             mapBegin { path, info, data, dt, kt, vt ->
                 val obj = JsonUnreferencableObject()
-                obj.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.MAP.asJsonString)
+                obj.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.MAP.asJsonString)
                 obj.setProperty(JsonDocument.ENTRIES, JsonArray())
                 currentObjStack.push(obj)
                 WalkInfo(info.up, obj)
@@ -241,7 +241,7 @@ class KSerialiserJson() {
             objectBegin { path, info, obj, datatype ->
                 val json = JsonReferencableObject(doc, path)
                 reference_cache[obj] = json.path
-                json.setProperty(JsonDocument.TYPE, JsonDocument.ComplexObjectKind.OBJECT.asJsonString)
+                json.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.OBJECT.asJsonString)
                 json.setProperty(JsonDocument.CLASS, JsonString(datatype.qualifiedName.value))
                 currentObjStack.push(json)
                 WalkInfo(path, json)
