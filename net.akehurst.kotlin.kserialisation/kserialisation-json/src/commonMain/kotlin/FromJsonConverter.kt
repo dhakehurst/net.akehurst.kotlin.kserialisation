@@ -139,7 +139,7 @@ class FromJsonConverter(
         }
     }
 
-    private fun convertObject(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
+    private fun convertObject(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any? {
         return if (resolvedReference.containsKey(path)) {
             resolvedReference[path]!!
         } else {
@@ -209,7 +209,7 @@ class FromJsonConverter(
         return et.valueOf(value)
     }
 
-    private fun convertObject2Object(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {
+    private fun convertObject2Object(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any? {
         val clsName = json.property[JsonDocument.CLASS]?.asString()?.value?.let { QualifiedName(it) }
             ?: targetType?.qualifiedTypeName
             ?: error("Cannot determine target type for Json object")
@@ -219,7 +219,14 @@ class FromJsonConverter(
         val dt = registry.findFirstByNameOrNull(sn)
         val obj = when (dt) {
             null -> error("Cannot find datatype $clsName, is it in the registered Konfigurations")
-            is SingletonType -> dt.objectInstance()
+            is ValueType -> {
+                val jsonPropValue = json.property[JsonDocument.VALUE]!! //json.property[valProp.name.value]
+                val propClsName = dt.valueProperty.typeInstance.typeName.value
+                val value = this.convertPrimitive(jsonPropValue, propClsName)
+                val obj = dt.constructValueType(value) //TODO: need better error when this fails
+                obj
+            }
+
             is DataType -> {
                 val constructorParams = dt.constructors[0].parameters
                 val consArgs = constructorParams.map {
@@ -233,7 +240,7 @@ class FromJsonConverter(
                     }
                 }
 
-                val obj = dt.construct(*consArgs.toTypedArray()) //TODO: need better error when this fails
+                val obj = dt.constructDataType(*consArgs.toTypedArray()) //TODO: need better error when this fails
                 // add resolved reference path ASAP, so that we avoid recursion if possible
                 resolvedReference[path] = obj
 

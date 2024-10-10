@@ -23,6 +23,7 @@ import net.akehurst.kotlinx.komposite.common.DatatypeRegistry
 import net.akehurst.kotlinx.komposite.common.PrimitiveMapper
 import net.akehurst.kotlinx.komposite.common.WalkInfo
 import net.akehurst.kotlinx.komposite.common.kompositeWalker
+import net.akehurst.kotlinx.reflect.reflect
 import net.akehurst.language.typemodel.api.TypeModel
 import kotlin.collections.List
 import kotlin.collections.Set
@@ -161,6 +162,18 @@ class KSerialiserJson() {
                 val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(data)
                     ?: error("Do not know how to convert '${clsName}' to json, did you register its converter")
                 WalkInfo(info.up, json)
+            }
+            valueType { path, info, data, dt, value, mapper ->
+                val clsName = dt.valueProperty.typeInstance.typeName
+
+                val json = (mapper as PrimitiveMapper<Any, JsonValue>?)?.toRaw?.invoke(value)
+                    ?: error("Do not know how to convert '${clsName}' to json, did you register its converter")
+
+                val obj = JsonUnreferencableObject()
+                obj.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.OBJECT.asJsonString)
+                obj.setProperty(JsonDocument.CLASS, JsonString(dt.qualifiedName.value))
+                obj.setProperty(JsonDocument.VALUE, json)
+                WalkInfo(info.up, obj)
             }
             enum { path, info, data, dt ->
                 val value = JsonString(data.name)

@@ -20,10 +20,7 @@ import net.akehurst.hjson.*
 import net.akehurst.language.base.api.QualifiedName
 import net.akehurst.kotlinx.komposite.common.*
 import net.akehurst.language.base.api.SimpleName
-import net.akehurst.language.typemodel.api.DataType
-import net.akehurst.language.typemodel.api.PrimitiveType
-import net.akehurst.language.typemodel.api.SingletonType
-import net.akehurst.language.typemodel.api.TypeInstance
+import net.akehurst.language.typemodel.api.*
 import kotlin.reflect.KClass
 
 
@@ -145,7 +142,7 @@ class FromHJsonConverter(
         }
     }
 
-    private fun convertObject(path: List<String>, json: HJsonObject, targetType: TypeInstance?): Any {
+    private fun convertObject(path: List<String>, json: HJsonObject, targetType: TypeInstance?): Any? {
         return if (resolvedReference.containsKey(path)) {
             resolvedReference[path]!!
         } else {
@@ -213,7 +210,7 @@ class FromHJsonConverter(
 
     }
 
-    private fun convertObject2Object(path: List<String>, json: HJsonObject, targetType: TypeInstance?): Any {
+    private fun convertObject2Object(path: List<String>, json: HJsonObject, targetType: TypeInstance?): Any? {
         val clsName = json.property[HJsonDocument.CLASS]?.asString()?.value?.let { QualifiedName(it) }
             ?: targetType?.qualifiedTypeName
             ?: error("Cannot determine target type for HJson object")
@@ -221,9 +218,16 @@ class FromHJsonConverter(
         val sn = clsName.last
         //TODO: use ns and Qualified name when JS supports it
         val dt = registry.findFirstByNameOrNull(sn)
-        return when (dt) {
+        val obj = when (dt) {
             null -> error("Cannot find datatype $clsName, is it in the konfiguration")
-            is SingletonType -> dt.objectInstance()
+            is ValueType -> {
+                val jsonPropValue = json.property[HJsonDocument.VALUE]!!
+                val propClsName = dt.valueProperty.typeInstance.typeName.value
+                val value = this.convertPrimitive(jsonPropValue, propClsName)
+                val obj = dt.constructValueType(value) //TODO: need better error when this fails
+                obj
+            }
+
             is DataType -> {
                 val constructorParams = dt.constructors[0].parameters
                 val consArgs = constructorParams.map {
@@ -237,7 +241,7 @@ class FromHJsonConverter(
                     }
                 }
 
-                val obj = dt.construct(*consArgs.toTypedArray()) //TODO: need better error when this fails
+                val obj = dt.constructDataType(*consArgs.toTypedArray()) //TODO: need better error when this fails
                 // add resolved reference path ASAP, so that we avoid recursion if possible
                 resolvedReference[path] = obj
 
@@ -256,6 +260,7 @@ class FromHJsonConverter(
 
             else -> error("Internal error: Cannot construct ''$clsName', '${dt::class.simpleName}' is not handled")
         }
+        return obj
     }
 
     private fun convertList(path: List<String>, json: HJsonArray, targetType: TypeInstance?): List<*> {

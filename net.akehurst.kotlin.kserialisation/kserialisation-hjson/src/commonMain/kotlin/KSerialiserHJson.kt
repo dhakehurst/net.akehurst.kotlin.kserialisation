@@ -164,6 +164,15 @@ class KSerialiserHJson() {
                 val json = (mapper as PrimitiveMapper<Any, HJsonValue>?)?.toRaw?.invoke(data) ?: throw KSerialiserHJsonException("Do not know how to convert ${data::class} to json, did you register its converter")
                 WalkInfo(info.up, json)
             }
+            valueType { path, info, data, dt, value, mapper ->
+                val clsName = dt.valueProperty.typeInstance.typeName
+                val json = (mapper as PrimitiveMapper<Any, HJsonValue>?)?.toRaw?.invoke(value)
+                    ?: error("Do not know how to convert '${clsName}' to json, did you register its converter")
+                val obj = HJsonUnreferencableObject()
+                obj.setProperty(HJsonDocument.KIND, HJsonDocument.ComplexObjectKind.ENUM.asHJsonString)
+                obj.setProperty(HJsonDocument.CLASS, HJsonString(dt.qualifiedName.value))
+                obj.setProperty(HJsonDocument.VALUE, json)
+                WalkInfo(info.up, obj)            }
             enum { path, info, data, dt ->
                 val value = HJsonString(data.name)
                 val obj = HJsonUnreferencableObject()
