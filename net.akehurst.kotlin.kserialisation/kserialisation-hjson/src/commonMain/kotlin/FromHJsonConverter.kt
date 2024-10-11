@@ -246,7 +246,9 @@ class FromHJsonConverter(
                 resolvedReference[path] = obj
 
                 // TODO: change this to enable nonExplicit properties, once JS reflection works
-                val memberProps = dt.allProperty.values.filter { it.isReadWrite }
+                val memberProps = dt.allProperty.values
+                    .filter { it.isReadWrite }
+                    .filterNot { mp -> constructorParams.any { cp -> cp.name.value == mp.name.value } }
                 memberProps.forEach {
                     val jsonPropValue = json.property[it.name.value]
                     if (null != jsonPropValue) {
