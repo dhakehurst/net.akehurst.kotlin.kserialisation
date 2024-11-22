@@ -145,7 +145,7 @@ class KSerialiserJson() {
     fun toJson(root: Any, data: Any): JsonDocument {
         this.reference_cache.clear()
         val doc = JsonDocument("json")
-        var currentObjStack = Stack<JsonValue>()
+        val currentObjStack = Stack<JsonValue>()
         val walker = kompositeWalker<List<String>, JsonValue>(registry) {
             configure {
                 ELEMENTS = JsonDocument.ELEMENTS
