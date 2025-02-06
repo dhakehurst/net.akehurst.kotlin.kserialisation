@@ -51,7 +51,7 @@ class FromJsonConverter(
 
     private fun convertNumber(json: JsonNumber, targetType: TypeInstance?): Any {
         return when {
-            null != targetType && targetType.declaration is PrimitiveType -> when (targetType.typeName.value) {
+            null != targetType && targetType.resolvedDeclaration is PrimitiveType -> when (targetType.typeName.value) {
                 "Int" -> json.toInt()
                 "Double" -> json.toDouble()
                 "Long" -> json.toLong()

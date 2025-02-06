@@ -51,7 +51,7 @@ class FromHJsonConverter(
 
     private fun convertNumber(hjson: HJsonNumber, targetType: TypeInstance?): Any {
         return when {
-            null != targetType && targetType.declaration is PrimitiveType -> when (targetType.typeName.value) {
+            null != targetType && targetType.resolvedDeclaration is PrimitiveType -> when (targetType.typeName.value) {
                 "Int" -> hjson.toInt()
                 "Double" -> hjson.toDouble()
                 "Long" -> hjson.toLong()

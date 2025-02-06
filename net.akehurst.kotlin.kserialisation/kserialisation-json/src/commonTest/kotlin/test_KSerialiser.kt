@@ -33,7 +33,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-internal class test_KSerialiser {
+class test_KSerialiser {
 
     private val sut = KSerialiserJson()
 
@@ -41,19 +41,11 @@ internal class test_KSerialiser {
     fun setup() {
         this.sut.configureFromKompositeString(
             """
-            namespace korlibs.time {
-              primitive DateTime
-            }
-            namespace net.akehurst.kotlin.kserialisation.json.test {
-                import kotlin
-                enum TestEnumEEE
-                datatype TestClassAAA {
-                    composite-val prop1 : String
-                    composite-val comp : TestClassAAA?
-                    reference-var refr : TestClassAAA?
-                    reference-var prop2  : Int
+            namespace net.akehurst.kotlin.kserialisation.json.test
+                class TestClassAAA {
+                    cmp prop1
+                    cmp comp
                 }
-            }
         """.trimIndent()
         )
 
