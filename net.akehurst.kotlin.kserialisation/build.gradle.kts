@@ -92,6 +92,11 @@ subprojects {
             nodejs()
             browser()
         }
+        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+        wasmJs() {
+            binaries.library()
+            browser()
+        }
         //macosArm64()
     }
 

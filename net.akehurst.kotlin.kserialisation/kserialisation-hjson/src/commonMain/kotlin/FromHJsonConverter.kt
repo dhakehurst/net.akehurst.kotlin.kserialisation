@@ -17,8 +17,12 @@
 package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
-import net.akehurst.language.base.api.QualifiedName
 import net.akehurst.kotlinx.komposite.common.*
+import net.akehurst.language.agl.expressions.processor.constructDataType
+import net.akehurst.language.agl.expressions.processor.constructValueType
+import net.akehurst.language.agl.expressions.processor.objectInstance
+import net.akehurst.language.agl.expressions.processor.set
+import net.akehurst.language.base.api.QualifiedName
 import net.akehurst.language.base.api.SimpleName
 import net.akehurst.language.typemodel.api.*
 import kotlin.reflect.KClass
@@ -189,7 +193,7 @@ class FromHJsonConverter(
         val ns = clsName.substringBeforeLast(".")
         val sn = SimpleName(clsName.substringAfterLast("."))
         //TODO: use qualified name when we can
-        val st = registry.findFirstByNameOrNull(sn) as SingletonType? ?: error("Cannot find SingletonType $clsName, is it in the konfiguration")
+        val st = registry.findFirstDefinitionByNameOrNull(sn) as SingletonType? ?: error("Cannot find SingletonType $clsName, is it in the konfiguration")
         //val value = json.property[JsonDocument.VALUE]!!.asString().value
         val obj = st.objectInstance()
         resolvedReference[path] = obj
@@ -217,7 +221,7 @@ class FromHJsonConverter(
         val ns = clsName.front.value
         val sn = clsName.last
         //TODO: use ns and Qualified name when JS supports it
-        val dt = registry.findFirstByNameOrNull(sn)
+        val dt = registry.findFirstDefinitionByNameOrNull(sn)
         val obj = when (dt) {
             null -> error("Cannot find datatype $clsName, is it in the konfiguration")
             is ValueType -> {

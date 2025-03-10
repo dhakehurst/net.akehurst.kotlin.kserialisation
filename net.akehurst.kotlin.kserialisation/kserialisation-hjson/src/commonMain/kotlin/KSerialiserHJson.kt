@@ -91,10 +91,10 @@ class KSerialiserHJson() {
         }
     }
 
-    fun configureFromKompositeString(kompositeModel: String) {
+    //fun configureFromKompositeString(kompositeModel: String) {
         //TODO: mappers!
-        registry.registerFromConfigString(kompositeModel, emptyMap())
-    }
+    //    registry.registerFromConfigString(kompositeModel, emptyMap())
+    //}
 
     fun configureFromTypeModel(kompositeModel: TypeModel) {
         //TODO: mappers!

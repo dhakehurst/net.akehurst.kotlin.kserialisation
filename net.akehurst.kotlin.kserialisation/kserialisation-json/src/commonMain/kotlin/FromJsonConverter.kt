@@ -17,9 +17,10 @@
 package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.json.*
+import net.akehurst.kotlinx.komposite.common.*
+import net.akehurst.language.agl.expressions.processor.*
 import net.akehurst.language.base.api.QualifiedName
 import net.akehurst.language.base.api.SimpleName
-import net.akehurst.kotlinx.komposite.common.*
 import net.akehurst.language.typemodel.api.*
 import kotlin.reflect.KClass
 
@@ -182,7 +183,7 @@ class FromJsonConverter(
         val ns = clsName.substringBeforeLast(".")
         val sn = SimpleName(clsName.substringAfterLast("."))
         //TODO: use qualified name when we can
-        val st = registry.findFirstByNameOrNull(sn) as SingletonType? ?: error("Cannot find SingletonType $clsName, is it in the konfiguration")
+        val st = registry.findFirstDefinitionByNameOrNull(sn) as SingletonType? ?: error("Cannot find SingletonType $clsName, is it in the konfiguration")
         //val value = json.property[JsonDocument.VALUE]!!.asString().value
         val obj = st.objectInstance()
         resolvedReference[path] = obj
@@ -204,7 +205,7 @@ class FromJsonConverter(
         val ns = clsName.substringBeforeLast(".")
         val sn = SimpleName(clsName.substringAfterLast("."))
         //TODO: use qualified name when we can
-        val et = registry.findFirstByNameOrNull(sn) as EnumType? ?: error("Cannot find enum $clsName, is it in the konfiguration")
+        val et = registry.findFirstDefinitionByNameOrNull(sn) as EnumType? ?: error("Cannot find enum $clsName, is it in the konfiguration")
         val value = json.property[JsonDocument.VALUE]!!.asString().value
         return et.valueOf(value)
     }
@@ -216,7 +217,7 @@ class FromJsonConverter(
         val ns = clsName.front
         val sn = clsName.last
         //TODO: use ns
-        val dt = registry.findFirstByNameOrNull(sn)
+        val dt = registry.findFirstDefinitionByNameOrNull(sn)
         val obj = when (dt) {
             null -> error("Cannot find datatype $clsName, is it in the registered Konfigurations")
             is ValueType -> {

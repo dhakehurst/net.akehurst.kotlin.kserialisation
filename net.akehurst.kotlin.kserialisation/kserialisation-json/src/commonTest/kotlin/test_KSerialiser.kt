@@ -27,7 +27,8 @@ import net.akehurst.kotlin.kserialisation.json.test.TestEnumEEE
 import net.akehurst.kotlinx.reflect.EnumValuesFunction
 import net.akehurst.kotlinx.reflect.KotlinxReflect
 import net.akehurst.language.base.api.SimpleName
-import net.akehurst.kotlinx.komposite.common.clazz
+import net.akehurst.language.agl.expressions.processor.clazz
+import net.akehurst.language.typemodel.builder.typeModel
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,6 +40,15 @@ class test_KSerialiser {
 
     @BeforeTest
     fun setup() {
+        this.sut.configureFromTypeModel(typeModel("",true) { 
+            namespace("net.akehurst.kotlin.kserialisation.json.test") {
+                dataType("TestClassAAA") {
+                    propertyOf(setOf(COMPOSITE,READ_ONLY),"prop1","String")
+                    propertyOf(setOf(REFERENCE, READ_WRITE),"comp","TestClassAAA")
+                }
+            }
+        })
+        /*
         this.sut.configureFromKompositeString(
             """
             namespace net.akehurst.kotlin.kserialisation.json.test
@@ -48,6 +58,7 @@ class test_KSerialiser {
                 }
         """.trimIndent()
         )
+*/
 
         this.sut.registerKotlinStdPrimitives()
         this.sut.registerPrimitiveAsObject(DateTime::class, //
@@ -116,7 +127,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val dt = sut.registry.findFirstByNameOrNull(SimpleName("Byte"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Byte"))!!
         assertEquals("Byte", dt.name.value)
 
         val expected = json("expected") {
@@ -129,7 +140,7 @@ class test_KSerialiser {
     @Test
     fun toData_Byte_1() {
 
-        val dt = sut.registry.findFirstByNameOrNull(SimpleName("Byte"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Byte"))!!
         val root = json("expected") {
             primitiveObject(dt.qualifiedName.value, 1)
         }.toFormattedJsonString("  ", "  ")
@@ -148,7 +159,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val dt = sut.registry.findFirstByNameOrNull(SimpleName("Int"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Int"))!!
         val expected = json("expected") {
             primitiveObject(dt.qualifiedName.value, root)
         }.toFormattedJsonString("  ", "  ")
@@ -159,7 +170,7 @@ class test_KSerialiser {
     @Test
     fun toData_Int_1() {
 
-        val dt = sut.registry.findFirstByNameOrNull(SimpleName("Int"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Int"))!!
         val root = json("expected") {
             primitiveObject(dt.qualifiedName.value, 1)
         }.toFormattedJsonString("  ", "  ")
@@ -178,7 +189,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val dt = sut.registry.findFirstByNameOrNull(SimpleName("Long"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Long"))!!
         val expected = json("expected") {
             primitiveObject(dt.qualifiedName.value, root)
         }.toFormattedJsonString("  ", "  ")
@@ -190,7 +201,7 @@ class test_KSerialiser {
     @Test
     fun toData_Long_1() {
 
-        val dt = sut.registry.findFirstByNameOrNull(SimpleName("Long"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Long"))!!
         val root = json("expected") {
             primitiveObject(dt.qualifiedName.value, 1)
         }.toFormattedJsonString("  ", "  ")
@@ -288,7 +299,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toJson(root, root)
 
-        val dt = sut.registry.findFirstByNameOrNull(SimpleName("DateTime"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("DateTime"))!!
 
         val expected = json("expected") {
             primitiveObject(dt.qualifiedName.value, now.unixMillisDouble)
@@ -301,7 +312,7 @@ class test_KSerialiser {
     fun toData_DateTime() {
 
         val now = DateTime.now()
-        val dt = sut.registry.findFirstByNameOrNull(SimpleName("DateTime"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("DateTime"))!!
         val root = json("expected") {
             primitiveObject(dt.qualifiedName.value, now.unixMillisDouble)
         }.toFormattedJsonString("  ", "  ")
@@ -522,7 +533,7 @@ class test_KSerialiser {
 
         val root = TestClassAAA("1: hello",null)
         root.prop2 = (5)
-        val dtA = sut.registry.findFirstByNameOrNull(SimpleName("TestClassAAA"))!!
+        val dtA = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("TestClassAAA"))!!
 
         val actual = this.sut.toJson(root, root)
 
@@ -543,7 +554,7 @@ class test_KSerialiser {
     @Test
     fun toData_A() {
 
-        val dtA = sut.registry.findFirstByNameOrNull(SimpleName("TestClassAAA"))!!
+        val dtA = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("TestClassAAA"))!!
 
         val json = json("expected") {
             objectReferenceable(dtA.qualifiedName.value) {
@@ -567,7 +578,7 @@ class test_KSerialiser {
         val root = TestClassAAA("1: hello",TestClassAAA("1.3",null))
         root.prop2 = (5)
         root.comp?.refr = root
-        val dtA = sut.registry.findFirstByNameOrNull(SimpleName("TestClassAAA"))!!
+        val dtA = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("TestClassAAA"))!!
 
         val actual = this.sut.toJson(root, root)
 
@@ -599,7 +610,7 @@ class test_KSerialiser {
     @Test
     fun toData_A_2() {
         //FIXME: this does not work in JS tests because the getters/setters are not included as properties by kotlinx-reflect!
-        val dtA = sut.registry.findFirstByNameOrNull(SimpleName("TestClassAAA"))!!
+        val dtA = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("TestClassAAA"))!!
         println("dta = $dtA")
         println(KotlinxReflect.registeredClasses)
         println("dta = ${dtA.clazz}")
