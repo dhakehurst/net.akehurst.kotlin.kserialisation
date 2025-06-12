@@ -42,9 +42,9 @@ class test_KSerialiser {
     fun setup() {
         this.sut.configureFromTypeModel(typeModel("",true) { 
             namespace("net.akehurst.kotlin.kserialisation.json.test") {
-                dataType("TestClassAAA") {
-                    propertyOf(setOf(COMPOSITE,READ_ONLY),"prop1","String")
-                    propertyOf(setOf(REFERENCE, READ_WRITE),"comp","TestClassAAA")
+                data("TestClassAAA") {
+                    propertyOf(setOf(CMP,VAL),"prop1","String")
+                    propertyOf(setOf(REF, VAR),"comp","TestClassAAA")
                 }
             }
         })

@@ -1,16 +1,16 @@
 [versions]
-project = "2.1.20-RC2"
+project = "2.1.21"
 
-kotlin = "2.1.20-RC2"
+kotlin = "2.1.21"
 dokka = "2.0.0"
-exportPublic = "2.1.20-RC2"
+exportPublic = "2.1.21"
 buildconfig = "5.5.1"
 credentials = "3.0"
 
-nal-agl-processor = "4.2.1.20-RC2"
-nak-hjson = "2.1.20-RC2"
-nak-json = "2.1.20-RC2"
-nak-kotlinx = "2.1.20-RC2"
+nal-agl-processor = "4.2.1.21"
+nak-hjson = "2.1.21"
+nak-json = "2.1.21"
+nak-kotlinx = "2.1.21"
 
 [libraries]
 nal-agl-processor = { module = "net.akehurst.language:agl-processor", version.ref = "nal-agl-processor" }

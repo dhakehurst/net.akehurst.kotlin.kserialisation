@@ -22,6 +22,7 @@ import net.akehurst.language.agl.expressions.processor.*
 import net.akehurst.language.base.api.QualifiedName
 import net.akehurst.language.base.api.SimpleName
 import net.akehurst.language.typemodel.api.*
+import net.akehurst.language.typemodel.asm.StdLibDefault
 import kotlin.reflect.KClass
 
 
@@ -240,24 +241,32 @@ class FromJsonConverter(
                         v
                     }
                 }
+                when {
+                    StdLibDefault.Pair.qualifiedName == clsName -> {
+                        val first = consArgs[0]
+                        val second = consArgs[1]
+                        Pair(first,second )
+                    }
+                    else -> {
+                        val obj = dt.constructDataType(*consArgs.toTypedArray()) //TODO: need better error when this fails
+                        // add resolved reference path ASAP, so that we avoid recursion if possible
+                        resolvedReference[path] = obj
 
-                val obj = dt.constructDataType(*consArgs.toTypedArray()) //TODO: need better error when this fails
-                // add resolved reference path ASAP, so that we avoid recursion if possible
-                resolvedReference[path] = obj
-
-                // TODO: change this to enable nonExplicit properties, once JS reflection works
-                val memberProps = dt.allProperty.values
-                    .filter { it.isReadWrite }
-                    .filterNot { mp -> constructorParams.any { cp -> cp.name.value == mp.name.value } }
-                memberProps.forEach {
-                    val jsonPropValue = json.property[it.name.value]
-                    if (null != jsonPropValue) {
-                        val propType = it.typeInstance
-                        val value = this.convertValue(path + it.name.value, jsonPropValue, propType)
-                        it.set(obj, value)
+                        // TODO: change this to enable nonExplicit properties, once JS reflection works
+                        val memberProps = dt.allProperty.values
+                            .filter { it.isReadWrite }
+                            .filterNot { mp -> constructorParams.any { cp -> cp.name.value == mp.name.value } }
+                        memberProps.forEach {
+                            val jsonPropValue = json.property[it.name.value]
+                            if (null != jsonPropValue) {
+                                val propType = it.typeInstance
+                                val value = this.convertValue(path + it.name.value, jsonPropValue, propType)
+                                it.set(obj, value)
+                            }
+                        }
+                        obj
                     }
                 }
-                obj
             }
 
             else -> error("Internal error: Cannot construct ''$clsName', '${dt::class.simpleName}' is not handled")

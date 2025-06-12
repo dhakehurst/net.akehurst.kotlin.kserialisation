@@ -65,14 +65,17 @@ class test_KSerialiser {
         this.sut.configureFromTypeModel(
             typeModel("", true) {
                 namespace("com.soywiz.klock") {
-                    primitiveType("DateTime")
+                    primitive("DateTime")
                 }
                 namespace("net.akehurst.kotlin.kserialisation.hjson") {
-                    dataType("TestClassAAA") {
-                        propertyOf(setOf(COMPOSITE,READ_ONLY),"prop1","String")
-                        propertyOf(setOf(COMPOSITE, READ_WRITE),"comp","String")
-                        propertyOf(setOf(REFERENCE, READ_WRITE),"refr","String")
-                        propertyOf(setOf(COMPOSITE, READ_WRITE),"prop2","String")
+                    data("TestClassAAA") {
+                        constructor_ {
+                            parameter("prop1", "String")
+                        }
+                        propertyOf(setOf(CMP,VAL),"prop1","String")
+                        propertyOf(setOf(CMP, VAR),"comp","String")
+                        propertyOf(setOf(REF, VAR),"refr","String")
+                        propertyOf(setOf(CMP, VAR),"prop2","String")
                     }
                 }
             }
