@@ -17,20 +17,12 @@
 package net.akehurst.kotlin.kserialisation.hjson
 
 import net.akehurst.hjson.*
-import net.akehurst.kotlinx.collections.Stack
+import net.akehurst.kotlinx.collections.mutableStackOf
 import net.akehurst.kotlinx.komposite.common.DatatypeRegistry
 import net.akehurst.kotlinx.komposite.common.PrimitiveMapper
 import net.akehurst.kotlinx.komposite.common.WalkInfo
 import net.akehurst.kotlinx.komposite.common.kompositeWalker
-import net.akehurst.language.typemodel.api.TypeModel
-import kotlin.collections.List
-import kotlin.collections.Set
-import kotlin.collections.emptyList
-import kotlin.collections.emptyMap
-import kotlin.collections.last
-import kotlin.collections.listOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.set
+import net.akehurst.language.types.api.TypesDomain
 import kotlin.reflect.KClass
 
 class KSerialiserHJsonException : RuntimeException {
@@ -96,7 +88,7 @@ class KSerialiserHJson() {
     //    registry.registerFromConfigString(kompositeModel, emptyMap())
     //}
 
-    fun configureFromTypeModel(kompositeModel: TypeModel) {
+    fun configureFromTypeModel(kompositeModel: TypesDomain) {
         //TODO: mappers!
         registry.registerFromTypeModel(kompositeModel, emptyMap())
     }
@@ -147,7 +139,7 @@ class KSerialiserHJson() {
         println("*** root = $root (${root::class}")
         this.reference_cache.clear()
         val doc = HJsonDocument("json")
-        var currentObjStack = Stack<HJsonValue>()
+        val currentObjStack = mutableStackOf<HJsonValue>()
         val walker = kompositeWalker<List<String>, HJsonValue>(registry) {
             configure {
                 ELEMENTS = HJsonDocument.ELEMENTS

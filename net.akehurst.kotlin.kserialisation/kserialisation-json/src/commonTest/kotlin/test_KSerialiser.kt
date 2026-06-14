@@ -28,7 +28,8 @@ import net.akehurst.kotlinx.reflect.EnumValuesFunction
 import net.akehurst.kotlinx.reflect.KotlinxReflect
 import net.akehurst.language.base.api.SimpleName
 import net.akehurst.language.agl.expressions.processor.clazz
-import net.akehurst.language.typemodel.builder.typeModel
+import net.akehurst.language.types.asm.StdLibDefault.enumType
+import net.akehurst.language.types.builder.typesDomain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,11 +41,19 @@ class test_KSerialiser {
 
     @BeforeTest
     fun setup() {
-        this.sut.configureFromTypeModel(typeModel("",true) { 
+        this.sut.configureFromTypeModel(typesDomain("", true) {
             namespace("net.akehurst.kotlin.kserialisation.json.test") {
+                primitive("DateTime")
+                enum("TestEnumEEE", emptyList())
                 data("TestClassAAA") {
-                    propertyOf(setOf(CMP,VAL),"prop1","String")
-                    propertyOf(setOf(REF, VAR),"comp","TestClassAAA")
+                    constructor_ {
+                        parameter("prop1", "String")
+                        parameter("comp", "TestClassAAA", true)
+                    }
+                    propertyOf(setOf(CMP, VAL), "prop1", "String")
+                    propertyOf(setOf(CMP, VAR), "comp", "TestClassAAA")
+                    propertyOf(setOf(REF, VAR), "refr", "TestClassAAA")
+                    propertyOf(setOf(CMP, VAR), "prop2", "Integer")
                 }
             }
         })
@@ -61,7 +70,8 @@ class test_KSerialiser {
 */
 
         this.sut.registerKotlinStdPrimitives()
-        this.sut.registerPrimitiveAsObject(DateTime::class, //
+        this.sut.registerPrimitiveAsObject(
+            DateTime::class, //
             { value -> JsonNumber(value.unixMillisDouble.toString()) }, //
             { json -> DateTime.fromUnixMillis(json.asNumber().toDouble()) }
         )
@@ -121,7 +131,7 @@ class test_KSerialiser {
     @Test
     fun toJson_Byte_1() {
 
-        val root:Any = 1.toByte()
+        val root: Any = 1.toByte()
         println("class.simpleName: ${root::class.simpleName}")
         assertEquals("Byte", root::class.simpleName)
 
@@ -531,7 +541,7 @@ class test_KSerialiser {
     @Test
     fun toJson_A() {
 
-        val root = TestClassAAA("1: hello",null)
+        val root = TestClassAAA("1: hello", null)
         root.prop2 = (5)
         val dtA = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("TestClassAAA"))!!
 
@@ -567,7 +577,7 @@ class test_KSerialiser {
 
         val actual: TestClassAAA = this.sut.toData(json)
 
-        val expected = TestClassAAA("hello",null)
+        val expected = TestClassAAA("hello", null)
 
         assertEquals(expected, actual)
     }
@@ -575,7 +585,7 @@ class test_KSerialiser {
     @Test
     fun toJson_A_2() {
 
-        val root = TestClassAAA("1: hello",TestClassAAA("1.3",null))
+        val root = TestClassAAA("1: hello", TestClassAAA("1.3", null))
         root.prop2 = (5)
         root.comp?.refr = root
         val dtA = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("TestClassAAA"))!!
@@ -621,7 +631,7 @@ class test_KSerialiser {
                 property("comp") {
                     objectReferenceable(dtA.qualifiedName.value) {
                         property("prop1", "1.3")
-                        property("comp",null)
+                        property("comp", null)
                         property("prop3", null)
                         property("refr") {
                             reference("/")
@@ -640,7 +650,7 @@ class test_KSerialiser {
 
         val actual: TestClassAAA = this.sut.toData(json)
 
-        val expected = TestClassAAA("1: hello",TestClassAAA("1.3",null))
+        val expected = TestClassAAA("1: hello", TestClassAAA("1.3", null))
         expected.prop2 = (5)
         expected.comp?.refr = expected
 

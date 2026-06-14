@@ -17,22 +17,13 @@
 package net.akehurst.kotlin.kserialisation.json
 
 import net.akehurst.kotlin.json.*
-import net.akehurst.kotlinx.collections.Stack
-import net.akehurst.language.base.api.SimpleName
+import net.akehurst.kotlinx.collections.mutableStackOf
 import net.akehurst.kotlinx.komposite.common.DatatypeRegistry
 import net.akehurst.kotlinx.komposite.common.PrimitiveMapper
 import net.akehurst.kotlinx.komposite.common.WalkInfo
 import net.akehurst.kotlinx.komposite.common.kompositeWalker
-import net.akehurst.kotlinx.reflect.reflect
-import net.akehurst.language.typemodel.api.TypeModel
-import kotlin.collections.List
-import kotlin.collections.Set
-import kotlin.collections.emptyList
-import kotlin.collections.emptyMap
-import kotlin.collections.last
-import kotlin.collections.listOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.set
+import net.akehurst.language.base.api.SimpleName
+import net.akehurst.language.types.api.TypesDomain
 import kotlin.reflect.KClass
 
 class KSerialiserJsonException : RuntimeException {
@@ -101,7 +92,7 @@ class KSerialiserJson() {
         //TODO: mappers!
     //    registry.registerFromConfigString(kompositeModel, emptyMap())
    // }
-    fun configureFromTypeModel(typeModel: TypeModel) {
+    fun configureFromTypeModel(typeModel: TypesDomain) {
         //TODO: mappers!
         registry.registerFromTypeModel(typeModel, emptyMap())
     }
@@ -126,7 +117,7 @@ class KSerialiserJson() {
 
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toJson: (value: P) -> JsonValue, fromJson: (json: JsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
-        val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
+        val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserJsonException("The primitive '${cls.simpleName}' is not defined in the Komposite configuration")
         val toJsonMpr = { value: P ->
             val obj = JsonUnreferencableObject()
             obj.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.PRIMITIVE.asJsonString)
@@ -145,7 +136,7 @@ class KSerialiserJson() {
     fun toJson(root: Any, data: Any): JsonDocument {
         this.reference_cache.clear()
         val doc = JsonDocument("json")
-        val currentObjStack = Stack<JsonValue>()
+        val currentObjStack = mutableStackOf<JsonValue>()
         val walker = kompositeWalker<List<String>, JsonValue>(registry) {
             configure {
                 ELEMENTS = JsonDocument.ELEMENTS

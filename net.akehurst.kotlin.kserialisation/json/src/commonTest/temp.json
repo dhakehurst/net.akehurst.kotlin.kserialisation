@@ -1,0 +1,42 @@
+{
+  "isBranch":true,
+  "name":"unit",
+  "children":[
+    {"isBranch":true,
+      "name":"declaration",
+      "children":[
+        {"isBranch":true,
+          "name":"datatype",
+          "children":[
+            {"isBranch":false,"name":"'class'","nonSkipMatchedText":"class"},
+            {"isBranch":true,
+              "name":"WS",
+              "children":[
+                {"isBranch":false,"name":"\"\\s+\"","nonSkipMatchedText":" "}
+              ]},
+            {"isBranch":false,"name":"ID","nonSkipMatchedText":"Person"},
+            {"isBranch":true,
+              "name":"WS",
+              "children":[
+                {"isBranch":false,"name":"\"\\s+\"","nonSkipMatchedText":" "}
+              ]},
+            {"isBranch":false,
+              "name":"'{'","nonSkipMatchedText":"{"
+            },
+            {"isBranch":true,
+              "name":"WS",
+              "children":[
+                {"isBranch":false,
+                  "name":"\"\\s+\"",
+                  "nonSkipMatchedText":""
+                }
+              ]},
+            {"isBranch":true,"name":"§datatype§multi1","children":[
+              {"isBranch":false,"name":"§empty.§datatype§multi1","nonSkipMatchedText":""}
+            ]},
+            {"isBranch":false,
+              "name":"'}'",
+              "nonSkipMatchedText":"}"}
+          ]}
+      ]}
+  ]}

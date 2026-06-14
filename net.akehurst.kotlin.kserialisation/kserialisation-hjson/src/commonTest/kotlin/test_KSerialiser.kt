@@ -21,7 +21,7 @@ import korlibs.time.DateTime
 import net.akehurst.hjson.*
 import net.akehurst.kotlinx.reflect.KotlinxReflect
 import net.akehurst.language.base.api.SimpleName
-import net.akehurst.language.typemodel.builder.typeModel
+import net.akehurst.language.types.builder.typesDomain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -63,7 +63,7 @@ class test_KSerialiser {
     @BeforeTest
     fun setup() {
         this.sut.configureFromTypeModel(
-            typeModel("", true) {
+            typesDomain("", true) {
                 namespace("com.soywiz.klock") {
                     primitive("DateTime")
                 }

@@ -1,0 +1,2728 @@
+{
+  $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ProjectSimple
+  identity:
+  {
+    $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ProjectIdentity
+    value: demo
+    value: demo
+  }
+  owner: Unknown
+  artefactDefinition:
+  {
+    $type: Set
+    $elements:
+    [
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: Requirement
+          value: Requirement
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#fac0c0"
+        layoutHint: "[20.907744874715256, 38.14009111617312, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: Requirement
+          value: Requirement
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/0"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: kind
+                value: kind
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/0"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: kind
+                value: kind
+              }
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/0"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: author
+                value: author
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/0"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: author
+                value: author
+              }
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/0"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: text
+                value: text
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/0"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: text
+                value: text
+              }
+            }
+          ]
+        }
+        name: Requirement
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: DesignItem
+          value: DesignItem
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#a3a3fa"
+        layoutHint: "[66.93280182232353, 121.8268792710706, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: DesignItem
+          value: DesignItem
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/1"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/1"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+            }
+          ]
+        }
+        name: DesignItem
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: IntegrationTest
+          value: IntegrationTest
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#7175fa"
+        layoutHint: "[308.85281572843644, 122.77658636059384, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: IntegrationTest
+          value: IntegrationTest
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/2"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/2"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+            }
+          ]
+        }
+        name: IntegrationTest
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: AcceptanceTest
+          value: AcceptanceTest
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#f75b5b"
+        layoutHint: "[342.77166214372096, 39.213222741683595, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: AcceptanceTest
+          value: AcceptanceTest
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/3"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/3"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+            }
+          ]
+        }
+        name: AcceptanceTest
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: UnitTestResult
+          value: UnitTestResult
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#03fa2c"
+        layoutHint: "[442.54724965104975, 199.77271029104247, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: UnitTestResult
+          value: UnitTestResult
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/4"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: status
+                value: status
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/4"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: status
+                value: status
+              }
+            }
+          ]
+        }
+        name: UnitTestResult
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: AcceptanceTestResult
+          value: AcceptanceTestResult
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#fa0303"
+        layoutHint: "[569.2241245116, 41.545314210698386, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: AcceptanceTestResult
+          value: AcceptanceTestResult
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/5"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: status
+                value: status
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/5"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: status
+                value: status
+              }
+            }
+          ]
+        }
+        name: AcceptanceTestResult
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: IntegrationTestResult
+          value: IntegrationTestResult
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#0350f7"
+        layoutHint: "[517.0050772878931, 120.73012541445925, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: IntegrationTestResult
+          value: IntegrationTestResult
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/6"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: status
+                value: status
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/6"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: status
+                value: status
+              }
+            }
+          ]
+        }
+        name: IntegrationTestResult
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: UnitTest
+          value: UnitTest
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#6bfc58"
+        layoutHint: "[271.1001369855905, 200.09908883826878, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: UnitTest
+          value: UnitTest
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/7"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/7"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+            }
+          ]
+        }
+        name: UnitTest
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: CodeFile
+          value: CodeFile
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        colour: "#c8fabb"
+        layoutHint: "[108.87129840546699, 199.01936218678816, 1, 1]"
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinitionIdentity
+          value: CodeFile
+          value: CodeFile
+        }
+        complex: false
+        property:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/8"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+              owner:
+              {
+                $type: Reference
+                $ref: "#/artefactDefinition/8"
+              }
+              identity:
+              {
+                $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactPropertyDefinitionIdentity
+                value: property
+                value: property
+              }
+            }
+          ]
+        }
+        name: CodeFile
+        queryConfiguration:
+        {
+          $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+        }
+      }
+    ]
+  }
+  description: A new Project
+  queryDefinition:
+  {
+    $type: Set
+    $elements:
+    [
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: AcceptanceTestResultPassCount
+          value: AcceptanceTestResultPassCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: AcceptanceTestResultPassCount
+          value: AcceptanceTestResultPassCount
+        }
+        name: AcceptanceTestResult Pass Count
+        queryText:
+          '''
+          MATCH AcceptanceTestResult AS n WHERE n.status=='pass' RETURN TABLE COLUMN AcceptanceTestResult CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all AcceptanceTestResult
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: UnitTestResultCount
+          value: UnitTestResultCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: UnitTestResultCount
+          value: UnitTestResultCount
+        }
+        name: UnitTestResult Count
+        queryText:
+          '''
+          MATCH UnitTestResult AS n RETURN TABLE COLUMN UnitTestResult CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all UnitTestResult
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: artefactCount
+          value: artefactCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: artefactCount
+          value: artefactCount
+        }
+        name: Artefact Count
+        queryText:
+          '''
+          MATCH any AS n RETURN TABLE COLUMN Count CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all artefacts by type
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: UnitTestCount
+          value: UnitTestCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: UnitTestCount
+          value: UnitTestCount
+        }
+        name: UnitTest Count
+        queryText:
+          '''
+          MATCH UnitTest AS n RETURN TABLE COLUMN UnitTest CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all UnitTest
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: requirementCoverage
+          value: requirementCoverage
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: requirementCoverage
+          value: requirementCoverage
+        }
+        name: Requirement Coverage
+        queryText:
+          '''
+          MATCH Requirement AS r
+            LINKED FROM AcceptanceTest
+            LINKED FROM AcceptanceTestResult AS atr
+            WHERE atr.status=='pass'
+            RETURN TABLE
+              COLUMN timestamp CONTAINING timestamp.format('MMM')
+              COLUMN coverage CONTAINING COUNT(r)
+          '''
+        description: Count of Requirements covered by Acceptance Test Results that pass
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: CodeFileCount
+          value: CodeFileCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: CodeFileCount
+          value: CodeFileCount
+        }
+        name: CodeFile Count
+        queryText:
+          '''
+          MATCH CodeFile AS n RETURN TABLE COLUMN CodeFile CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all CodeFile
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: IntegrationTestCount
+          value: IntegrationTestCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: IntegrationTestCount
+          value: IntegrationTestCount
+        }
+        name: IntegrationTest Count
+        queryText:
+          '''
+          MATCH IntegrationTest AS n RETURN TABLE COLUMN IntegrationTest CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all IntegrationTest
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: RequirementCount
+          value: RequirementCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: RequirementCount
+          value: RequirementCount
+        }
+        name: Requirement Count
+        queryText:
+          '''
+          MATCH Requirement AS n RETURN TABLE COLUMN Requirement CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all Requirements
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: AcceptanceTestResultCount
+          value: AcceptanceTestResultCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: AcceptanceTestResultCount
+          value: AcceptanceTestResultCount
+        }
+        name: AcceptanceTestResult Count
+        queryText:
+          '''
+          MATCH AcceptanceTestResult AS n RETURN TABLE COLUMN AcceptanceTestResult CONTAINING COUNT(n) COLUMN status CONTAINING n.status
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all AcceptanceTestResult
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: DesignItemCount
+          value: DesignItemCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: DesignItemCount
+          value: DesignItemCount
+        }
+        name: DesignItem Count
+        queryText:
+          '''
+          MATCH DesignItem AS n RETURN TABLE COLUMN DesignItem CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all DesignItem
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: AcceptanceTestCount
+          value: AcceptanceTestCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: AcceptanceTestCount
+          value: AcceptanceTestCount
+        }
+        name: AcceptanceTest Count
+        queryText:
+          '''
+          MATCH AcceptanceTest AS n RETURN TABLE COLUMN AcceptanceTest CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all AcceptanceTest
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: IntegrationTestResultCount
+          value: IntegrationTestResultCount
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        ownTable: false
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.QueryDefinitionIdentity
+          value: IntegrationTestResultCount
+          value: IntegrationTestResultCount
+        }
+        name: IntegrationTestResult Count
+        queryText:
+          '''
+          MATCH IntegrationTestResult AS n RETURN TABLE COLUMN IntegrationTestResult CONTAINING COUNT(n)
+          COLUMN Name CONTAINING n.tgType.identity
+          COLUMN Colour CONTAINING n.tgType.colour
+          '''
+        description: Count of all IntegrationTestResult
+      }
+    ]
+  }
+  widgetDefinition:
+  {
+    $type: Set
+    $elements:
+    [
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: artefactCountOverTime
+          value: artefactCountOverTime
+        }
+        layout:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.Layout
+          x: 12
+          y: 0
+          w: 14
+          h: 8
+          w: 14
+          h: 8
+          x: 12
+          y: 0
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: artefactCountOverTime
+          value: artefactCountOverTime
+        }
+        description: ""
+        label: Artefact Count Over Time
+        type: Chart
+        queryString:
+          '''
+            FOR TIMESPAN all EVERY month
+              FROM RequirementCount
+              RETURN TABLE
+                COLUMN Date CONTAINING timestamp.format('MMM')
+                COLUMN Requirement CONTAINING Requirement
+          JOIN
+            FOR TIMESPAN all EVERY month
+              FROM AcceptanceTestCount
+              RETURN TABLE
+                COLUMN Date CONTAINING timestamp.format('MMM')
+                COLUMN AcceptanceTest CONTAINING AcceptanceTest
+          JOIN
+            FOR TIMESPAN all EVERY month
+              FROM AcceptanceTestResultPassCount
+              RETURN TABLE
+                COLUMN Date CONTAINING timestamp.format('MMM')
+                COLUMN AcceptanceTestResultPass CONTAINING AcceptanceTestResult
+          JOIN
+            FOR TIMESPAN all EVERY month
+              FROM DesignItemCount
+              RETURN TABLE
+                COLUMN Date CONTAINING timestamp.format('MMM')
+                COLUMN DesignItem CONTAINING DesignItem
+          '''
+        properties:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: series2
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: series2
+              value: AcceptanceTest
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: series3
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: series3
+              value: AcceptanceTestResultPass
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: series0
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: series0
+              value: Requirement
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: chartType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: chartType
+              value: Line-Line
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: series1
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: series1
+              value: DesignItem
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colourType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colourType
+              value: auto
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: showLegend
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: showLegend
+              value: "true"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: startWithZero
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: startWithZero
+              value: "true"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: legendPosition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: legendPosition
+              value: top
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: reverseLabelOrder
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: reverseLabelOrder
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: labels
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: labels
+              value: Date
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: fullWidth
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: fullWidth
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colSeries1
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colSeries1
+              value: red
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colSeries0
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colSeries0
+              value: red
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colSeries3
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colSeries3
+              value: red
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colSeries2
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colSeries2
+              value: red
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colour
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/0"
+              }
+              name: colour
+            }
+          ]
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: ia
+          value: ia
+        }
+        layout:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.Layout
+          x: 0
+          y: 15
+          w: 12
+          h: 7
+          w: 12
+          h: 7
+          x: 0
+          y: 15
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: ia
+          value: ia
+        }
+        description: ""
+        label: Impact Analysis of Req-1
+        type: Graph
+        queryString:
+          '''
+          MATCH Requirement AS r
+
+          LINKED USING 1..8 LINKS FROM any
+
+          WHERE r.tgIdentity=='Req-1'
+          '''
+        properties:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: legendPosition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: legendPosition
+              value: top
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: reverseLabelOrder
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: reverseLabelOrder
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: colourType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: colourType
+              value: auto
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: chartType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: chartType
+              value: Bar-Normal
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: colour
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: colour
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: fullWidth
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: fullWidth
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: showLegend
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: showLegend
+              value: "true"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: labels
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: labels
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: startWithZero
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/1"
+              }
+              name: startWithZero
+              value: "true"
+            }
+          ]
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: ArtefactCount
+          value: ArtefactCount
+        }
+        layout:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.Layout
+          x: 0
+          y: 0
+          w: 12
+          h: 8
+          w: 12
+          h: 8
+          x: 0
+          y: 0
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: ArtefactCount
+          value: ArtefactCount
+        }
+        description: ""
+        label: Artefact Count
+        type: Chart
+        queryString: FROM artefactCount
+        properties:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: fullWidth
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: fullWidth
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: colSeries0
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: colSeries0
+              value: red
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: startWithZero
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: startWithZero
+              value: "true"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: legendPosition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: legendPosition
+              value: top
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: series0
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: series0
+              value: Count
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: reverseLabelOrder
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: reverseLabelOrder
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: chartType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: chartType
+              value: Pie
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: colourType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: colourType
+              value: column
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: labels
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: labels
+              value: Name
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: colour
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: colour
+              value: Colour
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: showLegend
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/2"
+              }
+              name: showLegend
+              value: "true"
+            }
+          ]
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: coverage
+          value: coverage
+        }
+        layout:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.Layout
+          x: 12
+          y: 8
+          w: 14
+          h: 7
+          w: 14
+          h: 7
+          x: 12
+          y: 8
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: coverage
+          value: coverage
+        }
+        description: ""
+        label: Requirements Coverage
+        type: Chart
+        queryString: FOR TIMESPAN all EVERY month FROM requirementCoverage
+        properties:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: colour
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: colour
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: startWithZero
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: startWithZero
+              value: "true"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: chartType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: chartType
+              value: Line-Line
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: series0
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: series0
+              value: coverage
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: showLegend
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: showLegend
+              value: "true"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: fullWidth
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: fullWidth
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: colSeries0
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: colSeries0
+              value: red
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: legendPosition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: legendPosition
+              value: top
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: labels
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: labels
+              value: timestamp
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: colourType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: colourType
+              value: auto
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: reverseLabelOrder
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/3"
+              }
+              name: reverseLabelOrder
+              value: "false"
+            }
+          ]
+        }
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionProject
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: keyRequirements
+          value: keyRequirements
+        }
+        layout:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.Layout
+          x: 0
+          y: 8
+          w: 12
+          h: 7
+          w: 12
+          h: 7
+          x: 0
+          y: 8
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionIdentity
+          value: keyRequirements
+          value: keyRequirements
+        }
+        description: ""
+        label: Key Requirement Test Status
+        type: Table
+        queryString:
+          '''
+          MATCH Requirement AS r
+          LINKED FROM AcceptanceTest AS at
+          LINKED FROM AcceptanceTestResult AS atr
+          WHERE r.kind=='Stakeholder'
+          RETURN TABLE
+            COLUMN Requirement CONTAINING r.tgIdentity
+            COLUMN TestStatus CONTAINING atr.status
+          '''
+        properties:
+        {
+          $type: Set
+          $elements:
+          [
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: startWithZero
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: startWithZero
+              value: "true"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: colourType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: colourType
+              value: auto
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: colour
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: colour
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: legendPosition
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: legendPosition
+              value: top
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: chartType
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: chartType
+              value: Bar-Normal
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: reverseLabelOrder
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: reverseLabelOrder
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: fullWidth
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: fullWidth
+              value: "false"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: showLegend
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: showLegend
+              value: "true"
+            }
+            {
+              $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.WidgetDefinitionPropertyValue
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: labels
+              owner:
+              {
+                $type: Reference
+                $ref: "#/widgetDefinition/4"
+              }
+              name: labels
+            }
+          ]
+        }
+      }
+    ]
+  }
+  identity:
+  {
+    $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ProjectIdentity
+    value: demo
+    value: demo
+  }
+  name: New Project
+  linkDefinition:
+  {
+    $type: Set
+    $elements:
+    [
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: realises
+          value: realises
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        sourceType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/1"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: realises
+          value: realises
+        }
+        stored: false
+        targetType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/0"
+        }
+        storage:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionStorage
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/0"
+          }
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/0"
+          }
+          complex: false
+          queryConfiguration:
+          {
+            $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+          }
+        }
+        reverse: false
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: vResult
+          value: vResult
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        sourceType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/5"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: vResult
+          value: vResult
+        }
+        stored: false
+        targetType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/3"
+        }
+        storage:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionStorage
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/1"
+          }
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/1"
+          }
+          complex: false
+          queryConfiguration:
+          {
+            $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+          }
+        }
+        reverse: false
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: verifies
+          value: verifies
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        sourceType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/3"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: verifies
+          value: verifies
+        }
+        stored: false
+        targetType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/0"
+        }
+        storage:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionStorage
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/2"
+          }
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/2"
+          }
+          complex: false
+          queryConfiguration:
+          {
+            $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+          }
+        }
+        reverse: false
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: iResult
+          value: iResult
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        sourceType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/6"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: iResult
+          value: iResult
+        }
+        stored: false
+        targetType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/2"
+        }
+        storage:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionStorage
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/3"
+          }
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/3"
+          }
+          complex: false
+          queryConfiguration:
+          {
+            $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+          }
+        }
+        reverse: false
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: tests
+          value: tests
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        sourceType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/7"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: tests
+          value: tests
+        }
+        stored: false
+        targetType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/8"
+        }
+        storage:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionStorage
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/4"
+          }
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/4"
+          }
+          complex: false
+          queryConfiguration:
+          {
+            $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+          }
+        }
+        reverse: false
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: uResult
+          value: uResult
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        sourceType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/4"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: uResult
+          value: uResult
+        }
+        stored: false
+        targetType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/7"
+        }
+        storage:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionStorage
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/5"
+          }
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/5"
+          }
+          complex: false
+          queryConfiguration:
+          {
+            $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+          }
+        }
+        reverse: false
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: confirms
+          value: confirms
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        sourceType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/2"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: confirms
+          value: confirms
+        }
+        stored: false
+        targetType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/1"
+        }
+        storage:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionStorage
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/6"
+          }
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/6"
+          }
+          complex: false
+          queryConfiguration:
+          {
+            $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+          }
+        }
+        reverse: false
+      }
+      {
+        $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinition
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: implements
+          value: implements
+        }
+        owner:
+        {
+          $type: Reference
+          $ref: "#/"
+        }
+        sourceType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/8"
+        }
+        identity:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionIdentity
+          value: implements
+          value: implements
+        }
+        stored: false
+        targetType:
+        {
+          $type: Reference
+          $ref: "#/artefactDefinition/1"
+        }
+        storage:
+        {
+          $class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.LinkDefinitionStorage
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/7"
+          }
+          owner:
+          {
+            $type: Reference
+            $ref: "#/linkDefinition/7"
+          }
+          complex: false
+          queryConfiguration:
+          {
+            $class: de.itemis.vistraq.traceability.computational.datasourceConnectors.api.data.DatasourceConnectorConfiguration
+          }
+        }
+        reverse: false
+      }
+    ]
+  }
+}
