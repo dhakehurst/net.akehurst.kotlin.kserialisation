@@ -1,14 +1,14 @@
 [versions]
-project = "2.2.21-SNAPSHOT"
+project = "2.2.21"
 
 kotlin = "2.2.21"
 dokka = "2.1.0"
 buildconfig = "5.7.1"
-exportPublic = "2.2.21-SNAPSHOT"
+exportPublic = "2.2.21"
 vanniktech = "0.34.0"
 
-nal-agl-processor = "4.2.2.21-SNAPSHOT"
-nak-kotlinx = "2.2.21-SNAPSHOT"
+nal-agl-processor = "4.2.2.21"
+nak-kotlinx = "2.2.21"
 
 [libraries]
 nal-agl-processor = { module = "net.akehurst.language:agl-processor", version.ref = "nal-agl-processor" }
