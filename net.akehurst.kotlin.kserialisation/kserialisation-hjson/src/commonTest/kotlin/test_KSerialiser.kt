@@ -16,8 +16,6 @@
 
 package net.akehurst.kotlin.kserialisation.hjson
 
-
-import korlibs.time.DateTime
 import net.akehurst.hjson.*
 import net.akehurst.kotlinx.reflect.KotlinxReflect
 import net.akehurst.language.base.api.SimpleName
@@ -26,6 +24,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 internal class TestClassAAA(
     internal val prop1: String
@@ -64,13 +64,13 @@ class test_KSerialiser {
     fun setup() {
         this.sut.configureFromTypeModel(
             typesDomain("", true) {
-                namespace("com.soywiz.klock") {
-                    primitive("DateTime")
+                namespace(" kotlin.time") {
+                    primitive("Instant")
                 }
                 namespace("net.akehurst.kotlin.kserialisation.hjson") {
                     data("TestClassAAA") {
                         constructor_ {
-                            parameter("prop1", "String")
+                            parameter(setOf(),"prop1", "String")
                         }
                         propertyOf(setOf(CMP,VAL),"prop1","String")
                         propertyOf(setOf(CMP, VAR),"comp","String")
@@ -80,28 +80,11 @@ class test_KSerialiser {
                 }
             }
         )
-        /*
-        this.sut.configureFromKompositeString("""
-            namespace com.soywiz.klock {
-              primitive DateTime
-            }
-            namespace net.akehurst.kotlin.kserialisation.hjson {
-                import kotlin
-            
-                datatype TestClassAAA {
-                    composite-val prop1 : String
-                    composite-var comp : TestClassAAA?
-                    reference-var refr : TestClassAAA?
-                    composite-var prop2  : Int
-                }
-            }
-        """.trimIndent())
-         */
 
         this.sut.registerKotlinStdPrimitives()
-        this.sut.registerPrimitiveAsObject(DateTime::class, //
-                { value -> HJsonNumber(value.unixMillisDouble.toString()) }, //
-                { json -> DateTime.fromUnixMillis(json.asNumber().toDouble()) }
+        this.sut.registerPrimitiveAsObject(Instant::class, //
+                { value -> HJsonNumber(value.toEpochMilliseconds().toString()) }, //
+                { json -> Instant.fromEpochMilliseconds(json.asNumber().toLong()) }
         )
         KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.hjson.TestClassAAA",TestClassAAA::class)
         this.sut.registry.resolveImports()
@@ -334,32 +317,32 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toHJson_DateTime() {
+    fun toHJson_Instant() {
 
-        val now = DateTime.now()
+        val now = Clock.System.now()
         val root = now
 
         val actual = this.sut.toHJson(root, root)
 
-        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("DateTime"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Instant"))!!
 
         val expected = hjson("expected") {
-            primitiveObject(dt.qualifiedName.value, now.unixMillisDouble)
+            primitiveObject(dt.qualifiedName.value, now.toEpochMilliseconds())
         }.toHJsonString()
 
         assertEquals(expected, actual.toHJsonString())
     }
 
     @Test
-    fun toData_DateTime() {
+    fun toData_Instant() {
 
-        val now = DateTime.now()
-        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("DateTime"))!!
+        val now = Clock.System.now()
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Instant"))!!
         val root = hjson("expected") {
-            primitiveObject(dt.qualifiedName.value, now.unixMillisDouble)
+            primitiveObject(dt.qualifiedName.value, now.toEpochMilliseconds())
         }.toHJsonString()
 
-        val actual:DateTime = this.sut.toData(root, DateTime::class)
+        val actual: Instant = this.sut.toData(root, Instant::class)
 
         val expected = now
 
@@ -400,7 +383,7 @@ class test_KSerialiser {
     @Test
     fun toHJson_Array() {
 
-        val root = arrayOf(1, true, "hello")
+        val root = arrayOf<Any>(1, true, "hello")
 
         val actual = this.sut.toHJson(root, root)
 
@@ -428,7 +411,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toData(root, Array::class) as Array<Any>
 
-        val expected = arrayOf(1, true, "hello")
+        val expected = arrayOf<Any>(1, true, "hello")
 
         assertTrue(expected contentEquals actual)
     }

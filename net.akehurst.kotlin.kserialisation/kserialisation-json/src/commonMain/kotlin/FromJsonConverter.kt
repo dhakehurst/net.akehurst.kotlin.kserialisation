@@ -21,6 +21,11 @@ import net.akehurst.kotlinx.komposite.common.*
 import net.akehurst.language.agl.expressions.processor.*
 import net.akehurst.language.base.api.QualifiedName
 import net.akehurst.language.base.api.SimpleName
+import net.akehurst.language.expressions.processor.constructDataType
+import net.akehurst.language.expressions.processor.constructValueType
+import net.akehurst.language.expressions.processor.objectInstance
+import net.akehurst.language.expressions.processor.set
+import net.akehurst.language.expressions.processor.valueOf
 import net.akehurst.language.types.api.*
 import net.akehurst.language.types.asm.StdLibDefault
 import kotlin.reflect.KClass

@@ -39,7 +39,7 @@ class SyntaxAnalyserHJson(
         super.registerFor("value", this::value_)
         super.registerFor("object", this::object_)
         super.register(this::property)
-        super.registerForBeginHandler("property",this::property_begin)
+        super.registerForBeginHandler("property", this::property_begin)
         super.register(this::array)
         super.register(this::arrayElements)
         super.register(this::arrayElementsSeparated)
@@ -53,6 +53,7 @@ class SyntaxAnalyserHJson(
         super.register(this::NUMBER)
         super.register(this::QUOTELESS_STRING)
         super.register(this::DOUBLE_QUOTE_STRING)
+        super.register(this::SINGLE_QUOTE_STRING)
         super.register(this::MULTI_LINE_STRING)
     }
 
@@ -77,20 +78,21 @@ class SyntaxAnalyserHJson(
         val props = (children[1] as List<Pair<String, HJsonValue>?>?)?.filterNotNull() ?: emptyList()
         return when {
             //HJsonReference
-            1==props.size && props[0].first==HJson.REF && (props[0].second is HJsonString)-> {
+            1 == props.size && props[0].first == HJson.REF && (props[0].second is HJsonString) -> {
                 val refStr = (props[0].second as HJsonString).value
                 HJsonReference(this._doc, refStr)
             }
 
-            (props.any{it.first==HJsonDocument.KIND && it.second is HJsonString && props[0].second == HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString }) ->{
+            (props.any { it.first == HJsonDocument.KIND && it.second is HJsonString && props[0].second == HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString }) -> {
                 val obj = HJsonReferencableObject(this._doc, this._path.elements.toMutableList())
                 props.forEach { (n, v) -> obj.setProperty(n, v) }
                 obj
             }
+
             else -> {
                 val obj = HJsonUnreferencableObject()
                 props.forEach { (n, v) -> obj.setProperty(n, v) }
-                 obj
+                obj
             }
         }
     }
@@ -120,7 +122,7 @@ class SyntaxAnalyserHJson(
 
     // arrayElementsSeparated = [ value / ',' ]* ;
     fun arrayElementsSeparated(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): List<HJsonValue> =
-        (children as List<Any>).toSeparatedList<Any, HJsonValue, String>().items
+        (children as List<List<Any>>).flatten().toSeparatedList<Any, HJsonValue, String>().items
 
     // arrayElementsSimple =  value* ;
     fun arrayElementsSimple(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): List<HJsonValue> =
@@ -170,12 +172,20 @@ class SyntaxAnalyserHJson(
 
     // leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]*[\n]" ;
     fun QUOTELESS_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonString {
-        val str = sentence.matchedTextNoSkip(nodeInfo.node).dropLast(1)
-        return HJsonString(str)
+        val str = sentence.matchedTextNoSkip(nodeInfo.node)
+        val v = if (str.endsWith("\n")) str.dropLast(1) else str
+        return HJsonString(v)
     }
 
     // leaf DOUBLE_QUOTE_STRING = "\"([^"\\]|\\.)*\"" ;
     fun DOUBLE_QUOTE_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonString {
+        val str = sentence.matchedTextNoSkip(nodeInfo.node)
+        val s = str.substring(1, str.length - 1)
+        return HJsonString(s)
+    }
+
+    // leaf SINGLE_QUOTE_STRING = "'(\\.|[^\n'\\])*'" ;
+    fun SINGLE_QUOTE_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonString {
         val str = sentence.matchedTextNoSkip(nodeInfo.node)
         val s = str.substring(1, str.length - 1)
         return HJsonString(s)

@@ -17,7 +17,6 @@
 package net.akehurst.kotlin.kserialisation.json
 
 
-import korlibs.time.DateTime
 import net.akehurst.kotlin.json.JsonBoolean
 import net.akehurst.kotlin.json.JsonNumber
 import net.akehurst.kotlin.json.JsonString
@@ -27,13 +26,14 @@ import net.akehurst.kotlin.kserialisation.json.test.TestEnumEEE
 import net.akehurst.kotlinx.reflect.EnumValuesFunction
 import net.akehurst.kotlinx.reflect.KotlinxReflect
 import net.akehurst.language.base.api.SimpleName
-import net.akehurst.language.agl.expressions.processor.clazz
-import net.akehurst.language.types.asm.StdLibDefault.enumType
+import net.akehurst.language.expressions.processor.clazz
 import net.akehurst.language.types.builder.typesDomain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class test_KSerialiser {
 
@@ -43,12 +43,12 @@ class test_KSerialiser {
     fun setup() {
         this.sut.configureFromTypeModel(typesDomain("", true) {
             namespace("net.akehurst.kotlin.kserialisation.json.test") {
-                primitive("DateTime")
+                primitive("Instant")
                 enum("TestEnumEEE", emptyList())
                 data("TestClassAAA") {
                     constructor_ {
-                        parameter("prop1", "String")
-                        parameter("comp", "TestClassAAA", true)
+                        parameter(setOf(),"prop1", "String")
+                        parameter(setOf(),"comp", "TestClassAAA", true)
                     }
                     propertyOf(setOf(CMP, VAL), "prop1", "String")
                     propertyOf(setOf(CMP, VAR), "comp", "TestClassAAA")
@@ -71,9 +71,9 @@ class test_KSerialiser {
 
         this.sut.registerKotlinStdPrimitives()
         this.sut.registerPrimitiveAsObject(
-            DateTime::class, //
-            { value -> JsonNumber(value.unixMillisDouble.toString()) }, //
-            { json -> DateTime.fromUnixMillis(json.asNumber().toDouble()) }
+            Instant::class, //
+            { value -> JsonNumber(value.toEpochMilliseconds().toString()) }, //
+            { json -> Instant.fromEpochMilliseconds(json.asNumber().toLong()) }
         )
         KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.json.test.TestClassAAA", TestClassAAA::class)
         KotlinxReflect.registerClass("net.akehurst.kotlin.kserialisation.json.test.TestEnumEEE", TestEnumEEE::class, TestEnumEEE::values as EnumValuesFunction)
@@ -302,32 +302,32 @@ class test_KSerialiser {
     }
 
     @Test
-    fun toJson_DateTime() {
+    fun toJson_Instant() {
 
-        val now = DateTime.now()
+        val now = Clock.System.now()
         val root = now
 
         val actual = this.sut.toJson(root, root)
 
-        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("DateTime"))!!
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Instant"))!!
 
         val expected = json("expected") {
-            primitiveObject(dt.qualifiedName.value, now.unixMillisDouble)
+            primitiveObject(dt.qualifiedName.value, now.toEpochMilliseconds())
         }.toFormattedJsonString("  ", "  ")
 
         assertEquals(expected, actual.toFormattedJsonString("  ", "  "))
     }
 
     @Test
-    fun toData_DateTime() {
+    fun toData_Instant() {
 
-        val now = DateTime.now()
-        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("DateTime"))!!
+        val now = Clock.System.now()
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Instant"))!!
         val root = json("expected") {
-            primitiveObject(dt.qualifiedName.value, now.unixMillisDouble)
+            primitiveObject(dt.qualifiedName.value, now.toEpochMilliseconds())
         }.toFormattedJsonString("  ", "  ")
 
-        val actual: DateTime = this.sut.toData(root)
+        val actual: Instant = this.sut.toData(root)
 
         val expected = now
 
@@ -368,7 +368,7 @@ class test_KSerialiser {
     @Test
     fun toJson_Array() {
 
-        val root = arrayOf(1, true, "hello")
+        val root = arrayOf<Any>(1, true, "hello")
 
         val actual = this.sut.toJson(root, root)
 
@@ -396,7 +396,7 @@ class test_KSerialiser {
 
         val actual = this.sut.toData(root, Array::class) as Array<Any>
 
-        val expected = arrayOf(1, true, "hello")
+        val expected = arrayOf<Any>(1, true, "hello")
 
         assertTrue(expected contentEquals actual)
     }

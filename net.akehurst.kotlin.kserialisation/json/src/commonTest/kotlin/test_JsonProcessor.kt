@@ -18,7 +18,6 @@ package net.akehurst.kotlin.json
 
 import kotlin.test.*
 
-
 class test_JsonProcessor {
 
     fun assertEquals(expected: JsonDocument, actual: JsonDocument) {

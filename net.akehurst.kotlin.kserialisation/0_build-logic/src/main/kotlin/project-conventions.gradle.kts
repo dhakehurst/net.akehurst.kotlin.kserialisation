@@ -29,9 +29,10 @@ plugins {
     signing
     alias(libs.plugins.vanniktech.maven.publish)
 }
-val kotlin_languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2
-val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2
-val jvmTargetVersion = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+val kotlin_languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
+val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
+val jvmTargetVersion = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+val junitVersion = "6.1.1"
 
 repositories {
     mavenLocal {
@@ -117,9 +118,9 @@ kotlin {
         }
         jvmTest.dependencies {
             //implementation(libs.kotest.runner.junit5)
-            implementation("org.junit.jupiter:junit-jupiter")
-            runtimeOnly("org.junit.platform:junit-platform-launcher")
-            runtimeOnly("org.junit.jupiter:junit-jupiter-params")
+            implementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+            runtimeOnly("org.junit.platform:junit-platform-launcher:$junitVersion")
+            runtimeOnly("org.junit.jupiter:junit-jupiter-params:$junitVersion")
         }
     }
 }

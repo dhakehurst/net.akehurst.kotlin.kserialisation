@@ -61,21 +61,21 @@ object HJson {
                 value = literal | object | array ;
                 object = '{' property* '}' ;
                 property = name ':' value ','?;
-                array = '[' arrayElements ']' ;
-                arrayElements = arrayElementsSeparated | arrayElementsSimple ;
-                arrayElementsSeparated = [ value / ',' ]2+ ;
-                arrayElementsSimple =  value* ;
-                name = DOUBLE_QUOTE_STRING | ID ;
+                array = '[' arrayElementsSeparated ']' ;
+                arrayElementsSeparated = (value ','?)* ;
+                name = ID | DOUBLE_QUOTE_STRING | SINGLE_QUOTE_STRING ;
                 
                 literal = string | NUMBER | BOOLEAN | NULL ;
-                string = QUOTELESS_STRING | DOUBLE_QUOTE_STRING | MULTI_LINE_STRING ;
+                string = QUOTELESS_STRING | DOUBLE_QUOTE_STRING | SINGLE_QUOTE_STRING | MULTI_LINE_STRING ;
                 
-                leaf ID = "[^\{\}\[\],:\n\r\t ]+" ;
+                leaf ID = "[^\{\}\[\],:\n\r\t \"'#/][^\{\}\[\],:\n\r\t ]*" ;
                 leaf NULL = 'null' ;
                 leaf BOOLEAN = "true|false" ;
                 leaf NUMBER = "-?(0|[0-9]+)([.][0-9]+)?([eE][+-]?[0-9]+)?" ;
-                leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]*([\n])" ;
-                leaf DOUBLE_QUOTE_STRING = "\"([^\n\"\\]|\\.)*\"" ;
+                // Stops before structural delimiters so arrays/objects parse cleanly
+                leaf QUOTELESS_STRING = "[^\{\}\[\],:\n\r\t \"'#/]+([ \t]+[^\{\}\[\],:\n\r\t \"'#/]+)*" ;
+                leaf DOUBLE_QUOTE_STRING = "\"(\\.|[^\n\"\\])*\"" ;
+                leaf SINGLE_QUOTE_STRING = "'(\\.|[^\n'\\])*'" ;
                 leaf MULTI_LINE_STRING = "'''([^\\]|\\.)*?'''" ;
             }
             

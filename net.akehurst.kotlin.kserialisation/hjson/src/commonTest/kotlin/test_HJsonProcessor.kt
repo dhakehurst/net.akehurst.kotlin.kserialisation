@@ -312,6 +312,7 @@ class test_HJsonProcessor {
 
     }
 
+
     @Test
     fun object_json() {
 
@@ -356,6 +357,7 @@ class test_HJsonProcessor {
         assertEquals(expected, actual)
 
     }
+
     @Test
     fun object_hjson() {
 
