@@ -29,8 +29,8 @@ plugins {
     signing
     alias(libs.plugins.vanniktech.maven.publish)
 }
-val kotlin_languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
-val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
+val kotlin_languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4
+val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4
 val jvmTargetVersion = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 val junitVersion = "6.1.1"
 
@@ -117,6 +117,7 @@ kotlin {
             implementation(kotlin("test-annotations-common"))
         }
         jvmTest.dependencies {
+            implementation(kotlin("test-junit5"))
             //implementation(libs.kotest.runner.junit5)
             implementation("org.junit.jupiter:junit-jupiter:$junitVersion")
             runtimeOnly("org.junit.platform:junit-platform-launcher:$junitVersion")

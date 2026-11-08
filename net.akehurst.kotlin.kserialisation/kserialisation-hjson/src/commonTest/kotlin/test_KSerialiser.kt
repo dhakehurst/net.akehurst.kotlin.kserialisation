@@ -33,16 +33,15 @@ internal class TestClassAAA(
 
     private var _privProp: Int = -1
 
-    internal var comp: TestClassAAA? = null
-    internal var refr: TestClassAAA? = null
+    var comp: TestClassAAA? = null
+    var refr: TestClassAAA? = null
 
-    fun getProp2(): Int {
-        return this._privProp
-    }
-
-    fun setProp2(value: Int) {
-        this._privProp = value
-    }
+    // a Kotlin property: kotlinx-reflect only treats get/set methods as properties on Java classes
+    var prop2: Int
+        get() = this._privProp
+        set(value) {
+            this._privProp = value
+        }
 
     override fun hashCode(): Int {
         return prop1.hashCode()
@@ -530,7 +529,7 @@ class test_KSerialiser {
     fun toHJson_A() {
 
         val root = TestClassAAA("1: hello")
-        root.setProp2(5)
+        root.prop2 = 5
         val dtA = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("TestClassAAA"))!!
 
         val actual = this.sut.toHJson(root, root)
@@ -574,7 +573,7 @@ class test_KSerialiser {
     fun toHJson_A_2() {
 
         val root = TestClassAAA("1: hello")
-        root.setProp2(5)
+        root.prop2 = 5
         root.comp = TestClassAAA("1.3")
         root.comp?.refr = root
         val dtA = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("TestClassAAA"))!!
@@ -636,14 +635,14 @@ class test_KSerialiser {
         val actual:TestClassAAA = this.sut.toData(json, TestClassAAA::class)
 
         val expected = TestClassAAA("1: hello")
-        expected.setProp2(5)
+        expected.prop2 = 5
         expected.comp = TestClassAAA("1.3")
         expected.comp?.refr = expected
 
         assertEquals(expected, actual)
-        assertEquals(expected.getProp2(), actual.getProp2())
+        assertEquals(expected.prop2, actual.prop2)
         assertEquals(expected.comp, actual.comp)
-        assertEquals(expected.comp?.getProp2(), actual.comp?.getProp2())
+        assertEquals(expected.comp?.prop2, actual.comp?.prop2)
         assertEquals(expected.comp?.comp, actual.comp?.comp)
         assertEquals(expected.comp?.refr, actual.comp?.refr)
         assertEquals(expected.refr, actual.refr)
