@@ -201,7 +201,7 @@ class KSerialiserJson() {
             }
             collEnd { path, info, data, dt, et ->
                 val jsonTypeName = when(data) {
-                    is Array<*> -> JsonDocument.ComplexObjectKind.ARRAY.asJsonString
+                //    is Array<*> -> JsonDocument.ComplexObjectKind.ARRAY.asJsonString
                     is Set<*> -> JsonDocument.ComplexObjectKind.SET.asJsonString
                     is List<*> -> JsonDocument.ComplexObjectKind.LIST.asJsonString
                     else -> throw KSerialiserJsonException("Unknown type $dt")

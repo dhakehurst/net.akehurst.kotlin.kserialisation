@@ -201,7 +201,7 @@ class KSerialiserHJson() {
             }
             collEnd { path, info, data, dt, et ->
                 val jsonTypeName = when (data) {
-                    is Array<*> -> HJsonDocument.ComplexObjectKind.ARRAY.asHJsonString
+                //    is Array<*> -> HJsonDocument.ComplexObjectKind.ARRAY.asHJsonString
                     is Set<*> -> HJsonDocument.ComplexObjectKind.SET.asHJsonString
                     is List<*> -> HJsonDocument.ComplexObjectKind.LIST.asHJsonString
                     else -> throw KSerialiserHJsonException("Unknown type $dt")
