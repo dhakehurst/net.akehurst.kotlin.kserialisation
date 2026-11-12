@@ -72,6 +72,10 @@ class KSerialiserHJson() {
                 propertyBegin { path, info, property ->
                     WalkInfo(info.up, info.acc)
                 }
+                objectRepeat { path, info, obj, datatype, firstPath ->
+                    // already walked (and so already written) at firstPath, written here as a reference
+                    WalkInfo(info.up, info.acc)
+                }
             }
 
             try {
@@ -185,6 +189,11 @@ class KSerialiserHJson() {
             reference { path, info, value, property ->
                 val refPath = calcReferencePath(root, value)
                 val ref = HJsonReference(doc, refPath)
+                WalkInfo(path, ref)
+            }
+            objectRepeat { path, info, obj, datatype, firstPath ->
+                // the same object (by identity) is only written once, other occurrences are written as a reference to it
+                val ref = HJsonReference(doc, firstPath)
                 WalkInfo(path, ref)
             }
             singleton { path, info, obj, datatype ->

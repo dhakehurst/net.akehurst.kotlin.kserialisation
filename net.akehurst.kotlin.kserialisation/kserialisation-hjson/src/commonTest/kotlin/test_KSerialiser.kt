@@ -659,4 +659,31 @@ class test_KSerialiser {
         assertEquals(expected.comp?.refr, actual.comp?.refr)
         assertEquals(expected.refr, actual.refr)
     }
+
+    @Test
+    fun toHJson_same_object_twice_is_written_once() {
+        // an object met more than once (by identity) is written in full once, and as a reference elsewhere
+        val shared = TestClassAAA("shared")
+        val root = listOf(shared, shared)
+
+        val str = this.sut.toHJson(root, root).toHJsonString()
+
+        assertEquals(1, Regex("shared").findAll(str).count(), str)
+        val actual: List<TestClassAAA> = this.sut.toData(str)
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] === actual[1], "expected the same instance")
+    }
+
+    @Test
+    fun toHJson_equal_but_distinct_objects_are_both_written() {
+        // objects are compared by identity, not by equals
+        val root = listOf(TestClassAAA("same"), TestClassAAA("same"))
+
+        val str = this.sut.toHJson(root, root).toHJsonString()
+
+        assertEquals(2, Regex("same").findAll(str).count(), str)
+        val actual: List<TestClassAAA> = this.sut.toData(str)
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] !== actual[1], "expected distinct instances")
+    }
 }

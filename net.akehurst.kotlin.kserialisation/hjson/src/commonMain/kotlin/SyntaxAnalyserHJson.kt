@@ -32,11 +32,19 @@ class SyntaxAnalyserHJson(
     private var _doc = HJsonDocument("hjson")
     private val _path = mutableStackOf<String>()
 
+    // to give array elements their index in _path, so that objects in arrays can be the target of a reference
+    // _context: per open property/array, null for a property, the next element index for an array
+    private val _context = mutableStackOf<IntArray?>()
+    // per open value, whether value_begin pushed an element index onto _path
+    private val _valuePushedIndex = mutableStackOf<Boolean>()
+
     override val embeddedSyntaxAnalyser: Map<QualifiedName, SyntaxAnalyser<HJsonDocument>> = emptyMap()
 
     override fun registerHandlers() {
         super.register(this::hjson)
         super.registerFor("value", this::value_)
+        super.registerForBeginHandler("value", this::value_begin)
+        super.registerForBeginHandler("array", this::array_begin)
         super.registerFor("object", this::object_)
         super.register(this::property)
         super.registerForBeginHandler("property", this::property_begin)
@@ -61,6 +69,8 @@ class SyntaxAnalyserHJson(
         super.clear(done)
         this._doc = HJsonDocument("hjson")
         this._path.clear()
+        this._context.clear()
+        this._valuePushedIndex.clear()
     }
 
     // hjson = value ;
@@ -69,9 +79,22 @@ class SyntaxAnalyserHJson(
         return this._doc
     }
 
+    fun value_begin(nodeInfo: SpptDataNodeInfo, siblings: List<Any?>, sentence: Sentence) {
+        val arrayIndex = if (this._context.isEmpty) null else this._context.peek()
+        if (null == arrayIndex) {
+            this._valuePushedIndex.push(false)
+        } else {
+            this._path.push(arrayIndex[0].toString())
+            arrayIndex[0]++
+            this._valuePushedIndex.push(true)
+        }
+    }
+
     // value = literal | object | array ;
-    fun value_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonValue =
-        children[0] as HJsonValue
+    fun value_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonValue {
+        if (this._valuePushedIndex.pop()) this._path.pop()
+        return children[0] as HJsonValue
+    }
 
     // object = '{' property* '}' ;
     fun object_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonValue {
@@ -101,17 +124,24 @@ class SyntaxAnalyserHJson(
     fun property_begin(nodeInfo: SpptDataNodeInfo, siblings: List<Any?>, sentence: Sentence) {
         val name = sentence.matchedTextNoSkip(nodeInfo.node).substringBefore(":").trim()
         this._path.push(name)
+        this._context.push(null)
     }
 
     fun property(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): Pair<String, HJsonValue> {
         this._path.pop()
+        this._context.pop()
         val name = children[0] as String
         val value = children[2] as HJsonValue
         return Pair(name, value)
     }
 
     // array = '[' arrayElements ']' ;
+    fun array_begin(nodeInfo: SpptDataNodeInfo, siblings: List<Any?>, sentence: Sentence) {
+        this._context.push(intArrayOf(0))
+    }
+
     fun array(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonArray {
+        this._context.pop()
         val l = children[1] as List<HJsonValue>
         return HJsonArray(l)
     }

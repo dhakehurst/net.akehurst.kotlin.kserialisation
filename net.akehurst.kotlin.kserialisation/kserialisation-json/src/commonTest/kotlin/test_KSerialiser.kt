@@ -31,6 +31,7 @@ import net.akehurst.language.types.builder.typesDomain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -673,5 +674,45 @@ class test_KSerialiser {
         assertEquals(expected.comp?.comp, actual.comp?.comp)
         assertEquals(expected.comp?.refr, actual.comp?.refr)
         assertEquals(expected.refr, actual.refr)
+    }
+
+    @Test
+    fun toJson_same_object_twice_is_written_once() {
+        // an object met more than once (by identity) is written in full once, and as a reference elsewhere
+        val shared = TestClassAAA("shared", null)
+        val root = listOf(shared, shared)
+
+        val str = this.sut.toJson(root, root).toFormattedJsonString("  ", "  ")
+
+        assertEquals(1, Regex("shared").findAll(str).count(), str)
+        val actual: List<TestClassAAA> = this.sut.toData(str)
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] === actual[1], "expected the same instance")
+    }
+
+    @Test
+    fun toJson_equal_but_distinct_objects_are_both_written() {
+        // objects are compared by identity, not by equals
+        val root = listOf(TestClassAAA("same", null), TestClassAAA("same", null))
+
+        val str = this.sut.toJson(root, root).toFormattedJsonString("  ", "  ")
+
+        assertEquals(2, Regex("same").findAll(str).count(), str)
+        val actual: List<TestClassAAA> = this.sut.toData(str)
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] !== actual[1], "expected distinct instances")
+    }
+
+    @Test
+    fun toJson_composite_cycle_through_constructor_gives_error() {
+        // x.comp = y, y.comp = x : neither can be constructed first
+        val x = TestClassAAA("x", null)
+        val y = TestClassAAA("y", x)
+        x.comp = y
+
+        val str = this.sut.toJson(x, x).toFormattedJsonString("  ", "  ")
+
+        val e = assertFailsWith<KSerialiserJsonException> { this.sut.toData<TestClassAAA>(str) }
+        assertTrue(e.message!!.contains("its constructor arguments refer back to it"), e.message)
     }
 }
