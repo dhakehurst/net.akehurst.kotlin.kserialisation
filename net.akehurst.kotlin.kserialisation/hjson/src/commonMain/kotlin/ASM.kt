@@ -25,7 +25,7 @@ class HJsonDocument(
 ) {
 
     enum class ComplexObjectKind {
-        SINGLETON, PRIMITIVE, ENUM, ARRAY, OBJECT, LIST, SET, MAP;
+        SINGLETON, SPECIAL, PRIMITIVE, ENUM, ARRAY, OBJECT, LIST, SET, MAP;
 
         val asHJsonString get() = HJsonString("\$${this.name}")
     }

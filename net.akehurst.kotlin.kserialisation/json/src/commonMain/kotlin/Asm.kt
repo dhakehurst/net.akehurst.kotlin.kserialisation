@@ -23,7 +23,7 @@ data class JsonDocument(
     val identity: String
 ) {
     enum class ComplexObjectKind {
-        SINGLETON, PRIMITIVE, ENUM, ARRAY, OBJECT, LIST, SET, MAP;
+        SINGLETON, SPECIAL, PRIMITIVE, ENUM, ARRAY, OBJECT, LIST, SET, MAP;
 
         val asJsonString get() = JsonString("\$${this.name}")
     }

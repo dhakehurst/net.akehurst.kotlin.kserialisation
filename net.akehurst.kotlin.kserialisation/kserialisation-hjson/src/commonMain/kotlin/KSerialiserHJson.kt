@@ -147,6 +147,13 @@ class KSerialiserHJson() {
                 KEY = HJsonDocument.KEY
                 VALUE = HJsonDocument.VALUE
             }
+            special { path, info, obj, type ->
+                // a special value, e.g. kotlin.Unit (the agl value nothing), written as its agl type, e.g. std.Nothing
+                val json = HJsonUnreferencableObject()
+                json.setProperty(HJsonDocument.KIND, HJsonDocument.ComplexObjectKind.SPECIAL.asHJsonString)
+                json.setProperty(HJsonDocument.CLASS, HJsonString(type.qualifiedName.value))
+                WalkInfo(info.up, json)
+            }
             nullValue { path, info, dt ->
                 WalkInfo(info.up, HJsonNull)
             }

@@ -144,6 +144,13 @@ class KSerialiserJson() {
                 KEY = JsonDocument.KEY
                 VALUE = JsonDocument.VALUE
             }
+            special { path, info, obj, type ->
+                // a special value, e.g. kotlin.Unit (the agl value nothing), written as its agl type, e.g. std.Nothing
+                val json = JsonUnreferencableObject()
+                json.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.SPECIAL.asJsonString)
+                json.setProperty(JsonDocument.CLASS, JsonString(type.qualifiedName.value))
+                WalkInfo(info.up, json)
+            }
             nullValue { path, info, t ->
                 WalkInfo(info.up, JsonNull)
             }

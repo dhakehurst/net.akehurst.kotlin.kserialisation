@@ -179,6 +179,7 @@ class FromHJsonConverter(
                 }
 
                 HJsonDocument.ComplexObjectKind.SINGLETON -> convertObject2Singleton(path, json, targetType)
+                HJsonDocument.ComplexObjectKind.SPECIAL -> convertObject2Special(json)
                 HJsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json, targetType)
                 HJsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json, targetType)
                 //TODO: HJsonDocument.ENUM -> convertObject2Enum()
@@ -187,6 +188,12 @@ class FromHJsonConverter(
                 }
             }
         }
+    }
+
+    private fun convertObject2Special(json: HJsonObject): Any {
+        val typeName = QualifiedName(json.property[HJsonDocument.CLASS]!!.asString().value)
+        val type = registry.findAglTypeOrNull(typeName) ?: throw KSerialiserHJsonException("Cannot find the special type '${typeName.value}'")
+        return registry.specialValueFor(type)
     }
 
     private fun convertObject2Singleton(path: List<String>, json: HJsonObject, targetType: TypeInstance?): Any {

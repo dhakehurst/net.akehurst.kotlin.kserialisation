@@ -174,6 +174,7 @@ class FromJsonConverter(
                 }
 
                 JsonDocument.ComplexObjectKind.SINGLETON -> convertObject2Singleton(path, json, targetType)
+                JsonDocument.ComplexObjectKind.SPECIAL -> convertObject2Special(json)
                 JsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json, targetType)
                 JsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json, targetType)
                 JsonDocument.ComplexObjectKind.ENUM -> convertObject2Enum(path, json) ?: throw KSerialiserJsonException("Incorrect JSON, no enum value found for ${json.toFormattedJsonString("", "")}")
@@ -182,6 +183,12 @@ class FromJsonConverter(
                 }
             }
         }
+    }
+
+    private fun convertObject2Special(json: JsonObject): Any {
+        val typeName = QualifiedName(json.property[JsonDocument.CLASS]!!.asString().value)
+        val type = registry.findAglTypeOrNull(typeName) ?: throw KSerialiserJsonException("Cannot find the special type '${typeName.value}'")
+        return registry.specialValueFor(type)
     }
 
     private fun convertObject2Singleton(path: List<String>, json: JsonObject, targetType: TypeInstance?): Any {

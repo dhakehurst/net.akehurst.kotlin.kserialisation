@@ -403,6 +403,18 @@ class test_KSerialiser {
 
 
     @Test
+    fun toJson_Unit_is_special_value_Nothing() {
+        // kotlin.Unit is the agl value nothing (ObjectGraphAccessorMutator.nothing()), of the special type std.Nothing
+        val root = listOf(1, Unit, "hello")
+
+        val str = this.sut.toJson(root, root).toFormattedJsonString("  ", "  ")
+
+        assertTrue(str.contains("\$SPECIAL") && str.contains("std.Nothing"), str)
+        val actual: List<Any> = this.sut.toData(str)
+        assertEquals(root, actual)
+    }
+
+    @Test
     fun toJson_List() {
 
         val root = listOf(1, true, "hello")
