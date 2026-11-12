@@ -81,6 +81,10 @@ class KSerialiserJson() {
                     // already walked (and so already written) at firstPath, written here as a reference
                     WalkInfo(info.up, info.acc)
                 }
+                lookup { path, info, obj, lookupName, key ->
+                    // written by its lookup key, not walked
+                    WalkInfo(info.up, info.acc)
+                }
             }
 
             try {
@@ -147,6 +151,14 @@ class KSerialiserJson() {
                 ENTRIES = JsonDocument.ENTRIES
                 KEY = JsonDocument.KEY
                 VALUE = JsonDocument.VALUE
+            }
+            lookup { path, info, obj, lookupName, key ->
+                // an object found, when read, by the key of a registered lookup (e.g. a definition owned by a singleton)
+                val json = JsonUnreferencableObject()
+                json.setProperty(JsonDocument.KIND, JsonDocument.ComplexObjectKind.LOOKUP.asJsonString)
+                json.setProperty(JsonDocument.CLASS, JsonString(lookupName))
+                json.setProperty(JsonDocument.VALUE, JsonString(key))
+                WalkInfo(info.up, json)
             }
             special { path, info, obj, type ->
                 // a special value, e.g. kotlin.Unit (the agl value nothing), written as its agl type, e.g. std.Nothing

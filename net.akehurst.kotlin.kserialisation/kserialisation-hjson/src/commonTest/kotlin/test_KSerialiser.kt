@@ -20,6 +20,7 @@ import net.akehurst.hjson.*
 import net.akehurst.kotlinx.reflect.KotlinxReflect
 import net.akehurst.language.base.api.SimpleName
 import net.akehurst.language.types.builder.typesDomain
+import net.akehurst.kotlinx.komposite.common.LookupMapper
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -685,5 +686,24 @@ class test_KSerialiser {
         val actual: List<TestClassAAA> = this.sut.toData(str)
         assertEquals(2, actual.size)
         assertTrue(actual[0] !== actual[1], "expected distinct instances")
+    }
+
+    @Test
+    fun toHJson_registered_lookup_writes_key_and_reads_existing_object() {
+        // an object a registered lookup gives a key for is written by that key, and found again by it
+        val known = TestClassAAA("known-value")
+        this.sut.registry.registerLookup(LookupMapper(
+            name = "known",
+            toKey = { v -> if (v === known) "the-known-one" else null },
+            fromKey = { k -> if (k == "the-known-one") known else null }
+        ))
+        val root = listOf(known, TestClassAAA("other"))
+
+        val str = this.sut.toHJson(root, root).toHJsonString()
+
+        assertTrue(str.contains("\$LOOKUP") && str.contains("the-known-one") && !str.contains("known-value"), str)
+        val actual: List<TestClassAAA> = this.sut.toData(str)
+        assertTrue(actual[0] === known, "expected the registered instance")
+        assertEquals("other", actual[1].prop1)
     }
 }

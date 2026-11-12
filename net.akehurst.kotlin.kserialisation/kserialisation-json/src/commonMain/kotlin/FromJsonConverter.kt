@@ -181,6 +181,7 @@ class FromJsonConverter(
 
                 JsonDocument.ComplexObjectKind.SINGLETON -> convertObject2Singleton(path, json, targetType)
                 JsonDocument.ComplexObjectKind.SPECIAL -> convertObject2Special(json)
+                JsonDocument.ComplexObjectKind.LOOKUP -> convertObject2Lookup(json)
                 JsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json, targetType)
                 JsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json, targetType)
                 JsonDocument.ComplexObjectKind.ENUM -> convertObject2Enum(path, json) ?: throw KSerialiserJsonException("Incorrect JSON, no enum value found for ${json.toFormattedJsonString("", "")}")
@@ -189,6 +190,12 @@ class FromJsonConverter(
                 }
             }
         }
+    }
+
+    private fun convertObject2Lookup(json: JsonObject): Any {
+        val lookupName = json.property[JsonDocument.CLASS]?.asString()?.value ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.CLASS} property found for lookup")
+        val key = json.property[JsonDocument.VALUE]?.asString()?.value ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.VALUE} property found for lookup")
+        return registry.lookupValueFor(lookupName, key)
     }
 
     private fun convertObject2Special(json: JsonObject): Any {

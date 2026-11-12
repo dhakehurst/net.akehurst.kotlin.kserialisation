@@ -186,6 +186,7 @@ class FromHJsonConverter(
 
                 HJsonDocument.ComplexObjectKind.SINGLETON -> convertObject2Singleton(path, json, targetType)
                 HJsonDocument.ComplexObjectKind.SPECIAL -> convertObject2Special(json)
+                HJsonDocument.ComplexObjectKind.LOOKUP -> convertObject2Lookup(json)
                 HJsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json, targetType)
                 HJsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json, targetType)
                 //TODO: HJsonDocument.ENUM -> convertObject2Enum()
@@ -194,6 +195,12 @@ class FromHJsonConverter(
                 }
             }
         }
+    }
+
+    private fun convertObject2Lookup(json: HJsonObject): Any {
+        val lookupName = json.property[HJsonDocument.CLASS]?.asString()?.value ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.CLASS} property found for lookup")
+        val key = json.property[HJsonDocument.VALUE]?.asString()?.value ?: throw KSerialiserHJsonException("Incorrect JSON, no ${HJsonDocument.VALUE} property found for lookup")
+        return registry.lookupValueFor(lookupName, key)
     }
 
     private fun convertObject2Special(json: HJsonObject): Any {
