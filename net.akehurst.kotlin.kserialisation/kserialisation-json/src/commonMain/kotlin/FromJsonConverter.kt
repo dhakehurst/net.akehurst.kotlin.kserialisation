@@ -37,6 +37,12 @@ class FromJsonConverter(
 
     private val resolvedReference = mutableMapOf<List<String>, Any>()
 
+    /**
+     * paths of objects whose constructor arguments are being converted, and how many times each has been entered.
+     * An object can be entered a second time via a forward reference from one of its own constructor arguments.
+     */
+    private val constructing = mutableMapOf<List<String>, Int>()
+
     fun <T : Any> convertTo(path: List<String>, json: JsonValue, targetKlass: KClass<T>? = null): T? {
         val targetType = targetKlass?.let { registry.findTypeDeclarationByKClass(it) }
         val type = targetType?.type()
@@ -175,6 +181,7 @@ class FromJsonConverter(
 
                 JsonDocument.ComplexObjectKind.SINGLETON -> convertObject2Singleton(path, json, targetType)
                 JsonDocument.ComplexObjectKind.SPECIAL -> convertObject2Special(json)
+                JsonDocument.ComplexObjectKind.LOOKUP -> convertObject2Lookup(json)
                 JsonDocument.ComplexObjectKind.OBJECT -> convertObject2Object(path, json, targetType)
                 JsonDocument.ComplexObjectKind.PRIMITIVE -> convertObject2Primitive(path, json, targetType)
                 JsonDocument.ComplexObjectKind.ENUM -> convertObject2Enum(path, json) ?: throw KSerialiserJsonException("Incorrect JSON, no enum value found for ${json.toFormattedJsonString("", "")}")
@@ -183,6 +190,12 @@ class FromJsonConverter(
                 }
             }
         }
+    }
+
+    private fun convertObject2Lookup(json: JsonObject): Any {
+        val lookupName = json.property[JsonDocument.CLASS]?.asString()?.value ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.CLASS} property found for lookup")
+        val key = json.property[JsonDocument.VALUE]?.asString()?.value ?: throw KSerialiserJsonException("Incorrect JSON, no ${JsonDocument.VALUE} property found for lookup")
+        return registry.lookupValueFor(lookupName, key)
     }
 
     private fun convertObject2Special(json: JsonObject): Any {
@@ -243,17 +256,28 @@ class FromJsonConverter(
 
             is DataType -> {
                 val constructorParams = dt.constructors[0].parameters
-                val consArgs = constructorParams.map {
-                    val jsonPropValue = json.property[it.name.value]
-                    if (null == jsonPropValue) {
-                        null
-                    } else {
-                        val propType = it.typeInstance
-                        val v = this.convertValue(path + it.name.value, jsonPropValue, propType)
-                        v
+                val entered = (constructing[path] ?: 0) + 1
+                if (entered > 2) throw KSerialiserJsonException("Cannot construct '$clsName' at '/${path.joinToString("/")}', its constructor arguments refer back to it")
+                constructing[path] = entered
+                val consArgs = try {
+                    constructorParams.map {
+                        val jsonPropValue = json.property[it.name.value]
+                        if (null == jsonPropValue) {
+                            null
+                        } else {
+                            val propType = it.typeInstance
+                            val v = this.convertValue(path + it.name.value, jsonPropValue, propType)
+                            v
+                        }
                     }
+                } finally {
+                    if (1 == entered) constructing.remove(path) else constructing[path] = entered - 1
                 }
+                // converting the constructor arguments may already have constructed this object, via a reference to it
+                val alreadyConstructed = resolvedReference[path]
                 when {
+                    null != alreadyConstructed -> alreadyConstructed
+
                     StdLibDefault.Pair.qualifiedName == clsName -> {
                         val first = consArgs[0]
                         val second = consArgs[1]

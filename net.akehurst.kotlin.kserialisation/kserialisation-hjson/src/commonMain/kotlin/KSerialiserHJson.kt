@@ -72,6 +72,14 @@ class KSerialiserHJson() {
                 propertyBegin { path, info, property ->
                     WalkInfo(info.up, info.acc)
                 }
+                objectRepeat { path, info, obj, datatype, firstPath ->
+                    // already walked (and so already written) at firstPath, written here as a reference
+                    WalkInfo(info.up, info.acc)
+                }
+                lookup { path, info, obj, lookupName, key ->
+                    // written by its lookup key, not walked
+                    WalkInfo(info.up, info.acc)
+                }
             }
 
             try {
@@ -147,6 +155,14 @@ class KSerialiserHJson() {
                 KEY = HJsonDocument.KEY
                 VALUE = HJsonDocument.VALUE
             }
+            lookup { path, info, obj, lookupName, key ->
+                // an object found, when read, by the key of a registered lookup (e.g. a definition owned by a singleton)
+                val json = HJsonUnreferencableObject()
+                json.setProperty(HJsonDocument.KIND, HJsonDocument.ComplexObjectKind.LOOKUP.asHJsonString)
+                json.setProperty(HJsonDocument.CLASS, HJsonString(lookupName))
+                json.setProperty(HJsonDocument.VALUE, HJsonString(key))
+                WalkInfo(info.up, json)
+            }
             special { path, info, obj, type ->
                 // a special value, e.g. kotlin.Unit (the agl value nothing), written as its agl type, e.g. std.Nothing
                 val json = HJsonUnreferencableObject()
@@ -185,6 +201,11 @@ class KSerialiserHJson() {
             reference { path, info, value, property ->
                 val refPath = calcReferencePath(root, value)
                 val ref = HJsonReference(doc, refPath)
+                WalkInfo(path, ref)
+            }
+            objectRepeat { path, info, obj, datatype, firstPath ->
+                // the same object (by identity) is only written once, other occurrences are written as a reference to it
+                val ref = HJsonReference(doc, firstPath)
                 WalkInfo(path, ref)
             }
             singleton { path, info, obj, datatype ->
