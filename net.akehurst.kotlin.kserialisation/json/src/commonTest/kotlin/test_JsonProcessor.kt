@@ -148,35 +148,35 @@ class test_JsonProcessor {
 
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun negative_loohbehind() {
+    fun negative_lookbehind() {
         val regex = Regex("(?<=x)a") // a preceded by x
         assertFalse(regex.matchesAt("ba",1))
         assertTrue(regex.matchesAt("xa",1))
     }
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun negative_loohbehind1() {
+    fun negative_lookbehind1() {
         val regex = Regex("(?<!x)a") // a NOT preceded by x
         assertTrue(regex.matchesAt("ba",1))
         assertFalse(regex.matchesAt("xa",1))
     }
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun negative_loohbehind2() {
+    fun negative_lookbehind2() {
         val regex = Regex("(?<=\\\\)a") // a preceded by \
         assertFalse(regex.matchesAt("ba",1))
         assertTrue(regex.matchesAt("\\a",1))
     }
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun negative_loohbehind3() {
+    fun negative_lookbehind3() {
         val regex = Regex("(?<!\\\\)a") // a NOT preceded by \
         assertTrue(regex.matchesAt("ba",1))
         assertFalse(regex.matchesAt("\\a",1))
     }
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun negative_loohbehind4() {
+    fun negative_lookbehind4() {
         val regex = Regex("(?<!\\\\)\\\\(.)") // \<any> NOT preceded by \
         assertTrue(regex.matchesAt("\\\\",0))
         assertFalse(regex.matchesAt("\\\\a",1))
