@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/dhakehurst/net.akehurst.kotlin.kserialisation.svg?branch=master)](https://travis-ci.org/dhakehurst/net.akehurst.kotlin.kserialisation)
 [![Maven Central](https://img.shields.io/maven-central/v/net.akehurst.kotlin.kserialisation/kserialisation-json.svg)](https://search.maven.org/artifact/net.akehurst.kotlin.kserialisation/kserialisation-json)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 ![Kotlin Version](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdhakehurst%2Fnet.akehurst.kotlin.kserialisation%2Frefs%2Fheads%2Fmaster%2Fnet.akehurst.kotlin.kserialisation%2Fgradle%2Flibs.versions.toml&search=kotlin%20%3D%20%22(%5B%5E%22%5D%2B)%22&replace=%241&label=Kotlin&color=green&link=https%3A%2F%2Fkotlinlang.org%2F)
@@ -205,6 +204,7 @@ Such objects are written as `{ "$kind" : "$LOOKUP", "$class" : "known", "$value"
 | `$elements`                | the elements of a list, set or array |
 | `$entries`                 | the entries of a map, each an object with `$key` and `$value` |
 | `{ "$ref" : "/a/b" }`      | a reference to the object written at that path in the document (`/` is the root) |
+| `{ $ref : "#/a/b" }`       | the HJSON form of a reference (paths are prefixed with `#/`) |
 
 Objects are compared by identity: two distinct but `equal` objects are both written in full.
 A cycle of composite properties that passes through constructor arguments cannot be re-created and gives a

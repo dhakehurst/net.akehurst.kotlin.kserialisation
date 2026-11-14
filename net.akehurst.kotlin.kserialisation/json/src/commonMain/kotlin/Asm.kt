@@ -15,13 +15,23 @@
  */
 package net.akehurst.kotlin.json
 
+/** Thrown when a JSON value is used as the wrong kind of value, or a reference cannot be resolved. */
 class JsonException : RuntimeException {
     constructor(message: String) : super(message)
 }
 
+/**
+ * A JSON document: a [root] value plus an index of the objects that can be the target of a reference.
+ *
+ * @property identity a name for the document, used for identification only
+ */
 data class JsonDocument(
     val identity: String
 ) {
+    /**
+     * The values of the `$kind` entry, which says how a serialised object is to be interpreted.
+     * Each is written as its name prefixed with `$`, e.g. `$OBJECT`.
+     */
     enum class ComplexObjectKind {
         SINGLETON, SPECIAL, LOOKUP, PRIMITIVE, ENUM, ARRAY, OBJECT, LIST, SET, MAP;
 
@@ -29,16 +39,24 @@ data class JsonDocument(
     }
 
     companion object {
+        /** Key of the entry giving the [ComplexObjectKind] of a serialised object. */
         val KIND = "\$kind"     // SINGLETON | PRIMITIVE | OBJECT | LIST | SET | MAP
+        /** Key of the entry giving the qualified type name of a serialised object (or the lookup name for `$LOOKUP`). */
         val CLASS = "\$class"
+        /** Key of the entry giving the key of a map entry. */
         val KEY = "\$key"
+        /** Key of the entry giving the value of a primitive, enum, value type, lookup or map entry. */
         val VALUE = "\$value"
+        /** Key of the entry giving the elements of a list, set or array. */
         val ELEMENTS = "\$elements"
+        /** Key of the entry giving the entries of a map. */
         val ENTRIES = "\$entries"
     }
 
+    /** The objects that can be the target of a reference, indexed by their path from the root. */
     val references = mutableMapOf<List<String>, JsonValue>()
 
+    /** The root value of the document. */
     var root: JsonValue = JsonUnreferencableObject()
 
     fun toStringJson(): String {
@@ -50,6 +68,10 @@ data class JsonDocument(
     }
 }
 
+/**
+ * Base class of all JSON values.
+ * The `as...` functions return this value as the requested kind, or throw [JsonException] if it is not of that kind.
+ */
 abstract class JsonValue {
 
     open fun asBoolean(): JsonBoolean {
@@ -76,17 +98,22 @@ abstract class JsonValue {
         throw JsonException("Object is not a JsonArray")
     }
 
+    /** Returns this value as compact JSON text. */
     abstract fun toStringJson(): String
+    /** Returns this value as indented JSON text, starting at [indent] and indenting nested values by [increment]. */
     abstract fun toFormattedJsonString(indent: String, increment: String): String
 }
 
+/** A JSON object: an ordered map of property names to values. */
 abstract class JsonObject : JsonValue() {
+    /** The properties of this object, in the order they were set. */
     var property: Map<String, JsonValue> = mutableMapOf()
 
     override fun asObject(): JsonObject {
         return this
     }
 
+    /** Sets the property [key] to [value] and returns this object. */
     open fun setProperty(key: String, value: JsonValue): JsonObject {
         (this.property as MutableMap)[key] = value
         return this
@@ -107,6 +134,7 @@ abstract class JsonObject : JsonValue() {
     }
 }
 
+/** A JSON object that cannot be the target of a reference. */
 class JsonUnreferencableObject : JsonObject() {
 
     override fun asObject(): JsonUnreferencableObject = this
@@ -115,6 +143,10 @@ class JsonUnreferencableObject : JsonObject() {
 
 }
 
+/**
+ * A JSON object that can be the target of a reference.
+ * It adds itself to the [document]'s references, under [path], when created.
+ */
 data class JsonReferencableObject(
     val document: JsonDocument,
     val path: List<String>
@@ -130,11 +162,21 @@ data class JsonReferencableObject(
 
 }
 
+/**
+ * A reference to an object written elsewhere in the same document, written as `{ "$ref" : "/a/b" }`.
+ *
+ * @property refPath the path, from the root, of the referenced object
+ */
 data class JsonReference(
     val document: JsonDocument,
     val refPath: List<String>
 ) : JsonValue() {
 
+    /**
+     * The referenced value.
+     *
+     * @throws JsonException if there is no referencable object at [refPath]
+     */
     val target: JsonValue
         get() {
             return this.document.references[refPath] ?: throw JsonException("Reference target not found for path='${refPath.joinToString(",", prefix = "/")}'")
@@ -154,6 +196,7 @@ data class JsonReference(
     }
 }
 
+/** A JSON boolean value. */
 data class JsonBoolean(
     val value: Boolean
 ) : JsonValue() {
@@ -170,6 +213,7 @@ data class JsonBoolean(
     }
 }
 
+/** A JSON number, held as its textual form so that no precision is lost until it is converted. */
 data class JsonNumber(
     private val _value: String
 ) : JsonValue() {
@@ -210,6 +254,7 @@ data class JsonNumber(
     }
 }
 
+/** A JSON string value. [value] is the unescaped string. */
 data class JsonString(
     val value: String
 ) : JsonValue() {
@@ -220,6 +265,7 @@ data class JsonString(
         private val unescape_n_regex = Regex("(?<!\\\\)\\\\n")
         private val unescape_r_regex = Regex("(?<!\\\\)\\\\r")
         private val unescape_t_regex = Regex("(?<!\\\\)\\\\t")
+        /** Escapes [rawString] for writing in a JSON string literal. */
         fun encode(rawString: String): String {
             return rawString
                 .replace("\\", "\\\\")
@@ -231,6 +277,7 @@ data class JsonString(
                 .replace("\"", "\\\"")
         }
 
+        /** Reverses [encode], returning the unescaped string. */
         fun decode(encodedValue: String): String {
             val value = encodedValue//.replace(Regex("(?<!\\\\)\\\\(.)"),"$1")
                 .replace(unescape_b_regex, "\b")
@@ -257,6 +304,7 @@ data class JsonString(
     }
 }
 
+/** A JSON array. */
 class JsonArray : JsonValue() {
 
     var elements: List<JsonValue> = mutableListOf<JsonValue>()
@@ -289,6 +337,7 @@ class JsonArray : JsonValue() {
         }
     }
 
+    /** Appends [element] and returns this array. */
     fun addElement(element: JsonValue): JsonArray {
         (this.elements as MutableList).add(element)
         return this
@@ -303,6 +352,7 @@ class JsonArray : JsonValue() {
     }
 }
 
+/** The JSON `null` value. */
 object JsonNull : JsonValue() {
     override fun toStringJson(): String {
         return "null"

@@ -26,20 +26,49 @@ import net.akehurst.language.base.api.SimpleName
 import net.akehurst.language.types.api.TypesDomain
 import kotlin.reflect.KClass
 
+/** Thrown when a value cannot be converted to or from JSON. */
 class KSerialiserJsonException : RuntimeException {
     constructor(message: String) : super(message)
 }
 
+/**
+ * Converts Kotlin object graphs to and from JSON.
+ *
+ * The serialiser is driven by a type model held in [registry]. Configure it with [configureFromTypeModel],
+ * then register mappings for primitive types (e.g. [registerKotlinStdPrimitives]) and make the classes available
+ * to `KotlinxReflect` so that objects can be created when reading.
+ *
+ * Composite properties are written in full; reference properties are written as `$ref` entries that point to the
+ * path, from the root, of an object written elsewhere in the same document (e.g. `{ "$ref" : "/child" }`).
+ * An object met more than once (compared by identity) is written once in full and as a reference elsewhere.
+ * Objects for which a registered lookup gives a key are written as `$LOOKUP` entries holding that key.
+ *
+ * Example:
+ * ```
+ * val serialiser = KSerialiserJson()
+ * serialiser.configureFromTypeModel(typeModel)
+ * serialiser.registerKotlinStdPrimitives()
+ * serialiser.registry.resolveImports()
+ * val text = serialiser.toJson(root, root).toFormattedJsonString("  ", "  ")
+ * val copy: MyClass = serialiser.toData(text)
+ * ```
+ */
 class KSerialiserJson() {
 
     internal val reference_cache = mutableMapOf<Any, List<String>>()
 
+    /** The type model and the primitive, lookup and other mappers used to walk and to re-create objects. */
     val registry = DatatypeRegistry()
 
+    /** Used internally to stop walking the object graph once a reference target has been found. */
     class FoundReferenceException : RuntimeException {
         constructor() : super()
     }
 
+    /**
+     * Computes the path, from [root], of the object [targetValue], as written in the document.
+     * Returns a path of the form `$unknown <ClassName>` if the object is not found.
+     */
     protected fun calcReferencePath(root: Any, targetValue: Any): List<String> {
         return if (reference_cache.containsKey(targetValue)) {
             reference_cache[targetValue]!!
@@ -100,11 +129,21 @@ class KSerialiserJson() {
         //TODO: mappers!
     //    registry.registerFromConfigString(kompositeModel, emptyMap())
    // }
+    /**
+     * Adds the types of the given type model to [registry].
+     * The type model says, for each class, which properties are composite (`CMP`) or references (`REF`),
+     * and which constructor parameters are used to create an instance when reading.
+     */
     fun configureFromTypeModel(typeModel: TypesDomain) {
         //TODO: mappers!
         registry.registerFromTypeModel(typeModel, emptyMap())
     }
 
+    /**
+     * Registers the Kotlin standard library type model and the JSON mappings for its primitive types.
+     * `Boolean` and `String` are written as plain JSON values; `Byte`, `Short`, `Int`, `Long`, `Float` and `Double`
+     * are written as `$PRIMITIVE` objects so that their exact type is kept.
+     */
     fun registerKotlinStdPrimitives() {
         this.registry.registerFromTypeModel(DatatypeRegistry.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> JsonBoolean(value) }, { json -> json.asBoolean().value })
@@ -117,12 +156,25 @@ class KSerialiserJson() {
         this.registerPrimitive(String::class, { value -> JsonString(value) }, { json -> json.asString().value })
     }
 
+    /**
+     * Registers a mapping for the primitive type [cls], written as the raw JSON value returned by `toJson`.
+     * The type must already be declared as a primitive in the type model.
+     *
+     * @throws KSerialiserJsonException if [cls] is not defined in the type model
+     */
     fun <T : Any> registerPrimitive(cls: KClass<T>, toJson: (value: T) -> JsonValue, toPrimitive: (json: JsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserJsonException("The primitive is not defined in the Komposite configuration")
         this.registry.registerPrimitiveMapper(PrimitiveMapper.create(cls, JsonValue::class, toJson, toPrimitive))
     }
 
+    /**
+     * Registers a mapping for the primitive type [cls], written as a `$PRIMITIVE` object
+     * with `$class` set to its qualified type name and `$value` set to the JSON value returned by `toJson`.
+     * The type must already be declared as a primitive in the type model.
+     *
+     * @throws KSerialiserJsonException if [cls] is not defined in the type model
+     */
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toJson: (value: P) -> JsonValue, fromJson: (json: JsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserJsonException("The primitive '${cls.simpleName}' is not defined in the Komposite configuration")
@@ -141,6 +193,13 @@ class KSerialiserJson() {
         this.registry.registerPrimitiveMapper(mapper)
     }
 
+    /**
+     * Converts [data] to a JSON document.
+     *
+     * @param root the object that reference paths are computed from; normally the same as [data]
+     * @param data the object to write
+     * @return the JSON document; use its string conversion functions to get the text
+     */
     fun toJson(root: Any, data: Any): JsonDocument {
         this.reference_cache.clear()
         val doc = JsonDocument("json")
@@ -299,6 +358,13 @@ class KSerialiserJson() {
         return doc
     }
 
+    /**
+     * Parses [jsonString] as JSON and re-creates the object it describes.
+     * The class of each object is taken from its `$class` entry.
+     *
+     * @param targetKlass the expected class of the result, needed when the root is a `$ARRAY`
+     * @return the re-created object, cast to [T]
+     */
     fun <T : Any> toData(jsonString: String, targetKlass: KClass<T>? = null): T {
         //TODO: use a bespoke written JSON parser, it will most likely be faster
         val json = Json.process(jsonString)

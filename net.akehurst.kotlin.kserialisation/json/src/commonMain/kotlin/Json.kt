@@ -17,8 +17,10 @@ package net.akehurst.kotlin.json
 
 import kotlin.js.JsName
 
+/** Entry point for parsing JSON text into a [JsonDocument]. */
 object Json {
 
+    /** Key used in a JSON object that is a reference, e.g. `{ "$ref" : "/a/b" }`. */
     val REF = "${'$'}ref"
 
     internal fun fetchGrammarStr(): String {
@@ -43,6 +45,12 @@ object Json {
     }
 
 
+    /**
+     * Parses [jsonString] into a [JsonDocument].
+     * Objects of the form `{ "$ref" : "/a/b" }` are read as [JsonReference]s.
+     *
+     * @throws JsonParserException if the text is not valid JSON
+     */
     @JsName("process")
     fun process(jsonString: String): JsonDocument {
         return JsonParser().process(jsonString)

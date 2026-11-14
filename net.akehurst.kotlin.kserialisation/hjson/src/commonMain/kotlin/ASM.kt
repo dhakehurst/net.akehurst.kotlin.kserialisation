@@ -16,14 +16,24 @@
 
 package net.akehurst.hjson
 
+/** Thrown when a HJSON value is used as the wrong kind of value, or a reference cannot be resolved. */
 class HJsonException : RuntimeException {
     constructor(message: String) : super(message)
 }
 
+/**
+ * A HJSON document: a [root] value plus an index of the objects that can be the target of a reference.
+ *
+ * @property identity a name for the document, used for identification only
+ */
 class HJsonDocument(
     val identity: String
 ) {
 
+    /**
+     * The values of the `$kind` entry, which says how a serialised object is to be interpreted.
+     * Each is written as its name prefixed with `$`, e.g. `$OBJECT`.
+     */
     enum class ComplexObjectKind {
         SINGLETON, SPECIAL, LOOKUP, PRIMITIVE, ENUM, ARRAY, OBJECT, LIST, SET, MAP;
 
@@ -31,17 +41,26 @@ class HJsonDocument(
     }
 
     companion object {
+        /** Key of the entry giving the [ComplexObjectKind] of a serialised object. */
         val KIND = "\$kind"     // SINGLETON | PRIMITIVE | OBJECT | LIST | SET | MAP
+        /** Key of the entry giving the qualified type name of a serialised object (or the lookup name for `$LOOKUP`). */
         val CLASS = "\$class"
+        /** Key of the entry giving the key of a map entry. */
         val KEY = "\$key"
+        /** Key of the entry giving the value of a primitive, enum, value type, lookup or map entry. */
         val VALUE = "\$value"
+        /** Key of the entry giving the elements of a list, set or array. */
         val ELEMENTS = "\$elements"
+        /** Key of the entry giving the entries of a map. */
         val ENTRIES = "\$entries"
     }
 
+    /** Every value in the document, indexed by its path from the root. */
     val index = mutableMapOf<List<String>, HJsonValue>()
+    /** The objects that can be the target of a reference, indexed by their path from the root. */
     val references = mutableMapOf<List<String>, HJsonValue>()
 
+    /** The root value of the document. */
     var root: HJsonValue = HJsonUnreferencableObject()
 
     fun toJsonString(): String {
@@ -72,6 +91,10 @@ class HJsonDocument(
     }
 }
 
+/**
+ * Base class of all HJSON values.
+ * The `as...` functions return this value as the requested kind, or throw [HJsonException] if it is not of that kind.
+ */
 abstract class HJsonValue {
 
     open fun asBoolean(): HJsonBoolean {
@@ -98,8 +121,11 @@ abstract class HJsonValue {
         throw HJsonException("Object is not a HJsonArray")
     }
 
+    /** Returns this value as compact JSON text. */
     abstract fun toJsonString(): String
+    /** Returns this value as indented JSON text, starting at [indent] and indenting nested values by [increment]. */
     abstract fun toFormattedJsonString(indent: String, increment: String): String
+    /** Returns this value as indented HJSON text, starting at [indent] and indenting nested values by [increment]. */
     abstract fun toHJsonString(indent: String, increment: String): String
 
     abstract override fun hashCode(): Int
@@ -110,13 +136,16 @@ abstract class HJsonValue {
     }
 }
 
+/** A HJSON object: an ordered map of property names to values. */
 abstract class HJsonObject : HJsonValue() {
+    /** The properties of this object, in the order they were set. */
     var property: Map<String, HJsonValue> = mutableMapOf()
 
     override fun asObject(): HJsonObject {
         return this
     }
 
+    /** Sets the property [key] to [value] and returns this object. */
     open fun setProperty(key: String, value: HJsonValue): HJsonObject {
         (this.property as MutableMap)[key] = value
         return this
@@ -167,6 +196,7 @@ abstract class HJsonObject : HJsonValue() {
     }
 }
 
+/** A HJSON object that cannot be the target of a reference. */
 class HJsonUnreferencableObject : HJsonObject() {
 
     override fun asObject(): HJsonUnreferencableObject = this
@@ -175,6 +205,10 @@ class HJsonUnreferencableObject : HJsonObject() {
         super.setProperty(key, value) as HJsonUnreferencableObject
 }
 
+/**
+ * A HJSON object that can be the target of a reference.
+ * It adds itself to the [document]'s references, under [path], when created.
+ */
 data class HJsonReferencableObject(
     val document: HJsonDocument,
     val path: List<String>
@@ -193,6 +227,11 @@ data class HJsonReferencableObject(
     override fun equals(other: Any?): Boolean = super.equals(other)
 }
 
+/**
+ * A reference to an object written elsewhere in the same document, written as `{ $ref : "#/a/b" }`.
+ *
+ * @property refPath the path, from the root, of the referenced object
+ */
 data class HJsonReference(
     val document: HJsonDocument,
     val refPath: List<String>
@@ -210,6 +249,11 @@ data class HJsonReference(
 
     constructor(document: HJsonDocument, refPathStr: String) : this(document, stringToList(refPathStr))
 
+    /**
+     * The referenced value.
+     *
+     * @throws HJsonException if there is no referencable object at [refPath]
+     */
     val target: HJsonValue
         get() {
             return this.document.references[refPath] ?: throw HJsonException(
@@ -247,6 +291,7 @@ data class HJsonReference(
     }
 }
 
+/** A HJSON boolean value. */
 data class HJsonBoolean(
     val value: Boolean
 ) : HJsonValue() {
@@ -267,6 +312,7 @@ data class HJsonBoolean(
     }
 }
 
+/** A HJSON number, held as its textual form so that no precision is lost until it is converted. */
 data class HJsonNumber(
     private val _value: String
 ) : HJsonValue() {
@@ -311,6 +357,7 @@ data class HJsonNumber(
     }
 }
 
+/** A HJSON string value. [value] is the unescaped string. */
 data class HJsonString(
     val value: String
 ) : HJsonValue() {
@@ -363,6 +410,7 @@ data class HJsonString(
     }
 }
 
+/** A HJSON array. */
 class HJsonArray(
     initialElements: List<HJsonValue>
 ) : HJsonValue() {
@@ -410,6 +458,7 @@ class HJsonArray(
         }
     }
 
+    /** Appends [element] and returns this array. */
     fun addElement(element: HJsonValue): HJsonArray {
         (this.elements as MutableList).add(element)
         return this
@@ -431,6 +480,7 @@ class HJsonArray(
     }
 }
 
+/** The HJSON `null` value. */
 object HJsonNull : HJsonValue() {
     override fun toJsonString(): String {
         return "null"

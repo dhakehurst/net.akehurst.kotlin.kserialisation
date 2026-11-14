@@ -25,20 +25,49 @@ import net.akehurst.kotlinx.komposite.common.kompositeWalker
 import net.akehurst.language.types.api.TypesDomain
 import kotlin.reflect.KClass
 
+/** Thrown when a value cannot be converted to or from HJSON. */
 class KSerialiserHJsonException : RuntimeException {
     constructor(message: String) : super(message)
 }
 
+/**
+ * Converts Kotlin object graphs to and from HJSON.
+ *
+ * The serialiser is driven by a type model held in [registry]. Configure it with [configureFromTypeModel],
+ * then register mappings for primitive types (e.g. [registerKotlinStdPrimitives]) and make the classes available
+ * to `KotlinxReflect` so that objects can be created when reading.
+ *
+ * Composite properties are written in full; reference properties are written as `$ref` entries that point to the
+ * path, from the root, of an object written elsewhere in the same document (e.g. `{ $ref : "#/child" }`).
+ * An object met more than once (compared by identity) is written once in full and as a reference elsewhere.
+ * Objects for which a registered lookup gives a key are written as `$LOOKUP` entries holding that key.
+ *
+ * Example:
+ * ```
+ * val serialiser = KSerialiserHJson()
+ * serialiser.configureFromTypeModel(typeModel)
+ * serialiser.registerKotlinStdPrimitives()
+ * serialiser.registry.resolveImports()
+ * val text = serialiser.toHJson(root, root).toHJsonString()
+ * val copy: MyClass = serialiser.toData(text)
+ * ```
+ */
 class KSerialiserHJson() {
 
     internal val reference_cache = mutableMapOf<Any, List<String>>()
 
+    /** The type model and the primitive, lookup and other mappers used to walk and to re-create objects. */
     val registry = DatatypeRegistry()
 
+    /** Used internally to stop walking the object graph once a reference target has been found. */
     class FoundReferenceException : RuntimeException {
         constructor() : super()
     }
 
+    /**
+     * Computes the path, from [root], of the object [targetValue], as written in the document.
+     * Returns a path of the form `$unknown <ClassName>` if the object is not found.
+     */
     protected fun calcReferencePath(root: Any, targetValue: Any): List<String> {
         return if (reference_cache.containsKey(targetValue)) {
             reference_cache[targetValue]!!
@@ -96,11 +125,21 @@ class KSerialiserHJson() {
     //    registry.registerFromConfigString(kompositeModel, emptyMap())
     //}
 
+    /**
+     * Adds the types of the given type model to [registry].
+     * The type model says, for each class, which properties are composite (`CMP`) or references (`REF`),
+     * and which constructor parameters are used to create an instance when reading.
+     */
     fun configureFromTypeModel(kompositeModel: TypesDomain) {
         //TODO: mappers!
         registry.registerFromTypeModel(kompositeModel, emptyMap())
     }
 
+    /**
+     * Registers the Kotlin standard library type model and the HJSON mappings for its primitive types.
+     * `Boolean` and `String` are written as plain HJSON values; `Byte`, `Short`, `Int`, `Long`, `Float` and `Double`
+     * are written as `$PRIMITIVE` objects so that their exact type is kept.
+     */
     fun registerKotlinStdPrimitives() {
         this.registry.registerFromTypeModel(DatatypeRegistry.KOTLIN_STD_MODEL, emptyMap())
         this.registerPrimitive(Boolean::class, { value -> HJsonBoolean(value) }, { json -> json.asBoolean().value })
@@ -113,12 +152,25 @@ class KSerialiserHJson() {
         this.registerPrimitive(String::class, { value -> HJsonString(value) }, { json -> json.asString().value })
     }
 
+    /**
+     * Registers a mapping for the primitive type [cls], written as the raw HJSON value returned by `toHJson`.
+     * The type must already be declared as a primitive in the type model.
+     *
+     * @throws KSerialiserHJsonException if [cls] is not defined in the type model
+     */
     fun <T : Any> registerPrimitive(cls: KClass<T>, toHJson: (value: T) -> HJsonValue, toPrimitive: (json: HJsonValue) -> T) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
         this.registry.registerPrimitiveMapper(PrimitiveMapper.create(cls, HJsonValue::class, toHJson, toPrimitive))
     }
 
+    /**
+     * Registers a mapping for the primitive type [cls], written as a `$PRIMITIVE` object
+     * with `$class` set to its qualified type name and `$value` set to the HJSON value returned by `toHJson`.
+     * The type must already be declared as a primitive in the type model.
+     *
+     * @throws KSerialiserHJsonException if [cls] is not defined in the type model
+     */
     fun <P : Any> registerPrimitiveAsObject(cls: KClass<P>, toHJson: (value: P) -> HJsonValue, fromHJson: (json: HJsonValue) -> P) {
         //TODO: check cls is defined as primitive in the datatype registry..maybe auto add it!
         val dt = this.registry.findTypeDeclarationByKClass(cls) ?: throw KSerialiserHJsonException("The primitive is not defined in the Komposite configuration")
@@ -143,6 +195,13 @@ class KSerialiserHJson() {
         this.registry.registerPrimitiveMapper(mapper)
     }
 
+    /**
+     * Converts [data] to a HJSON document.
+     *
+     * @param root the object that reference paths are computed from; normally the same as [data]
+     * @param data the object to write
+     * @return the HJSON document; use its string conversion functions to get the text
+     */
     fun toHJson(root: Any, data: Any): HJsonDocument {
         println("*** root = $root (${root::class}")
         this.reference_cache.clear()
@@ -299,6 +358,13 @@ class KSerialiserHJson() {
         return doc
     }
 
+    /**
+     * Parses [jsonString] as HJSON and re-creates the object it describes.
+     * The class of each object is taken from its `$class` entry.
+     *
+     * @param targetKlass the expected class of the result, needed when the root is a `$ARRAY`
+     * @return the re-created object, cast to [T]
+     */
     fun <T : Any> toData(jsonString: String, targetKlass: KClass<T>? = null): T {
         //TODO: use a bespoke written JSON parser, it will most likely be faster
         val json = HJson.process(jsonString)
