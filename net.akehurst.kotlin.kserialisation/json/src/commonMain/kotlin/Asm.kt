@@ -163,7 +163,7 @@ data class JsonReferencableObject(
 }
 
 /**
- * A reference to an object written elsewhere in the same document, written as `{ "$ref" : "/a/b" }`.
+ * A reference to an object written elsewhere in the same document, written as `{ "$ref" : "#/a/b" }`.
  *
  * @property refPath the path, from the root, of the referenced object
  */
@@ -171,6 +171,23 @@ data class JsonReference(
     val document: JsonDocument,
     val refPath: List<String>
 ) : JsonValue() {
+
+    companion object {
+        /**
+         * Converts a reference string to a path.
+         * Accepts the standard form `#/a/b` and also `/a/b`, as written by earlier versions of the JSON format;
+         * `#/`, `#` and `/` refer to the root.
+         */
+        fun stringToList(refPathStr: String): List<String> {
+            val ref = refPathStr.removePrefix("#").removePrefix("/")
+            return when {
+                ref.isEmpty() -> emptyList()
+                else -> ref.split("/")
+            }
+        }
+    }
+
+    constructor(document: JsonDocument, refPathStr: String) : this(document, stringToList(refPathStr))
 
     /**
      * The referenced value.
@@ -187,7 +204,7 @@ data class JsonReference(
     }
 
     override fun toStringJson(): String {
-        val refPathStr = this.refPath.joinToString(separator = "/", prefix = "/")
+        val refPathStr = this.refPath.joinToString(separator = "/", prefix = "#/")
         return """{ "${Json.REF}" : "$refPathStr" }"""
     }
 

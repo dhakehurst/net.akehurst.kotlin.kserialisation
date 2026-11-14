@@ -194,7 +194,7 @@ class JsonArrayBuilder(
         this._elements.add(b.value!!)
     }
 
-    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `/`. */
+    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b` (`/a/b` is also accepted). */
     fun reference(path:String) {
         val b = JsonValueBuilder(doc, nextPath)
         b.reference(path)
@@ -314,7 +314,7 @@ class JsonCollectionBuilder(
         this._elements.add(b.value!!)
     }
 
-    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `/`. */
+    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b` (`/a/b` is also accepted). */
     fun reference(path:String) {
         val b = JsonValueBuilder(doc, nextPath)
         b.reference(path)
@@ -539,12 +539,10 @@ class JsonValueBuilder(
         this.value = obj
     }
 
-    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `/`. */
+    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b` (`/a/b` is also accepted). */
     fun reference(path:String) {
         this.validate(this)
-        // remove leading '/' then split
-        val refPath = path.substring(1).split("/").toList()
-        this.value = JsonReference(doc,refPath)
+        this.value = JsonReference(doc, path)
     }
 
     /** Adds a plain JSON array, built by [init]. */

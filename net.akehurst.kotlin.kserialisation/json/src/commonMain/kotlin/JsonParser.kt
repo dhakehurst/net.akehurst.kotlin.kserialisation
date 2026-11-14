@@ -175,10 +175,7 @@ class JsonParser {
                             // JsonReference
                             (1 == peek.property.size && peek.property.containsKey(Json.REF)) -> {
                                 val refStr = peek.property[Json.REF]!!.asString().value
-                                // remove leading '/' then split
-                                val refStr1 = refStr.substring(1)
-                                val refPath = if (refStr1.isEmpty()) emptyList<String>() else refStr1.split("/")
-                                val ref = JsonReference(doc, refPath)
+                                val ref = JsonReference(doc, refStr)
                                 valueStack.pop()
                                 valueStack.push(ref)
                             }

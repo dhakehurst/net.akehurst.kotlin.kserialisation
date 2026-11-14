@@ -201,7 +201,7 @@ class HJsonArrayBuilder(
         this._elements.add(b.value!!)
     }
 
-    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b`. */
+    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b` (`/a/b` is also accepted). */
     fun reference(path:String) {
         val b = HJsonValueBuilder(doc, nextPath)
         b.reference(path)
@@ -327,7 +327,7 @@ class HJsonCollectionBuilder(
         this._elements.add(b.value!!)
     }
 
-    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b`. */
+    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b` (`/a/b` is also accepted). */
     fun reference(path:String) {
         val b = HJsonValueBuilder(doc, nextPath)
         b.reference(path)
@@ -555,7 +555,7 @@ class HJsonValueBuilder(
         this.value = obj
     }
 
-    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b`. */
+    /** Adds a reference to the object at [path], given as `/`-separated segments starting with `#/`, e.g. `#/a/b` (`/a/b` is also accepted). */
     fun reference(path:String) {
         this.validate(this)
         this.value = HJsonReference(doc,path)

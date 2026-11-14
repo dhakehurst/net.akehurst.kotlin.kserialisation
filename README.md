@@ -141,7 +141,7 @@ The JSON produced looks like this (the shape is the same for HJSON, written with
     "$class" : "com.example.Node",
     "name" : "leaf",
     "child" : null,
-    "parent" : { "$ref" : "/" },
+    "parent" : { "$ref" : "#/" },
     "size" : { "$kind" : "$PRIMITIVE", "$class" : "kotlin.Int", "$value" : -1 }
   },
   "parent" : null,
@@ -203,8 +203,10 @@ Such objects are written as `{ "$kind" : "$LOOKUP", "$class" : "known", "$value"
 | `$value`                   | the value of a primitive, enum, value type or lookup key |
 | `$elements`                | the elements of a list, set or array |
 | `$entries`                 | the entries of a map, each an object with `$key` and `$value` |
-| `{ "$ref" : "/a/b" }`      | a reference to the object written at that path in the document (`/` is the root) |
-| `{ $ref : "#/a/b" }`       | the HJSON form of a reference (paths are prefixed with `#/`) |
+| `{ "$ref" : "#/a/b" }`     | a reference to the object written at that path in the document (`#/` is the root); in HJSON, `{ $ref : "#/a/b" }` |
+
+References use the JSON Reference form: `#` followed by a JSON Pointer (RFC 6901). When reading, the form
+`/a/b`, written by earlier versions of the JSON format, is also accepted.
 
 Objects are compared by identity: two distinct but `equal` objects are both written in full.
 A cycle of composite properties that passes through constructor arguments cannot be re-created and gives a
