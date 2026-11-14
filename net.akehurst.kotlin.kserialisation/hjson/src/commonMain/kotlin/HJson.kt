@@ -24,9 +24,12 @@ import net.akehurst.language.api.processor.LanguageProcessor
 import net.akehurst.language.issues.api.LanguageProcessorPhase
 import net.akehurst.language.issues.ram.IssueHolder
 
+/** Entry point for parsing HJSON text into an [HJsonDocument]. The parser is built with AGL. */
 object HJson {
 
+    /** Key used in an HJSON object that is a reference, e.g. `{ $ref : "#/a/b" }`. */
     val REF = "\$ref"
+    /** Words that must be quoted when used as an HJSON object key. */
     val KEY_WORDS = arrayOf("true", "false", "null")
 
     internal val processor: LanguageProcessor<HJsonDocument, SentenceContextAny> by lazy {
@@ -82,6 +85,11 @@ object HJson {
             """.trimIndent()
     }
 
+    /**
+     * Parses [jsonString] as HJSON into an [HJsonDocument].
+     *
+     * @throws HJsonParserException if the text is not valid HJSON
+     */
     fun process(jsonString: String): HJsonDocument {
         val res = this.processor.process(jsonString)
         return when {

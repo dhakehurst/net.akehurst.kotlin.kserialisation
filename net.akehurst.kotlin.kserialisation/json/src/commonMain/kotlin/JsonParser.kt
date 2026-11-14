@@ -15,10 +15,12 @@
  */
 package net.akehurst.kotlin.json
 
+/** Thrown when JSON text cannot be parsed. */
 class JsonParserException : RuntimeException {
     constructor(message: String) : super(message)
 }
 
+/** A hand-written JSON parser. Normally used through [Json.process]. */
 class JsonParser {
 
     val TOKEN_WHITESPACE = Regex("\\s+", RegexOption.MULTILINE)
@@ -74,6 +76,11 @@ class JsonParser {
         }
     }
 
+    /**
+     * Parses [input] into a [JsonDocument].
+     *
+     * @throws JsonParserException if the text is not valid JSON
+     */
     fun process(input: String): JsonDocument {
         val doc = JsonDocument("json")
         if (input.isEmpty()) {
