@@ -238,10 +238,15 @@ data class HJsonReference(
 ) : HJsonValue() {
 
     companion object {
+        /**
+         * Converts a reference string to a path.
+         * Accepts the standard form `#/a/b` and also `/a/b`, as written by earlier versions of the JSON format;
+         * `#/`, `#` and `/` refer to the root.
+         */
         fun stringToList(refPathStr: String): List<String> {
-            val ref = refPathStr.substringAfter("#/")
+            val ref = refPathStr.removePrefix("#").removePrefix("/")
             return when {
-                ref.isBlank() -> emptyList()
+                ref.isEmpty() -> emptyList()
                 else -> ref.split("/")
             }
         }

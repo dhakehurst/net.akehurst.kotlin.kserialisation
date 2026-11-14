@@ -39,7 +39,7 @@ class KSerialiserJsonException : RuntimeException {
  * to `KotlinxReflect` so that objects can be created when reading.
  *
  * Composite properties are written in full; reference properties are written as `$ref` entries that point to the
- * path, from the root, of an object written elsewhere in the same document (e.g. `{ "$ref" : "/child" }`).
+ * path, from the root, of an object written elsewhere in the same document (e.g. `{ "$ref" : "#/child" }`).
  * An object met more than once (compared by identity) is written once in full and as a reference elsewhere.
  * Objects for which a registered lookup gives a key are written as `$LOOKUP` entries holding that key.
  *

@@ -236,10 +236,7 @@ object HJsonParser {
                                 // JsonReference
                                 (1 == peek.property.size && peek.property.containsKey(HJson.REF)) -> {
                                     val refStr = peek.property[HJson.REF]!!.asString().value
-                                    // remove leading '/' then split
-                                    val refStr1 = refStr.substring(1)
-                                    val refPath = if (refStr1.isEmpty()) emptyList<String>() else refStr1.split("/")
-                                    val ref = HJsonReference(doc, refPath)
+                                    val ref = HJsonReference(doc, refStr)
                                     valueStack.pop()
                                     valueStack.push(ref)
                                 }
