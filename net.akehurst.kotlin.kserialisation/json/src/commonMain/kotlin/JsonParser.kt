@@ -49,9 +49,8 @@ class JsonParser {
 
         @OptIn(ExperimentalStdlibApi::class)
         fun hasNext(pattern: Regex): Boolean {
-            return pattern.matchesAt(this.input, this.position)
-            //val lookingAt = pattern.find(this.input, this.position)?.range?.start == this.position
-           // return lookingAt
+            // matchAt, not matchesAt: matchesAt fails at runtime on Kotlin/JS ("matchesAt is not a function")
+            return null != pattern.matchAt(this.input, this.position)
         }
 
         fun next(literal: String): String {

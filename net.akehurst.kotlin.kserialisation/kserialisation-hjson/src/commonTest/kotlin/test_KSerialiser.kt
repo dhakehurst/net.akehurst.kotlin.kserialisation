@@ -344,7 +344,8 @@ class test_KSerialiser {
 
         val actual: Instant = this.sut.toData(root, Instant::class)
 
-        val expected = now
+        // Instant is written as epoch milliseconds, so anything finer is not kept
+        val expected = Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
 
         assertEquals(expected, actual)
     }
@@ -551,10 +552,10 @@ class test_KSerialiser {
             objectReferenceable(dtA.qualifiedName.value) {
                 property("prop1", "1: hello")
                 property("comp", null)
-                property("refr", null)
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)
                 }
+                property("refr", null)
             }
         }.toHJsonString()
 
@@ -600,18 +601,18 @@ class test_KSerialiser {
                     objectReferenceable(dtA.qualifiedName.value) {
                         property("prop1", "1.3")
                         property("comp", null)
-                        property("refr") {
-                            reference("/")
-                        }
                         property("prop2") {
                             primitiveObject("kotlin.Int", -1)
                         }
+                        property("refr") {
+                            reference("/")
+                        }
                     }
                 }
-                property("refr", null)
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)
                 }
+                property("refr", null)
             }
         }.toHJsonString()
 
