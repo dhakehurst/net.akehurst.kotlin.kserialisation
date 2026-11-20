@@ -15,6 +15,8 @@
  */
 package net.akehurst.kotlin.json
 
+import kotlin.js.JsName
+
 /** Thrown when JSON text cannot be parsed. */
 class JsonParserException : RuntimeException {
     constructor(message: String) : super(message)
@@ -43,16 +45,19 @@ class JsonParser {
             return this.position < this.input.length
         }
 
+        // the overloads have distinct JS names: exported to JS with the same name, one would replace the other
+        @JsName("hasNextLiteral")
         fun hasNext(literal: String): Boolean {
             return this.input.startsWith(literal, this.position, false)
         }
 
         @OptIn(ExperimentalStdlibApi::class)
+        @JsName("hasNextPattern")
         fun hasNext(pattern: Regex): Boolean {
-            // matchAt, not matchesAt: matchesAt fails at runtime on Kotlin/JS ("matchesAt is not a function")
             return null != pattern.matchAt(this.input, this.position)
         }
 
+        @JsName("nextLiteral")
         fun next(literal: String): String {
             //assumes hasNext already called
             this.position += literal.length
@@ -60,6 +65,7 @@ class JsonParser {
         }
 
         @OptIn(ExperimentalStdlibApi::class)
+        @JsName("nextPattern")
         fun next(pattern: Regex): String {
             //val m = pattern.find(this.input, this.position)
             //val lookingAt = (m?.range?.start == this.position)

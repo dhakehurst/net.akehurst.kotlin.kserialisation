@@ -22,7 +22,11 @@ import net.akehurst.kotlinx.komposite.common.DatatypeRegistry
 import net.akehurst.kotlinx.komposite.common.PrimitiveMapper
 import net.akehurst.kotlinx.komposite.common.WalkInfo
 import net.akehurst.kotlinx.komposite.common.kompositeWalker
+import net.akehurst.language.base.api.SimpleName
+import net.akehurst.language.types.api.CollectionType
+import net.akehurst.language.types.api.TypeInstance
 import net.akehurst.language.types.api.TypesDomain
+import net.akehurst.language.types.asm.StdLibDefault
 import kotlin.reflect.KClass
 
 /** Thrown when a value cannot be converted to or from HJSON. */
@@ -63,6 +67,10 @@ class KSerialiserHJson() {
     class FoundReferenceException : RuntimeException {
         constructor() : super()
     }
+
+    /** The registry's kotlin Array collection type, with element type Any, or null if the registry has no Array type. */
+    private fun arrayTypeOrNull(): TypeInstance? = (registry.findFirstDefinitionByNameOrNull(SimpleName("Array")) as? CollectionType)
+        ?.type(listOf(StdLibDefault.AnyType.asTypeArgument))
 
     /**
      * Computes the path, from [root], of the object [targetValue], as written in the document.
@@ -287,10 +295,11 @@ class KSerialiserHJson() {
                 WalkInfo(info.up, elements)
             }
             collEnd { path, info, data, dt, et ->
-                val jsonTypeName = when (data) {
-                //    is Array<*> -> HJsonDocument.ComplexObjectKind.ARRAY.asHJsonString
-                    is Set<*> -> HJsonDocument.ComplexObjectKind.SET.asHJsonString
-                    is List<*> -> HJsonDocument.ComplexObjectKind.LIST.asHJsonString
+                // the walker passes an Array as a List, so the collection type says whether it was an Array
+                val jsonTypeName = when {
+                    dt.name.value == "Array" -> HJsonDocument.ComplexObjectKind.ARRAY.asHJsonString
+                    data is Set<*> -> HJsonDocument.ComplexObjectKind.SET.asHJsonString
+                    data is List<*> -> HJsonDocument.ComplexObjectKind.LIST.asHJsonString
                     else -> throw KSerialiserHJsonException("Unknown type $dt")
                 }
                 val elements = currentObjStack.pop()
@@ -353,7 +362,9 @@ class KSerialiserHJson() {
             }
         }
 
-        val result = walker.walk(WalkInfo(emptyList(), HJsonNull), data)
+        // with no target type the walker treats a root Array as a List, so give it the Array type
+        val rootType = (data as? Array<*>)?.let { arrayTypeOrNull() }
+        val result = walker.walk(WalkInfo(emptyList(), HJsonNull), data, rootType)
         doc.root = result.acc
         return doc
     }

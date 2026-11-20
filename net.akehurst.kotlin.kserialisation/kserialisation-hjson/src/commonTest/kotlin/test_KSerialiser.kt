@@ -62,6 +62,8 @@ class test_KSerialiser {
 
     @BeforeTest
     fun setup() {
+        // registers the test classes' members, needed for reflection on JS, wasm and native
+        kserialisation_hjson_commonTest.KotlinxReflectForModule.registerUsedClasses()
         this.sut.configureFromTypeModel(
             typesDomain("", true) {
                 namespace(" kotlin.time") {
@@ -147,13 +149,15 @@ class test_KSerialiser {
         val root:Byte = 1.toByte()
         assertEquals("Byte", root::class.simpleName)
 
+        // on JS a Byte is a JS number at runtime, its class is Int, so it is written as a kotlin.Int
+        val runtimeTypeName = if (platformKeepsByteTypeAtRuntime) "Byte" else "Int"
         val x:Any = root
-        assertEquals("Byte", x::class.simpleName) //This needs to pass or rest of test will fail
+        assertEquals(runtimeTypeName, x::class.simpleName) //This needs to pass or rest of test will fail
 
         val actual = this.sut.toHJson(root, root)
 
-        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Byte"))!!
-        assertEquals("Byte", dt.name.value)
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName(runtimeTypeName))!!
+        assertEquals(runtimeTypeName, dt.name.value)
 
         val expected = hjson("expected") {
             primitiveObject(dt.qualifiedName.value, root)

@@ -23,7 +23,10 @@ import net.akehurst.kotlinx.komposite.common.PrimitiveMapper
 import net.akehurst.kotlinx.komposite.common.WalkInfo
 import net.akehurst.kotlinx.komposite.common.kompositeWalker
 import net.akehurst.language.base.api.SimpleName
+import net.akehurst.language.types.api.CollectionType
+import net.akehurst.language.types.api.TypeInstance
 import net.akehurst.language.types.api.TypesDomain
+import net.akehurst.language.types.asm.StdLibDefault
 import kotlin.reflect.KClass
 
 /** Thrown when a value cannot be converted to or from JSON. */
@@ -64,6 +67,10 @@ class KSerialiserJson() {
     class FoundReferenceException : RuntimeException {
         constructor() : super()
     }
+
+    /** The registry's kotlin Array collection type, with element type Any, or null if the registry has no Array type. */
+    private fun arrayTypeOrNull(): TypeInstance? = (registry.findFirstDefinitionByNameOrNull(SimpleName("Array")) as? CollectionType)
+        ?.type(listOf(StdLibDefault.AnyType.asTypeArgument))
 
     /**
      * Computes the path, from [root], of the object [targetValue], as written in the document.
@@ -287,10 +294,11 @@ class KSerialiserJson() {
                 WalkInfo(info.up, elements)
             }
             collEnd { path, info, data, dt, et ->
-                val jsonTypeName = when(data) {
-                //    is Array<*> -> JsonDocument.ComplexObjectKind.ARRAY.asJsonString
-                    is Set<*> -> JsonDocument.ComplexObjectKind.SET.asJsonString
-                    is List<*> -> JsonDocument.ComplexObjectKind.LIST.asJsonString
+                // the walker passes an Array as a List, so the collection type says whether it was an Array
+                val jsonTypeName = when {
+                    dt.name.value == "Array" -> JsonDocument.ComplexObjectKind.ARRAY.asJsonString
+                    data is Set<*> -> JsonDocument.ComplexObjectKind.SET.asJsonString
+                    data is List<*> -> JsonDocument.ComplexObjectKind.LIST.asJsonString
                     else -> throw KSerialiserJsonException("Unknown type $dt")
                 }
                 val elements = currentObjStack.pop()
@@ -353,7 +361,9 @@ class KSerialiserJson() {
             }
         }
 
-        val result = walker.walk(WalkInfo(emptyList(), JsonNull), data)
+        // with no target type the walker treats a root Array as a List, so give it the Array type
+        val rootType = (data as? Array<*>)?.let { arrayTypeOrNull() }
+        val result = walker.walk(WalkInfo(emptyList(), JsonNull), data, rootType)
         doc.root = result.acc
         return doc
     }

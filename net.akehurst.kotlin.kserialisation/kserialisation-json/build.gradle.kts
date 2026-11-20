@@ -1,5 +1,6 @@
 plugins {
     id("project-conventions")
+    alias(libs.plugins.kotlinx.reflect)
 }
 val version_klock:String by project
 
@@ -18,4 +19,9 @@ exportPublic {
     exportPatterns.set(listOf(
         "net.akehurst.kotlin.kserialisation.json.**",
     ))
+}
+
+kotlinxReflect {
+    // the test classes; on JS, wasm and native reflection only knows the members of registered classes
+    forReflectionTest.set(listOf("net.akehurst.kotlin.kserialisation.json.test.*"))
 }
