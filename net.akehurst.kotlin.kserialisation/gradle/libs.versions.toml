@@ -23,4 +23,5 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 buildconfig =  { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
 exportPublic =  { id = "net.akehurst.kotlin.gradle.plugin.exportPublic", version.ref = "exportPublic" }
 vanniktech-maven-publish = { id="com.vanniktech.maven.publish", version.ref="vanniktech" }
+kotlinx-reflect = { id = "net.akehurst.kotlinx.kotlinx-reflect-gradle-plugin", version.ref = "nak-kotlinx" }
 

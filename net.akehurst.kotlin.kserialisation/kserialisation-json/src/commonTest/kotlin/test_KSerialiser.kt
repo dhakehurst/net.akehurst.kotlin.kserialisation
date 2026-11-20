@@ -43,6 +43,8 @@ class test_KSerialiser {
 
     @BeforeTest
     fun setup() {
+        // registers the test classes' members, needed for reflection on JS, wasm and native
+        kserialisation_json_commonTest.KotlinxReflectForModule.registerUsedClasses()
         this.sut.configureFromTypeModel(typesDomain("", true) {
             namespace("net.akehurst.kotlin.kserialisation.json.test") {
                 primitive("Instant")
@@ -134,13 +136,15 @@ class test_KSerialiser {
     fun toJson_Byte_1() {
 
         val root: Any = 1.toByte()
+        // on JS a Byte is a JS number at runtime, its class is Int, so it is written as a kotlin.Int
+        val runtimeTypeName = if (platformKeepsByteTypeAtRuntime) "Byte" else "Int"
         println("class.simpleName: ${root::class.simpleName}")
-        assertEquals("Byte", root::class.simpleName)
+        assertEquals(runtimeTypeName, root::class.simpleName)
 
         val actual = this.sut.toJson(root, root)
 
-        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName("Byte"))!!
-        assertEquals("Byte", dt.name.value)
+        val dt = sut.registry.findFirstDefinitionByNameOrNull(SimpleName(runtimeTypeName))!!
+        assertEquals(runtimeTypeName, dt.name.value)
 
         val expected = json("expected") {
             primitiveObject(dt.qualifiedName.value, root)
@@ -331,7 +335,8 @@ class test_KSerialiser {
 
         val actual: Instant = this.sut.toData(root)
 
-        val expected = now
+        // Instant is written as epoch milliseconds, so anything finer is not kept
+        val expected = Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
 
         assertEquals(expected, actual)
     }
@@ -565,10 +570,10 @@ class test_KSerialiser {
             objectReferenceable(dtA.qualifiedName.value) {
                 property("prop1", "1: hello")
                 property("comp", null)
-                property("refr", null)
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)
                 }
+                property("refr", null)
             }
         }.toFormattedJsonString("  ", "  ")
 
@@ -613,18 +618,18 @@ class test_KSerialiser {
                     objectReferenceable(dtA.qualifiedName.value) {
                         property("prop1", "1.3")
                         property("comp", null)
-                        property("refr") {
-                            reference("/")
-                        }
                         property("prop2") {
                             primitiveObject("kotlin.Int", -1)
                         }
+                        property("refr") {
+                            reference("/")
+                        }
                     }
                 }
-                property("refr", null)
                 property("prop2") {
                     primitiveObject("kotlin.Int", 5)
                 }
+                property("refr", null)
             }
         }.toFormattedJsonString("  ", "  ")
 

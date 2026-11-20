@@ -16,7 +16,8 @@ class test_TestClassAAA {
             obj1
         """) as TestClassAAA
 
-        assertEquals("obj1",obj1.prop1)
+        // JS does not stop plain JS code assigning to a Kotlin val property, so the assignment above takes effect
+        assertEquals("should not be possible, val property",obj1.prop1)
         assertEquals("obj2",obj1.comp?.prop1)
         assertEquals("obj3",obj1.refr?.prop1)
     }
